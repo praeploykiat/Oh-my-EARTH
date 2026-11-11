@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "catalog.schema.json",
+  "title": "Catalog",
+  "type": "object",
+  "required": ["datasets"],
+  "additionalProperties": false,
+  "properties": {
+    "datasets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "file", "variable", "region"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "file": { "type": "string" },
+          "variable": { "type": "string" },
+          "region": { "type": "string" }
+        }
+      }
+    }
+  }
+}

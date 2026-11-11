@@ -1,0 +1,22 @@
+{
+  "datasets": [
+    {
+      "id": "phangnga-t2m",
+      "file": "phangnga-t2m.json",
+      "variable": "Air temperature at 2 m",
+      "region": "Phang Nga"
+    },
+    {
+      "id": "chiangmai-precip",
+      "file": "chiangmai-precip.json",
+      "variable": "Precipitation",
+      "region": "Chiang Mai"
+    },
+    {
+      "id": "songkhla-precip",
+      "file": "songkhla-precip.json",
+      "variable": "Precipitation",
+      "region": "Songkhla"
+    }
+  ]
+}

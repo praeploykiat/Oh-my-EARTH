@@ -1,0 +1,6 @@
+requests==2.32.3
+jsonschema==4.23.0
+pytest==8.3.4
+pymannkendall==1.4.3
+jupyterlab==4.3.4
+matplotlib==3.9.4
