@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useI18n } from './core/i18n';
 import { Experience } from './features/experience';
 import { Workbench } from './features/workbench';
-import { LanguageSwitcher } from './shared';
+import { BrandMark, Footer, LanguageSwitcher } from './shared';
 
 const ROUTES = {
   '/': Experience,
@@ -21,7 +21,10 @@ export function App() {
   const [route, setRoute] = useState<Route>(currentRoute);
 
   useEffect(() => {
-    const onChange = () => setRoute(currentRoute());
+    const onChange = () => {
+      setRoute(currentRoute());
+      window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
@@ -29,19 +32,28 @@ export function App() {
   const Page = ROUTES[route];
 
   return (
-    <>
-      <nav className="nav">
-        <a href="#/" aria-current={route === '/'}>
-          {t('nav.experience')}
+    <div className="app">
+      <header className="header">
+        <a href="#/" className="brand">
+          <BrandMark />
+          <span>{t('app.title')}</span>
         </a>
-        <a href="#/workbench" aria-current={route === '/workbench'}>
-          {t('nav.workbench')}
-        </a>
+        <nav className="nav-links" aria-label={t('nav.main')}>
+          <a href="#/" aria-current={route === '/'}>
+            {t('nav.experience')}
+          </a>
+          <a href="#/workbench" aria-current={route === '/workbench'}>
+            {t('nav.workbench')}
+          </a>
+        </nav>
         <LanguageSwitcher />
-      </nav>
-      <main className="page">
-        <Page />
+      </header>
+
+      <main className="main">
+        <Page key={route} />
       </main>
-    </>
+
+      <Footer />
+    </div>
   );
 }

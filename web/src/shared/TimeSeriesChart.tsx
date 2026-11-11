@@ -1,55 +1,144 @@
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import type { SeriesPoint } from '../core/data';
 import { useI18n } from '../core/i18n';
 
 interface TimeSeriesChartProps {
   series: SeriesPoint[];
   unit: string;
+  slopePerStep?: number;
   height?: number;
 }
 
-const WIDTH = 720;
-const PADDING = { top: 16, right: 16, bottom: 28, left: 48 };
+const PADDING = { top: 20, right: 20, bottom: 32, left: 52 };
+const TICK_COUNT = 4;
 
-export function TimeSeriesChart({ series, unit, height = 260 }: TimeSeriesChartProps) {
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, width] as const;
+}
+
+function niceTicks(min: number, max: number, count: number): number[] {
+  const step = (max - min) / (count - 1 || 1);
+  return Array.from({ length: count }, (_, i) => min + step * i);
+}
+
+function trendIntercept(series: SeriesPoint[], slope: number): number {
+  const residuals = series
+    .map((p, i) => (p.value === null ? null : p.value - slope * i))
+    .filter((v): v is number => v !== null)
+    .sort((a, b) => a - b);
+  return residuals[Math.floor(residuals.length / 2)];
+}
+
+export function TimeSeriesChart({ series, unit, slopePerStep, height = 300 }: TimeSeriesChartProps) {
   const { t } = useI18n();
-  const values = series.map((p) => p.value).filter((v): v is number => v !== null);
-  if (values.length === 0) return <p>{t('chart.noData')}</p>;
+  const [containerRef, width] = useElementWidth<HTMLDivElement>();
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  const values = useMemo(() => series.map((p) => p.value).filter((v): v is number => v !== null), [series]);
+
+  if (values.length === 0) return <p className="status">{t('chart.noData')}</p>;
 
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
-  const plotWidth = WIDTH - PADDING.left - PADDING.right;
+  const plotWidth = Math.max(width - PADDING.left - PADDING.right, 0);
   const plotHeight = height - PADDING.top - PADDING.bottom;
+  const bottom = PADDING.top + plotHeight;
 
   const x = (i: number) => PADDING.left + (i / Math.max(series.length - 1, 1)) * plotWidth;
   const y = (v: number) => PADDING.top + (1 - (v - min) / span) * plotHeight;
 
-  const path = series
-    .map((p, i) => (p.value === null ? null : `${x(i).toFixed(1)},${y(p.value).toFixed(1)}`))
-    .filter(Boolean)
-    .join(' L ');
+  const points = series.flatMap((p, i) => (p.value === null ? [] : [`${x(i).toFixed(1)},${y(p.value).toFixed(1)}`]));
+  const linePath = `M ${points.join(' L ')}`;
+  const areaPath = `${linePath} L ${x(series.length - 1)},${bottom} L ${x(0)},${bottom} Z`;
 
-  const yTicks = [min, min + span / 2, max];
-  const xTickEvery = Math.max(1, Math.round(series.length / 6));
+  const yearLabelEvery = Math.max(1, Math.round(series.length / Math.max(2, Math.floor(plotWidth / 90))));
+  const intercept = slopePerStep === undefined ? null : trendIntercept(series, slopePerStep);
+
+  const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const ratio = (event.clientX - box.left - PADDING.left) / (plotWidth || 1);
+    const index = Math.round(ratio * (series.length - 1));
+    setHoverIndex(index >= 0 && index < series.length ? index : null);
+  };
+
+  const hovered = hoverIndex === null ? null : series[hoverIndex];
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${height}`} className="chart" role="img" aria-label={`Time series in ${unit}`}>
-      {yTicks.map((v) => (
-        <g key={v}>
-          <line x1={PADDING.left} x2={WIDTH - PADDING.right} y1={y(v)} y2={y(v)} className="chart-grid" />
-          <text x={PADDING.left - 6} y={y(v)} className="chart-label" textAnchor="end" dominantBaseline="middle">
-            {v.toFixed(1)}
-          </text>
-        </g>
-      ))}
-      {series.map((p, i) =>
-        i % xTickEvery === 0 ? (
-          <text key={p.t} x={x(i)} y={height - 8} className="chart-label" textAnchor="middle">
-            {p.t.slice(0, 4)}
-          </text>
-        ) : null,
+    <div className="chart" ref={containerRef}>
+      {width > 0 && (
+        <svg
+          width={width}
+          height={height}
+          role="img"
+          aria-label={t('chart.label', { unit })}
+          onPointerMove={onPointerMove}
+          onPointerLeave={() => setHoverIndex(null)}
+        >
+          <defs>
+            <linearGradient id="chart-area" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--data)" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="var(--data)" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+
+          {niceTicks(min, max, TICK_COUNT).map((v) => (
+            <g key={v}>
+              <line x1={PADDING.left} x2={PADDING.left + plotWidth} y1={y(v)} y2={y(v)} className="chart-grid" />
+              <text x={PADDING.left - 8} y={y(v)} className="chart-label" textAnchor="end" dominantBaseline="middle">
+                {v.toFixed(1)}
+              </text>
+            </g>
+          ))}
+
+          {series.map((p, i) =>
+            i % yearLabelEvery === 0 ? (
+              <text key={p.t} x={x(i)} y={height - 10} className="chart-label" textAnchor="middle">
+                {p.t.slice(0, 4)}
+              </text>
+            ) : null,
+          )}
+
+          <path d={areaPath} fill="url(#chart-area)" />
+          <path d={linePath} className="chart-line" />
+
+          {intercept !== null && slopePerStep !== undefined && (
+            <line
+              x1={x(0)}
+              y1={y(intercept)}
+              x2={x(series.length - 1)}
+              y2={y(intercept + slopePerStep * (series.length - 1))}
+              className="chart-trend"
+            />
+          )}
+
+          {hovered && hovered.value !== null && hoverIndex !== null && (
+            <g className="chart-hover">
+              <line x1={x(hoverIndex)} x2={x(hoverIndex)} y1={PADDING.top} y2={bottom} />
+              <circle cx={x(hoverIndex)} cy={y(hovered.value)} r={4} />
+            </g>
+          )}
+        </svg>
       )}
-      <path d={`M ${path}`} className="chart-line" />
-    </svg>
+
+      {hovered && hovered.value !== null && (
+        <div className="chart-tooltip">
+          <span>{hovered.t}</span>
+          <strong>
+            {hovered.value.toFixed(2)} {unit}
+          </strong>
+        </div>
+      )}
+    </div>
   );
 }
