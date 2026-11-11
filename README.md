@@ -39,6 +39,14 @@ npm run dev
 | `npm run validate:data` | Check datasets against the contract |
 | `npm run build` | Production build into `web/dist` |
 
+### Languages
+
+The UI shows one language at a time, English by default, with a switcher in the nav. The choice is remembered per browser.
+
+- Strings live in `web/src/core/i18n/en.ts` and `th.ts`.
+- Add a key to `en.ts` first. TypeScript and `npm test` fail until `th.ts` has the same key and placeholders.
+- Use `const { t } = useI18n()` and `t('key', { name: value })` in components.
+
 ### Pipeline
 
 ```bash

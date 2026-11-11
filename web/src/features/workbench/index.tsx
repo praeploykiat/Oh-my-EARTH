@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { analyzeTrend } from '../../core/stats';
 import { loadCatalog, loadDataset, useAsync, type Dataset } from '../../core/data';
+import { useI18n } from '../../core/i18n';
 import { StatusMessage, TimeSeriesChart, TrendSummary } from '../../shared';
 
 export function Workbench() {
+  const { t } = useI18n();
   const catalog = useAsync(loadCatalog, []);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
@@ -14,9 +16,9 @@ export function Workbench() {
 
   return (
     <section className="workbench">
-      <h1>Workbench</h1>
+      <h1>{t('workbench.title')}</h1>
       <label>
-        Dataset{' '}
+        {t('workbench.dataset')}{' '}
         <select value={file} onChange={(e) => setSelectedFile(e.target.value)}>
           {entries.map((entry) => (
             <option key={entry.id} value={entry.file}>
@@ -37,6 +39,7 @@ function DatasetView({ file }: { file: string }) {
 }
 
 function Analysis({ dataset }: { dataset: Dataset }) {
+  const { t } = useI18n();
   const [removeSeasonality, setRemoveSeasonality] = useState(true);
 
   const live = useMemo(() => {
@@ -57,7 +60,7 @@ function Analysis({ dataset }: { dataset: Dataset }) {
       <TimeSeriesChart series={dataset.series} unit={dataset.unit} />
       <label>
         <input type="checkbox" checked={removeSeasonality} onChange={(e) => setRemoveSeasonality(e.target.checked)} />{' '}
-        Remove seasonal cycle
+        {t('workbench.removeSeasonality')}
       </label>
       <TrendSummary dataset={{ ...dataset, trend: live }} />
     </>

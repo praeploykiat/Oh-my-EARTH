@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useI18n } from './core/i18n';
 import { Experience } from './features/experience';
 import { Workbench } from './features/workbench';
+import { LanguageSwitcher } from './shared';
 
 const ROUTES = {
   '/': Experience,
@@ -15,6 +17,7 @@ function currentRoute(): Route {
 }
 
 export function App() {
+  const { t } = useI18n();
   const [route, setRoute] = useState<Route>(currentRoute);
 
   useEffect(() => {
@@ -29,11 +32,12 @@ export function App() {
     <>
       <nav className="nav">
         <a href="#/" aria-current={route === '/'}>
-          Experience
+          {t('nav.experience')}
         </a>
         <a href="#/workbench" aria-current={route === '/workbench'}>
-          Workbench
+          {t('nav.workbench')}
         </a>
+        <LanguageSwitcher />
       </nav>
       <main className="page">
         <Page />

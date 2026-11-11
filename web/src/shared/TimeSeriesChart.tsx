@@ -1,4 +1,5 @@
 import type { SeriesPoint } from '../core/data';
+import { useI18n } from '../core/i18n';
 
 interface TimeSeriesChartProps {
   series: SeriesPoint[];
@@ -10,8 +11,9 @@ const WIDTH = 720;
 const PADDING = { top: 16, right: 16, bottom: 28, left: 48 };
 
 export function TimeSeriesChart({ series, unit, height = 260 }: TimeSeriesChartProps) {
+  const { t } = useI18n();
   const values = series.map((p) => p.value).filter((v): v is number => v !== null);
-  if (values.length === 0) return <p>No data</p>;
+  if (values.length === 0) return <p>{t('chart.noData')}</p>;
 
   const min = Math.min(...values);
   const max = Math.max(...values);
