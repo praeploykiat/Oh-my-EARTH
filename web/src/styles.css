@@ -764,3 +764,90 @@ button:hover,
     transition: none !important;
   }
 }
+
+/* Map */
+.thailand-map {
+  margin: 12px 0 0;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(91, 156, 245, 0.08), transparent 70%),
+    var(--surface);
+}
+
+.thailand-map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 460px;
+  cursor: crosshair;
+}
+
+.map-province {
+  fill: #1c2230;
+  stroke: var(--bg);
+  stroke-width: 0.6;
+  transition: fill 0.12s;
+}
+
+.map-province:hover {
+  fill: #2b3446;
+}
+
+.map-province.is-selected {
+  fill: rgba(252, 61, 33, 0.35);
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+
+.map-marker circle {
+  fill: var(--data);
+  stroke: var(--bg);
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.map-marker.is-active circle {
+  fill: var(--fg);
+}
+
+.map-pin {
+  pointer-events: none;
+}
+
+.map-pin circle {
+  fill: var(--accent);
+}
+
+.map-pin .map-pin-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+.map-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-soft);
+}
+
+.map-caption span {
+  color: var(--muted);
+}
+
+.province-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--fg);
+  background: var(--surface);
+}

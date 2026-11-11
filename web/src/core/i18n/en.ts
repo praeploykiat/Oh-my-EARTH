@@ -55,6 +55,14 @@ export const en = {
   'workbench.dataset': 'Dataset',
   'workbench.options': 'Analysis',
   'workbench.removeSeasonality': 'Remove seasonal cycle',
+  'workbench.location': 'Location',
+  'workbench.customLocation': 'Selected location',
+  'workbench.liveTitle': 'Live data · coming soon',
+  'workbench.liveBody': 'NASA POWER data for this point will load here, analyzed in your browser. Until then, pick a prepared dataset below.',
+
+  'map.label': 'Map of Thailand by province',
+  'map.hint': 'Click a province on the map',
+  'map.selectProvince': 'Choose a province',
 
   'footer.team': 'Far Side of the Moon',
   'footer.event': 'NASA Space Apps Challenge 2026 · Bangkok',

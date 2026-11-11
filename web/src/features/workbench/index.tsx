@@ -1,13 +1,16 @@
 import { useMemo, useState } from 'react';
 import { analyzeTrend } from '../../core/stats';
 import { loadCatalog, loadDataset, useAsync, type CatalogEntry, type Dataset } from '../../core/data';
+import { provinceByCode, type Place } from '../../core/geo';
 import { useI18n } from '../../core/i18n';
-import { SourceNote, StatusMessage, TimeSeriesChart, TrendSummary } from '../../shared';
+import { ProvinceSelect, SourceNote, StatusMessage, ThailandMap, TimeSeriesChart, TrendSummary } from '../../shared';
+
+type Selection = { kind: 'dataset'; file: string } | { kind: 'place'; place: Place };
 
 export function Workbench() {
   const { t } = useI18n();
   const catalog = useAsync(loadCatalog, []);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
   const [removeSeasonality, setRemoveSeasonality] = useState(true);
 
   if (catalog.status !== 'ready') {
@@ -19,7 +22,8 @@ export function Workbench() {
   }
 
   const entries = catalog.data.datasets;
-  const file = selectedFile ?? entries[0]?.file;
+  const active: Selection | null = selection ?? (entries[0] ? { kind: 'dataset', file: entries[0].file } : null);
+  const selectPlace = (place: Place) => setSelection({ kind: 'place', place });
 
   return (
     <section className="section workbench">
@@ -27,8 +31,19 @@ export function Workbench() {
         <span className="eyebrow">{t('workbench.title')}</span>
         <p className="panel-intro">{t('workbench.intro')}</p>
 
+        <span className="field-label">{t('workbench.location')}</span>
+        <ProvinceSelect
+          value={active?.kind === 'place' ? active.place.provinceCode : null}
+          onSelectPlace={selectPlace}
+        />
+        <ThailandMap selected={active?.kind === 'place' ? active.place : null} onSelectPlace={selectPlace} />
+
         <span className="field-label">{t('workbench.dataset')}</span>
-        <DatasetList entries={entries} selected={file} onSelect={setSelectedFile} />
+        <DatasetList
+          entries={entries}
+          selected={active?.kind === 'dataset' ? active.file : undefined}
+          onSelect={(file) => setSelection({ kind: 'dataset', file })}
+        />
 
         <span className="field-label">{t('workbench.options')}</span>
         <label className="toggle">
@@ -38,7 +53,8 @@ export function Workbench() {
       </aside>
 
       <div className="workbench-main">
-        {file && <DatasetView file={file} removeSeasonality={removeSeasonality} />}
+        {active?.kind === 'dataset' && <DatasetView file={active.file} removeSeasonality={removeSeasonality} />}
+        {active?.kind === 'place' && <PlaceView place={active.place} />}
       </div>
     </section>
   );
@@ -72,7 +88,32 @@ function DatasetList({ entries, selected, onSelect }: DatasetListProps) {
   );
 }
 
-// Analysis
+// Place view
+
+function PlaceView({ place }: { place: Place }) {
+  const { language, t } = useI18n();
+  const province = place.provinceCode ? provinceByCode(place.provinceCode) : undefined;
+
+  return (
+    <>
+      <header className="analysis-header">
+        <h1>{province ? province[language] : t('workbench.customLocation')}</h1>
+        <div className="chips">
+          <span className="chip">
+            {place.lat.toFixed(2)}°, {place.lon.toFixed(2)}°
+          </span>
+          {place.provinceCode && <span className="chip">{place.provinceCode}</span>}
+        </div>
+      </header>
+      <div className="card placeholder">
+        <span className="eyebrow">{t('workbench.liveTitle')}</span>
+        <p>{t('workbench.liveBody')}</p>
+      </div>
+    </>
+  );
+}
+
+// Dataset analysis
 
 function DatasetView({ file, removeSeasonality }: { file: string; removeSeasonality: boolean }) {
   const dataset = useAsync(() => loadDataset(file), [file]);

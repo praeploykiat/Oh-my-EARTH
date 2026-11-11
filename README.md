@@ -14,6 +14,7 @@ fixtures/      Reference trend cases both implementations must match
 pipeline/      Python: fetch NASA data, compute trends, export datasets
 web/           Vite + React + TypeScript app
   public/datasets/   Exported datasets read by the app
+  public/geo/        Thailand province boundaries
   src/core/          Stats and data loading
   src/features/      experience (interactive story), workbench (analysis tool)
   src/shared/        Chart and summary components
@@ -87,6 +88,7 @@ CI (`.github/workflows/ci.yml`) runs on every pull request and push to `main`: t
 | Source | Product | Use |
 | --- | --- | --- |
 | [NASA POWER](https://power.larc.nasa.gov/) | MERRA-2 monthly point data | Temperature and precipitation series |
+| [geoBoundaries](https://www.geoboundaries.org/) (CC BY 4.0) | Thailand ADM1, simplified | Province map in `web/public/geo/` |
 
 Sample datasets in `web/public/datasets/` are synthetic until replaced by `python export.py`. Each file marks this with `source.synthetic`.
 

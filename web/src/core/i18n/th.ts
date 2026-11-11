@@ -57,6 +57,14 @@ export const th: Record<MessageKey, string> = {
   'workbench.dataset': 'ชุดข้อมูล',
   'workbench.options': 'การวิเคราะห์',
   'workbench.removeSeasonality': 'ตัดวัฏจักรฤดูกาลออก',
+  'workbench.location': 'ตำแหน่ง',
+  'workbench.customLocation': 'ตำแหน่งที่เลือก',
+  'workbench.liveTitle': 'ข้อมูลสด · เร็วๆ นี้',
+  'workbench.liveBody': 'ข้อมูล NASA POWER ของจุดนี้จะแสดงที่นี่และวิเคราะห์ในเบราว์เซอร์ของคุณ ระหว่างนี้เลือกชุดข้อมูลที่เตรียมไว้ด้านล่างได้',
+
+  'map.label': 'แผนที่ประเทศไทยรายจังหวัด',
+  'map.hint': 'คลิกจังหวัดบนแผนที่',
+  'map.selectProvince': 'เลือกจังหวัด',
 
   'footer.team': 'Far Side of the Moon',
   'footer.event': 'NASA Space Apps Challenge 2026 · กรุงเทพฯ',
