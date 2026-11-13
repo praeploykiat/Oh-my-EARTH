@@ -1,9 +1,15 @@
-import type { Dataset } from '../core/data';
+import { crossCheckUrl, type Dataset, type Origin } from '../core/data';
 import { useI18n } from '../core/i18n';
 
-export function SourceNote({ dataset }: { dataset: Dataset }) {
+interface SourceNoteProps {
+  dataset: Dataset;
+  origin?: Origin;
+}
+
+export function SourceNote({ dataset, origin }: SourceNoteProps) {
   const { t } = useI18n();
   const { provider, product, url, synthetic } = dataset.source;
+  const checkUrl = crossCheckUrl(dataset);
 
   return (
     <div className="source-note">
@@ -16,7 +22,14 @@ export function SourceNote({ dataset }: { dataset: Dataset }) {
         <span>{provider}</span>
       )}
       <span>{product}</span>
+      {origin === 'live' && <span className="badge badge-live">{t('source.live')}</span>}
+      {origin === 'saved' && <span className="badge">{t('source.saved')}</span>}
       {synthetic && <span className="badge">{t('source.synthetic')}</span>}
+      {checkUrl && (
+        <a className="source-check" href={checkUrl} target="_blank" rel="noreferrer">
+          {t('source.crossCheck')} ↗
+        </a>
+      )}
     </div>
   );
 }

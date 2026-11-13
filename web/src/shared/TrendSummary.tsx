@@ -1,5 +1,7 @@
+import { slopeDecimals } from '../core/analysis/format';
 import type { Dataset } from '../core/data';
 import { useI18n } from '../core/i18n';
+import { InfoTip } from './InfoTip';
 
 interface TrendSummaryProps {
   dataset: Dataset;
@@ -19,22 +21,28 @@ export function TrendSummary({ dataset }: TrendSummaryProps) {
   return (
     <div className="stats">
       <div className={`stat ${significant ? 'is-highlight' : ''}`}>
-        <span className="stat-label">{t('stats.trend')}</span>
+        <span className="stat-label">
+          {t('stats.trend')} <InfoTip text={t('info.trend')} />
+        </span>
         <strong className="stat-value">
           {sign}
-          {Math.abs(slopePerDecade).toFixed(2)}
+          {Math.abs(slopePerDecade).toFixed(slopeDecimals(dataset.series))}
         </strong>
         <span className="stat-unit">{t('stats.perDecade', { unit: dataset.unit })}</span>
       </div>
 
       <div className="stat">
-        <span className="stat-label">{t('stats.pValue')}</span>
+        <span className="stat-label">
+          {t('stats.pValue')} <InfoTip text={t('info.pValue')} />
+        </span>
         <strong className="stat-value">{pValue < 0.001 ? '<0.001' : pValue.toFixed(3)}</strong>
         <span className="stat-unit">{t('stats.mannKendall')}</span>
       </div>
 
       <div className="stat">
-        <span className="stat-label">{t('stats.verdict')}</span>
+        <span className="stat-label">
+          {t('stats.verdict')} <InfoTip text={t('info.verdict')} />
+        </span>
         <strong className="stat-value stat-value-text">
           {significant ? t('stats.significant') : t('stats.notSignificant')}
         </strong>

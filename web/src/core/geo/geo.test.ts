@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { PROVINCES, provinceAt, provinceByCode, provinceCentroid, type ProvinceCollection } from '.';
+import { nearestProvince, PROVINCES, provinceAt, provinceByCode, provinceCentroid, type ProvinceCollection } from '.';
 
 const boundaries: ProvinceCollection = JSON.parse(
   readFileSync(join(__dirname, '../../../public/geo/thailand-provinces.json'), 'utf-8'),
@@ -29,6 +29,11 @@ describe('point lookup', () => {
 
   it('returns nothing outside Thailand', () => {
     expect(provinceAt(boundaries, { lat: 1.35, lon: 103.8 })).toBeUndefined();
+  });
+
+  it('snaps a point just offshore to the nearest province', () => {
+    expect(provinceAt(boundaries, { lat: 8.6, lon: 98.2 })).toBeUndefined();
+    expect(nearestProvince(boundaries, { lat: 8.6, lon: 98.2 })?.properties.code).toBe('TH-82');
   });
 
   it('places each centroid near its province', () => {

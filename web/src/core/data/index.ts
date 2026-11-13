@@ -1,4 +1,11 @@
 export * from './types';
 export * from './loadDataset';
+export * from './crossCheck';
+export * from './remote';
+export * from './power';
+export * from './proxy';
+export * from './range';
+export * from './resolve';
 export * from './useAsync';
+export * from './variables';
 export { DatasetError } from './validate';

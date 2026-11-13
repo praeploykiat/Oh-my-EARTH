@@ -3,7 +3,7 @@ import { BrandMark } from './BrandMark';
 
 const REPO_URL = 'https://github.com/praeploykiat/space-apps-challenge-th';
 const CHALLENGE_URL = 'https://www.spaceappschallenge.org/2026/challenges/be-an-earth-system-trend-detective/';
-const DATA_URL = 'https://power.larc.nasa.gov/';
+const DATA_URL = '#/methods';
 
 export function Footer() {
   const { t } = useI18n();
@@ -23,7 +23,7 @@ export function Footer() {
           <a href={CHALLENGE_URL} target="_blank" rel="noreferrer">
             {t('footer.challenge')}
           </a>
-          <a href={DATA_URL} target="_blank" rel="noreferrer">
+          <a href={DATA_URL}>
             {t('footer.data')}
           </a>
           <a href={REPO_URL} target="_blank" rel="noreferrer">

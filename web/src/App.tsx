@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from './core/i18n';
+import { splitHash } from './core/url';
 import { Experience } from './features/experience';
+import { Methods } from './features/methods';
 import { Workbench } from './features/workbench';
 import { BrandMark, Footer, LanguageSwitcher } from './shared';
 
 const ROUTES = {
   '/': Experience,
   '/workbench': Workbench,
+  '/methods': Methods,
 } as const;
 
 type Route = keyof typeof ROUTES;
 
 function currentRoute(): Route {
-  const path = window.location.hash.replace(/^#/, '') || '/';
+  const { path } = splitHash(window.location.hash);
   return path in ROUTES ? (path as Route) : '/';
 }
 
@@ -44,6 +47,9 @@ export function App() {
           </a>
           <a href="#/workbench" aria-current={route === '/workbench'}>
             {t('nav.workbench')}
+          </a>
+          <a href="#/methods" aria-current={route === '/methods'}>
+            {t('nav.methods')}
           </a>
         </nav>
         <LanguageSwitcher />

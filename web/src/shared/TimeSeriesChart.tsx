@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import type { SeriesPoint } from '../core/data';
+import { decimalsFor } from '../core/analysis/format';
 import { useI18n } from '../core/i18n';
+
+export interface ChartBand {
+  from: number;
+  to: number;
+  value: number;
+  label: string;
+}
 
 interface TimeSeriesChartProps {
   series: SeriesPoint[];
   unit: string;
   slopePerStep?: number;
+  bands?: ChartBand[];
   height?: number;
 }
 
@@ -39,7 +48,7 @@ function trendIntercept(series: SeriesPoint[], slope: number): number {
   return residuals[Math.floor(residuals.length / 2)];
 }
 
-export function TimeSeriesChart({ series, unit, slopePerStep, height = 300 }: TimeSeriesChartProps) {
+export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height = 300 }: TimeSeriesChartProps) {
   const { t } = useI18n();
   const [containerRef, width] = useElementWidth<HTMLDivElement>();
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -54,6 +63,8 @@ export function TimeSeriesChart({ series, unit, slopePerStep, height = 300 }: Ti
   const plotWidth = Math.max(width - PADDING.left - PADDING.right, 0);
   const plotHeight = height - PADDING.top - PADDING.bottom;
   const bottom = PADDING.top + plotHeight;
+  const ticks = niceTicks(min, max, TICK_COUNT);
+  const tickDecimals = decimalsFor(ticks.length > 1 ? ticks[1] - ticks[0] : span);
 
   const x = (i: number) => PADDING.left + (i / Math.max(series.length - 1, 1)) * plotWidth;
   const y = (v: number) => PADDING.top + (1 - (v - min) / span) * plotHeight;
@@ -92,11 +103,11 @@ export function TimeSeriesChart({ series, unit, slopePerStep, height = 300 }: Ti
             </linearGradient>
           </defs>
 
-          {niceTicks(min, max, TICK_COUNT).map((v) => (
+          {ticks.map((v) => (
             <g key={v}>
               <line x1={PADDING.left} x2={PADDING.left + plotWidth} y1={y(v)} y2={y(v)} className="chart-grid" />
               <text x={PADDING.left - 8} y={y(v)} className="chart-label" textAnchor="end" dominantBaseline="middle">
-                {v.toFixed(1)}
+                {v.toFixed(tickDecimals)}
               </text>
             </g>
           ))}
@@ -109,8 +120,21 @@ export function TimeSeriesChart({ series, unit, slopePerStep, height = 300 }: Ti
             ) : null,
           )}
 
+          {min < 0 && max > 0 && (
+            <line x1={PADDING.left} x2={PADDING.left + plotWidth} y1={y(0)} y2={y(0)} className="chart-zero" />
+          )}
+
           <path d={areaPath} fill="url(#chart-area)" />
           <path d={linePath} className="chart-line" />
+
+          {bands.map((band) => (
+            <g key={band.label} className="chart-band">
+              <line x1={x(band.from)} x2={x(band.to)} y1={y(band.value)} y2={y(band.value)} />
+              <text x={(x(band.from) + x(band.to)) / 2} y={y(band.value) - 8} textAnchor="middle">
+                {band.label}
+              </text>
+            </g>
+          ))}
 
           {intercept !== null && slopePerStep !== undefined && (
             <line
@@ -135,7 +159,7 @@ export function TimeSeriesChart({ series, unit, slopePerStep, height = 300 }: Ti
         <div className="chart-tooltip">
           <span>{hovered.t}</span>
           <strong>
-            {hovered.value.toFixed(2)} {unit}
+            {hovered.value.toFixed(tickDecimals + 1)} {unit}
           </strong>
         </div>
       )}
