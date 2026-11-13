@@ -77,9 +77,10 @@ Known limitation: the test does not yet correct for serial autocorrelation, whic
 
 ## Deployment
 
-Pushing to `main` deploys `web/` to GitHub Pages through `.github/workflows/deploy.yml`.
+The site is hosted on [Vercel](https://vercel.com/) with **Root Directory** set to `web` and the Vite preset. No environment variables are needed.
 
-One-time setup: repository **Settings → Pages → Source: GitHub Actions**.
+- Every push to `main` deploys to production.
+- Every pull request gets its own preview URL.
 
 CI (`.github/workflows/ci.yml`) runs on every pull request and push to `main`: typecheck, tests in both languages, dataset validation, and build.
 
