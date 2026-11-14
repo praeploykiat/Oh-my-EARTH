@@ -52,10 +52,15 @@ export function requestUrl({ parameter, lat, lon }: PowerRequest): string {
 
 export function fetchPowerMonthly(request: PowerRequest): Promise<SeriesPoint[]> {
   return cachedSeries(cacheKey(request), async () => {
-    const response = await fetchWithTimeout(requestUrl(request), TIMEOUT_MS);
-    if (!response.ok) throw new Error(`NASA POWER returned ${response.status}`);
-    return parsePowerMonthly((await response.json()) as PowerResponse, request.parameter);
+    return parsePowerMonthly((await fetchPowerResponse(request)) as PowerResponse, request.parameter);
   });
+}
+
+// For consumers that inspect units and provenance before normalizing the response.
+export async function fetchPowerResponse(request: PowerRequest): Promise<unknown> {
+  const response = await fetchWithTimeout(requestUrl(request), TIMEOUT_MS);
+  if (!response.ok) throw new Error(`NASA POWER returned ${response.status}`);
+  return response.json() as Promise<unknown>;
 }
 
 function cacheKey(request: PowerRequest): string {

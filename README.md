@@ -69,9 +69,23 @@ Add or change datasets in `SPECS` inside `pipeline/export.py`.
 
 Open `#/global` from **Global explorer** in the navigation. This separate page provides a clickable world map and searchable catalog of 195 representative capital-city locations. The four initial variables are air temperature (`T2M`), corrected precipitation (`PRECTOTCORR`), relative humidity (`RH2M`), and solar radiation (`ALLSKY_SFC_SW_DWN`).
 
-The page reuses the POWER monthly point connector, session cache, time-series chart, annual/anomaly transformations, and trend summary. It requests only the selected variable and location for 2001–2024. Selection and view are stored in the URL, for example `#/global?country=TH&v=T2M&view=annual`. Failed requests show a retry action; this page does not substitute synthetic featured datasets. Missing months retain their calendar positions for analysis.
+The page reuses the POWER monthly point connector, time-series chart, anomaly transformation, and trend summary. One request retrieves all four variables for the selected capital for 2001–2024. Validated raw responses are cached in memory and session storage with their original retrieval timestamps; the quality panel can refresh them. Country, variable, view, and selected years are stored in the URL, for example `#/global?country=TH&v=T2M&view=annual&start=2010&end=2024`. Changing years or variables reuses the loaded response. Failed requests show a retry action; this page does not substitute synthetic featured datasets.
 
-Observations represent NASA grid data at the listed capital coordinate, not national averages or local station measurements. Annual values use the existing unweighted mean of at least 10 valid monthly values; rainfall remains a daily rate, not an annual total. Statistics always use the monthly record, including in annual view, and retain the autocorrelation limitation described below.
+Observations represent NASA grid data at the listed capital coordinate, not national averages or local station measurements. The global explorer uses day-weighted annual means for temperature, humidity, and daily solar energy, and derives annual rainfall totals by summing each monthly daily rate multiplied by its calendar days (including leap days). Annual values require all 12 valid months; incomplete years remain gaps and are never scaled or filled. Derived rainfall totals inherit the precision of the rounded monthly rates. The Thailand workbench retains its existing aggregation.
+
+Within the selected period, monthly/anomaly views and annual means use deseasonalized monthly observations for statistics. Annual rainfall view uses complete annual totals, so its chart and trend both use `mm/year`. This change of analysis basis is labeled next to the results. Anomaly baselines follow the selected period. Inference is withheld unless the selection covers at least 10 years, observations occur in at least 10 distinct years, and at least 80% of monthly observations are valid; annual rainfall additionally requires 10 complete years. These are explicit MVP display safeguards, not statistical guarantees, and autocorrelation remains uncorrected.
+
+The **Data quality and provenance** panel reports all four variables for the selected years, including source units, valid/missing/rejected month counts, requested and API response coordinates, source products, and retrieval time. Runtime validation rejects malformed response structure, missing variable metadata, incompatible units, unexpected months/years, and location mismatches. Missing/fill values remain missing; nonnumeric, nonfinite, or implausible values are excluded and counted separately. See [validation rules and live pilot](docs/global-data-validation.md).
+
+Run the opt-in live pilot from `web/`:
+
+```bash
+npm run validate:global:live
+# Optional subset:
+npm run validate:global:live -- --countries=TH,NO
+```
+
+The script uses the same validator and aggregator as the page, writes a summary to `docs/global-data-validation.json`, and retains original responses with request metadata in ignored `pipeline/raw/global-validation/`. A rerun replaces those pilot outputs; no live request is required by the ordinary unit tests.
 
 Bundled geography and source attribution:
 

@@ -3,6 +3,7 @@ import type { SeriesPoint } from '../core/data';
 import { decimalsFor } from '../core/analysis/format';
 import { trendIntercept } from '../core/analysis/series';
 import { useI18n } from '../core/i18n';
+import { chartPaths } from './chartPaths';
 
 export interface ChartBand {
   from: number;
@@ -50,8 +51,11 @@ export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height
 
   if (values.length === 0) return <p className="status">{t('chart.noData')}</p>;
 
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  const padding = rawMin === rawMax ? Math.abs(rawMin) * 0.05 || 1 : 0;
+  const min = rawMin - padding;
+  const max = rawMax + padding;
   const span = max - min || 1;
   const plotWidth = Math.max(width - PADDING.left - PADDING.right, 0);
   const plotHeight = height - PADDING.top - PADDING.bottom;
@@ -59,12 +63,10 @@ export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height
   const ticks = niceTicks(min, max, TICK_COUNT);
   const tickDecimals = decimalsFor(ticks.length > 1 ? ticks[1] - ticks[0] : span);
 
-  const x = (i: number) => PADDING.left + (i / Math.max(series.length - 1, 1)) * plotWidth;
+  const x = (i: number) => PADDING.left + (series.length === 1 ? 0.5 : i / (series.length - 1)) * plotWidth;
   const y = (v: number) => PADDING.top + (1 - (v - min) / span) * plotHeight;
 
-  const points = series.flatMap((p, i) => (p.value === null ? [] : [`${x(i).toFixed(1)},${y(p.value).toFixed(1)}`]));
-  const linePath = `M ${points.join(' L ')}`;
-  const areaPath = `${linePath} L ${x(series.length - 1)},${bottom} L ${x(0)},${bottom} Z`;
+  const paths = chartPaths(series, x, y, bottom);
 
   const yearLabelEvery = Math.max(1, Math.round(series.length / Math.max(2, Math.floor(plotWidth / 90))));
   const intercept = slopePerStep === undefined ? null : trendIntercept(series, slopePerStep);
@@ -117,8 +119,9 @@ export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height
             <line x1={PADDING.left} x2={PADDING.left + plotWidth} y1={y(0)} y2={y(0)} className="chart-zero" />
           )}
 
-          <path d={areaPath} fill="url(#chart-area)" />
-          <path d={linePath} className="chart-line" />
+          <path d={paths.area} fill="url(#chart-area)" />
+          <path d={paths.line} className="chart-line" />
+          {paths.isolated.map((i) => <circle key={series[i].t} cx={x(i)} cy={y(series[i].value!)} r={3.5} fill="var(--data)" />)}
 
           {bands.map((band) => (
             <g key={band.label} className="chart-band">

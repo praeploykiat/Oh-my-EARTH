@@ -18,6 +18,24 @@
 .global-variable input { accent-color: var(--accent); }
 .global-variable small { display: block; color: var(--muted); margin-top: 3px; font-family: var(--font-mono); }
 .global-controls-note, .global-search-count { font-size: 12px; margin: 12px 0 0; }
+.global-controls .global-range { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.global-range legend { grid-column: 1 / -1; }
+.global-range label { font-size: 12px; color: var(--fg-soft); }
+.global-range label[for='global-end'] { grid-column: 2; grid-row: 1; }
+.global-range select { grid-row: 2; }
+.global-range-note { font-size: 11px; margin: 8px 0 0; }
+.global-coverage { display: flex; gap: 8px 18px; flex-wrap: wrap; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; font-size: 12px; color: var(--fg-soft); }
+.global-coverage strong { color: var(--accent); }
+.global-aggregation-note, .global-analysis-basis { font-size: 12px; margin: 12px 0; }
+.global-insufficient { padding: 14px; border-left: 3px solid var(--gold); background: var(--surface); color: var(--fg-soft); font-size: 13px; }
+.global-quality { margin-top: 24px; padding: 16px; border: 1px solid var(--line-strong); border-radius: var(--radius); font-size: 12px; }
+.global-quality summary { cursor: pointer; color: var(--fg-soft); }
+.global-quality[open] summary { margin-bottom: 14px; }
+.global-quality-scroll { overflow-x: auto; margin-bottom: 16px; }
+.global-quality table { width: 100%; border-collapse: collapse; text-align: left; }
+.global-quality th, .global-quality td { padding: 8px; border-bottom: 1px solid var(--line); }
+.global-quality th { font-weight: 500; color: var(--fg-soft); }
+.global-quality caption { text-align: left; color: var(--accent); padding-bottom: 8px; }
 .global-content { min-width: 0; }
 .global-map { position: relative; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #1a3033, #101c20); }
 .global-map-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; color: var(--muted); font-size: 12px; }
@@ -56,7 +74,7 @@
 .global-explorer :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (max-width: 740px) {
   .header { gap: 12px; }
-  .nav-links { min-width: 0; overflow-x: auto; gap: 16px; }
+  .nav-links { min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; gap: 16px; }
   .nav-links a { flex-shrink: 0; white-space: nowrap; }
   .header > :last-child { flex-shrink: 0; }
 }

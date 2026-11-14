@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { computeTrend, seriesForView, type View } from '../../core/analysis';
-import { fetchPowerMonthly, requestUrl } from '../../core/data/power';
+import type { View } from '../../core/analysis';
 import { START_YEAR, END_YEAR } from '../../core/data/range';
-import { useAsync, variableByKey, type Dataset, type SeriesPoint } from '../../core/data';
+import { useAsync, variableByKey, type Dataset } from '../../core/data';
 import { CAPITALS, capitalByCode, type Capital } from '../../core/geo/capitals';
 import { useI18n } from '../../core/i18n';
 import { splitHash } from '../../core/url';
 import { TimeSeriesChart, TrendSummary } from '../../shared';
 import { WorldMap } from './WorldMap';
-import { GLOBAL_VARIABLES, completeMonthlyRecord } from './data';
+import { GLOBAL_VARIABLES, YEARS, parseYearRange, prepareGlobalAnalysis, recordCoverage, completeMonthlyRecord, type GlobalVariable, type YearRange } from './data';
+import { fetchGlobalRecord, globalRequestUrl, type GlobalRecord } from './powerRecord';
 import './global.css';
 
 const VIEWS: View[] = ['monthly', 'annual', 'anomaly'];
@@ -19,6 +19,7 @@ function initialState() {
     country: capitalByCode(params.get('country') ?? '')?.code ?? 'TH',
     variable: GLOBAL_VARIABLES.find((key) => key === params.get('v')) ?? 'T2M',
     view: VIEWS.find((view) => view === params.get('view')) ?? 'annual',
+    ...parseYearRange(params),
   };
 }
 
@@ -40,7 +41,7 @@ export function GlobalExplorer() {
   }, []);
   useEffect(() => {
     if (splitHash(window.location.hash).path !== '/global') return;
-    const params = new URLSearchParams({ country: state.country, v: state.variable, view: state.view });
+    const params = new URLSearchParams({ country: state.country, v: state.variable, view: state.view, start: String(state.start), end: String(state.end) });
     window.history.replaceState(null, '', `#/global?${params}`);
   }, [state]);
 
@@ -48,7 +49,7 @@ export function GlobalExplorer() {
     <section className="global-explorer">
       <header className="global-heading">
         <div><span className="eyebrow">{t('global.eyebrow')}</span><h1>{t('global.title')}</h1><p>{t('global.intro')}</p></div>
-        <div className="global-period"><strong>{START_YEAR}—{END_YEAR}</strong><span>{t('global.period')}</span></div>
+        <div className="global-period"><strong>{state.start}—{state.end}</strong><span>{t('global.period')}</span></div>
       </header>
       <p className="global-scope">{t('global.scope')}</p>
       <div className="global-layout">
@@ -70,16 +71,29 @@ export function GlobalExplorer() {
               </label>;
             })}
           </fieldset>
+          <fieldset className="global-range"><legend>{t('global.timeRange')}</legend>
+            <label htmlFor="global-start">{t('global.startYear')}</label>
+            <select id="global-start" value={state.start} onChange={(event) => {
+              const start = Number(event.target.value);
+              setState((s) => ({ ...s, start, end: Math.max(start, s.end) }));
+            }}>{YEARS.map((year) => <option key={year} value={year}>{year}</option>)}</select>
+            <label htmlFor="global-end">{t('global.endYear')}</label>
+            <select id="global-end" value={state.end} onChange={(event) => {
+              const end = Number(event.target.value);
+              setState((s) => ({ ...s, end, start: Math.min(end, s.start) }));
+            }}>{YEARS.map((year) => <option key={year} value={year}>{year}</option>)}</select>
+          </fieldset>
+          <p className="global-range-note">{t('global.rangeAvailable', { start: START_YEAR, end: END_YEAR })}</p>
           <p className="global-controls-note">{t('global.onDemand', { count: CAPITALS.length })}</p>
         </aside>
         <div className="global-content">
           <WorldMap selected={capital} onSelect={(country) => setState((s) => ({ ...s, country }))} />
           <div className="global-result-heading"><div><span className="eyebrow">{capital.country}</span><h2>{capital.city}</h2></div>
             <div className="global-views" role="group" aria-label={t('global.view')}>
-              {VIEWS.map((view) => <button key={view} type="button" aria-pressed={view === state.view} onClick={() => setState((s) => ({ ...s, view }))}>{t(`view.${view}`)}</button>)}
+              {VIEWS.map((view) => <button key={view} type="button" aria-pressed={view === state.view} onClick={() => setState((s) => ({ ...s, view }))}>{t(view === 'annual' && state.variable === 'PRECTOTCORR' ? 'global.yearlyTotal' : `view.${view}`)}</button>)}
             </div>
           </div>
-          <GlobalResult key={`${capital.code}:${state.variable}`} capital={capital} variable={state.variable} view={state.view} />
+          <GlobalResult key={capital.code} capital={capital} variable={state.variable} view={state.view} range={{ start: state.start, end: state.end }} />
         </div>
       </div>
       <details className="global-methods"><summary>{t('global.about')}</summary><p>{t('global.method')}</p><p>{t('global.annual')}</p><p>{t('global.geography')}</p>
@@ -90,34 +104,63 @@ export function GlobalExplorer() {
   );
 }
 
-function GlobalResult({ capital, variable, view }: { capital: Capital; variable: string; view: View }) {
+function GlobalResult({ capital, variable, view, range }: { capital: Capital; variable: GlobalVariable; view: View; range: YearRange }) {
   const { t, language } = useI18n();
   const [attempt, setAttempt] = useState(0);
-  const result = useAsync(async () => {
-    const series = await fetchPowerMonthly({ parameter: variable, lat: capital.lat, lon: capital.lon });
-    return completeMonthlyRecord(series);
-  }, [capital.code, variable, attempt]);
+  const result = useAsync(() => fetchGlobalRecord(capital, attempt > 0), [capital.code, attempt]);
   if (result.status === 'loading') return <div className="result-state is-loading" role="status"><div className="scan" aria-hidden="true" />{t('state.fetching', { place: capital.city })}</div>;
-  if (result.status === 'error') return <div className="result-state is-error" role="alert"><strong>{t('global.fetchFailed')}</strong><p>{t('global.fetchHelp')}</p><button type="button" className="button-secondary" onClick={() => setAttempt((n) => n + 1)}>{t('state.retry')}</button></div>;
+  if (result.status === 'error') return <div className="result-state is-error" role="alert"><strong>{t('global.fetchFailed')}</strong><p>{t('global.fetchHelp')}</p><a href={globalRequestUrl(capital)} target="_blank" rel="noreferrer">{t('global.source')}</a><button type="button" className="button-secondary" onClick={() => setAttempt((n) => n + 1)}>{t('state.retry')}</button></div>;
   const definition = variableByKey(variable)!;
-  return <GlobalChart series={result.data} capital={capital} variable={variable} view={view} label={definition.label[language]} unit={definition.unit} />;
+  return <>
+    <GlobalChart record={result.data} capital={capital} variable={variable} view={view} range={range} label={definition.label[language]} monthlyUnit={definition.unit} />
+    <QualityPanel record={result.data} range={range} onRefresh={() => setAttempt((n) => n + 1)} />
+  </>;
 }
 
-function GlobalChart({ series, capital, variable, view, label, unit }: { series: SeriesPoint[]; capital: Capital; variable: string; view: View; label: string; unit: string }) {
+function GlobalChart({ record, capital, variable, view, range, label, monthlyUnit }: { record: GlobalRecord; capital: Capital; variable: GlobalVariable; view: View; range: YearRange; label: string; monthlyUnit: string }) {
   const { t } = useI18n();
-  const trend = useMemo(() => computeTrend(series, 'monthly'), [series]);
-  const shown = useMemo(() => seriesForView(series, view), [series, view]);
-  const dataset: Dataset = {
+  const analysis = useMemo(() => prepareGlobalAnalysis(record.variables[variable].series, variable, range, view), [record, variable, range.start, range.end, view]);
+  const { shown, coverage, completeYears, annualRain, trend, slopePerStep } = analysis;
+  const unit = analysis.unit ?? monthlyUnit;
+  const dataset: Dataset | null = trend ? {
     id: `global-${capital.code}-${variable}`, variable: { key: variable, label }, unit,
-    source: { provider: 'NASA POWER', product: 'Monthly point data' },
-    region: { name: capital.city, lat: capital.lat, lon: capital.lon }, resolution: 'monthly', series, trend,
-  };
+    source: { provider: 'NASA POWER', product: record.sources.join(', ') || 'Monthly point data' },
+    region: { name: capital.city, lat: capital.lat, lon: capital.lon },
+    resolution: annualRain ? 'annual' : 'monthly', series: analysis.analysisSeries, trend,
+  } : null;
   return <article className="global-result">
-    <div className="card"><div className="card-header"><span>{label} ({unit})</span><span className="legend"><i className="legend-line" />{t('chart.observed')}<i className="legend-trend" />{t('chart.trend')}</span></div>
-      <TimeSeriesChart series={shown} unit={unit} slopePerStep={trend.slopePerDecade / (view === 'annual' ? 10 : 120)} height={260} />
+    <div className="global-coverage" role="status">
+      <strong>{range.start}–{range.end}</strong>
+      <span>{t('global.validMonths', { count: coverage.valid, total: coverage.total })} ({(coverage.fraction * 100).toFixed(1)}%)</span>
+      <span>{t('global.completeYears', { count: completeYears, total: range.end - range.start + 1 })}</span>
     </div>
-    <TrendSummary dataset={dataset} />
-    <p className="global-source"><a href={requestUrl({ parameter: variable, lat: capital.lat, lon: capital.lon })} target="_blank" rel="noreferrer">{t('global.source')}</a><span>{t('global.validMonths', { count: series.filter((p) => p.value !== null).length, total: series.length })}</span></p>
+    <div className="card"><div className="card-header"><span>{label} ({unit})</span><span className="legend"><i className="legend-line" />{t('chart.observed')}{trend && <><i className="legend-trend" />{t('chart.trend')}</>}</span></div>
+      <TimeSeriesChart series={shown} unit={unit} slopePerStep={slopePerStep} height={260} />
+    </div>
+    <p className="global-aggregation-note">{t(view === 'annual' ? annualRain ? 'global.rainAggregation' : 'global.meanAggregation' : view === 'anomaly' ? 'global.anomalyBaseline' : 'global.monthlyValues', { start: range.start, end: range.end })}</p>
+    {dataset ? <TrendSummary dataset={dataset} /> : <p className="global-insufficient" role="status">{t('global.insufficient')}</p>}
+    <p className="global-analysis-basis">{t(annualRain ? 'global.annualTrendBasis' : 'global.monthlyTrendBasis')}</p>
+    <p className="global-source"><a href={record.requestUrl} target="_blank" rel="noreferrer">{t('global.source')}</a></p>
     <p className="global-caution">{t('global.caution')}</p>
   </article>;
+}
+
+function QualityPanel({ record, range, onRefresh }: { record: GlobalRecord; range: YearRange; onRefresh: () => void }) {
+  const { t, language } = useI18n();
+  return <details className="global-quality"><summary>{t('global.qualityTitle')}</summary>
+    <p>{t('global.qualityIntro')}</p>
+    <div className="global-quality-scroll"><table><caption>{t('global.qualityPeriod', { start: range.start, end: range.end })}</caption><thead><tr>
+      <th scope="col">{t('global.variable')}</th><th scope="col">{t('global.sourceUnit')}</th><th scope="col">{t('global.valid')}</th><th scope="col">{t('global.missing')}</th><th scope="col">{t('global.rejected')}</th>
+    </tr></thead><tbody>{GLOBAL_VARIABLES.map((key) => {
+      const data = record.variables[key];
+      const coverage = recordCoverage(completeMonthlyRecord(data.series, range));
+      const inRange = (month: string) => Number(month.slice(0, 4)) >= range.start && Number(month.slice(0, 4)) <= range.end;
+      return <tr key={key}><th scope="row">{variableByKey(key)!.label[language]}</th><td>{data.sourceUnit}</td><td>{coverage.valid}/{coverage.total}</td><td>{data.missing.filter(inRange).length}</td><td>{data.rejected.filter(inRange).length}</td></tr>;
+    })}</tbody></table></div>
+    <p>{t('global.retrieved', { date: new Date(record.retrievedAt).toLocaleString(language === 'th' ? 'th-TH' : 'en-GB') })}</p>
+    <p>{t('global.requestedCoordinates', { lat: record.requested.lat.toFixed(4), lon: record.requested.lon.toFixed(4) })}<br />
+      {t('global.responseCoordinates', { lat: record.responseCoordinates.lat.toFixed(4), lon: record.responseCoordinates.lon.toFixed(4) })}</p>
+    {record.sources.length > 0 && <p>{t('source.label')}: {record.sources.join(', ')}</p>}
+    <button type="button" className="button-secondary button-compact" onClick={onRefresh}>{t('global.refresh')}</button>
+  </details>;
 }

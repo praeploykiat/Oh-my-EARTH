@@ -1,0 +1,425 @@
+{
+  "checkedAt": "2026-11-14T19:18:48.513Z",
+  "period": {
+    "start": 2001,
+    "end": 2024
+  },
+  "scope": "Selected pilot capitals only; not validation of all 195 locations or measurement accuracy.",
+  "locations": [
+    {
+      "country": "TH",
+      "city": "Bangkok",
+      "status": "PASS",
+      "requested": {
+        "code": "TH",
+        "iso3": "THA",
+        "country": "Thailand",
+        "city": "Bangkok",
+        "lat": 13.75,
+        "lon": 100.52
+      },
+      "responseCoordinates": {
+        "lon": 100.52,
+        "lat": 13.75
+      },
+      "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M%2CPRECTOTCORR%2CRH2M%2CALLSKY_SFC_SW_DWN&community=RE&latitude=13.7500&longitude=100.5200&start=2001&end=2024&format=JSON",
+      "retrievedAt": "2026-11-14T19:18:49.283Z",
+      "sources": [
+        "SYN1DEG",
+        "MERRA2",
+        "POWER"
+      ],
+      "rawSnapshot": "pipeline/raw/global-validation/TH.json",
+      "variables": {
+        "T2M": {
+          "sourceUnit": "C",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "C",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 27.642794520547948
+          }
+        },
+        "PRECTOTCORR": {
+          "sourceUnit": "mm/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "mm/year",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 1212.15
+          }
+        },
+        "RH2M": {
+          "sourceUnit": "%",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "%",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 75.25632876712328
+          }
+        },
+        "ALLSKY_SFC_SW_DWN": {
+          "sourceUnit": "kW-hr/m^2/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "kW-hr/m^2/day",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 5.215895068493151
+          }
+        }
+      }
+    },
+    {
+      "country": "NO",
+      "city": "Oslo",
+      "status": "PASS",
+      "requested": {
+        "code": "NO",
+        "iso3": "NOR",
+        "country": "Norway",
+        "city": "Oslo",
+        "lat": 59.92,
+        "lon": 10.75
+      },
+      "responseCoordinates": {
+        "lon": 10.75,
+        "lat": 59.92
+      },
+      "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M%2CPRECTOTCORR%2CRH2M%2CALLSKY_SFC_SW_DWN&community=RE&latitude=59.9200&longitude=10.7500&start=2001&end=2024&format=JSON",
+      "retrievedAt": "2026-11-14T19:18:50.346Z",
+      "sources": [
+        "SYN1DEG",
+        "MERRA2",
+        "POWER"
+      ],
+      "rawSnapshot": "pipeline/raw/global-validation/NO.json",
+      "variables": {
+        "T2M": {
+          "sourceUnit": "C",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "C",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 3.588493150684932
+          }
+        },
+        "PRECTOTCORR": {
+          "sourceUnit": "mm/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "mm/year",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 1000.1499999999999
+          }
+        },
+        "RH2M": {
+          "sourceUnit": "%",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "%",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 89.47115068493152
+          }
+        },
+        "ALLSKY_SFC_SW_DWN": {
+          "sourceUnit": "kW-hr/m^2/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "kW-hr/m^2/day",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 2.574829315068493
+          }
+        }
+      }
+    },
+    {
+      "country": "EG",
+      "city": "Cairo",
+      "status": "PASS",
+      "requested": {
+        "code": "EG",
+        "iso3": "EGY",
+        "country": "Egypt",
+        "city": "Cairo",
+        "lat": 30.05,
+        "lon": 31.25
+      },
+      "responseCoordinates": {
+        "lon": 31.25,
+        "lat": 30.05
+      },
+      "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M%2CPRECTOTCORR%2CRH2M%2CALLSKY_SFC_SW_DWN&community=RE&latitude=30.0500&longitude=31.2500&start=2001&end=2024&format=JSON",
+      "retrievedAt": "2026-11-14T19:18:51.419Z",
+      "sources": [
+        "SYN1DEG",
+        "MERRA2",
+        "POWER"
+      ],
+      "rawSnapshot": "pipeline/raw/global-validation/EG.json",
+      "variables": {
+        "T2M": {
+          "sourceUnit": "C",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "C",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 21.79104109589041
+          }
+        },
+        "PRECTOTCORR": {
+          "sourceUnit": "mm/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "mm/year",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 29.08
+          }
+        },
+        "RH2M": {
+          "sourceUnit": "%",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "%",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 50.685479452054786
+          }
+        },
+        "ALLSKY_SFC_SW_DWN": {
+          "sourceUnit": "kW-hr/m^2/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "kW-hr/m^2/day",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 5.813932602739726
+          }
+        }
+      }
+    },
+    {
+      "country": "AU",
+      "city": "Canberra",
+      "status": "PASS",
+      "requested": {
+        "code": "AU",
+        "iso3": "AUS",
+        "country": "Australia",
+        "city": "Canberra",
+        "lat": -35.27,
+        "lon": 149.13
+      },
+      "responseCoordinates": {
+        "lon": 149.13,
+        "lat": -35.27
+      },
+      "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M%2CPRECTOTCORR%2CRH2M%2CALLSKY_SFC_SW_DWN&community=RE&latitude=-35.2700&longitude=149.1300&start=2001&end=2024&format=JSON",
+      "retrievedAt": "2026-11-14T19:18:52.065Z",
+      "sources": [
+        "SYN1DEG",
+        "MERRA2",
+        "POWER"
+      ],
+      "rawSnapshot": "pipeline/raw/global-validation/AU.json",
+      "variables": {
+        "T2M": {
+          "sourceUnit": "C",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "C",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 12.431397260273974
+          }
+        },
+        "PRECTOTCORR": {
+          "sourceUnit": "mm/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "mm/year",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 703.01
+          }
+        },
+        "RH2M": {
+          "sourceUnit": "%",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "%",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 71.9733698630137
+          }
+        },
+        "ALLSKY_SFC_SW_DWN": {
+          "sourceUnit": "kW-hr/m^2/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "kW-hr/m^2/day",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 4.5864435616438355
+          }
+        }
+      }
+    },
+    {
+      "country": "SG",
+      "city": "Singapore",
+      "status": "PASS",
+      "requested": {
+        "code": "SG",
+        "iso3": "SGP",
+        "country": "Singapore",
+        "city": "Singapore",
+        "lat": 1.28,
+        "lon": 103.85
+      },
+      "responseCoordinates": {
+        "lon": 103.85,
+        "lat": 1.28
+      },
+      "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M%2CPRECTOTCORR%2CRH2M%2CALLSKY_SFC_SW_DWN&community=RE&latitude=1.2800&longitude=103.8500&start=2001&end=2024&format=JSON",
+      "retrievedAt": "2026-11-14T19:18:53.145Z",
+      "sources": [
+        "SYN1DEG",
+        "MERRA2",
+        "POWER"
+      ],
+      "rawSnapshot": "pipeline/raw/global-validation/SG.json",
+      "variables": {
+        "T2M": {
+          "sourceUnit": "C",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "C",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 26.749287671232874
+          }
+        },
+        "PRECTOTCORR": {
+          "sourceUnit": "mm/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "mm/year",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 2744.5199999999995
+          }
+        },
+        "RH2M": {
+          "sourceUnit": "%",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "%",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 85.84761643835617
+          }
+        },
+        "ALLSKY_SFC_SW_DWN": {
+          "sourceUnit": "kW-hr/m^2/day",
+          "valid": 288,
+          "total": 288,
+          "fraction": 1,
+          "missing": [],
+          "rejected": [],
+          "completeYears": 24,
+          "annualUnit": "kW-hr/m^2/day",
+          "firstAnnualValue": {
+            "t": "2001",
+            "value": 4.541733424657535
+          }
+        }
+      }
+    }
+  ]
+}
