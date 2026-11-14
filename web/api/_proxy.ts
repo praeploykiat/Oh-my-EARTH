@@ -24,14 +24,14 @@ export async function proxy(request: Request, service: RemoteService): Promise<R
   if (!dataset || dataset.service !== service) return json({ error: 'Unknown variable' }, 400);
   if (lat === null || lon === null) return json({ error: 'Invalid coordinates' }, 400);
 
-  const token = process.env.EARTHDATA_TOKEN;
+  const token = process.env.EARTHDATA_TOKEN?.trim().replace(/^bearer\s+/i, '').replace(/^["']|["']$/g, '');
   if (!token) return json({ error: 'EARTHDATA_TOKEN is not configured' }, 500);
 
   let upstream: Response;
   let text: string;
   try {
     upstream = await fetch(upstreamUrl(dataset, lat, lon, START_YEAR, END_YEAR), {
-      headers: { authorization: `Bearer ${token}`, authorizationtoken: token },
+      headers: { authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(55_000),
     });
     text = await upstream.text();
