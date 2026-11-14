@@ -66,3 +66,11 @@ export function compareDecades(monthly: SeriesPoint[]): DecadeComparison | null 
     change: lastMean - firstMean,
   };
 }
+
+export function trendIntercept(series: SeriesPoint[], slope: number): number {
+  const residuals = series
+    .map((p, i) => (p.value === null ? null : p.value - slope * i))
+    .filter((v): v is number => v !== null)
+    .sort((a, b) => a - b);
+  return residuals[Math.floor(residuals.length / 2)];
+}

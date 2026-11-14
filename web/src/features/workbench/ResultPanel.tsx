@@ -3,8 +3,9 @@ import { compareDecades, seriesForView, slopeDecimals, stepsPerDecade, valueDeci
 import { NoDataError, resolveQuery, useAsync, variableByKey, type Dataset, type Origin } from '../../core/data';
 import type { Place } from '../../core/geo';
 import { useI18n } from '../../core/i18n';
-import { SourceNote, TimeSeriesChart, TrendSummary, type ChartBand } from '../../shared';
+import { saveCaseImage, SourceNote, TimeSeriesChart, TrendSummary, type ChartBand } from '../../shared';
 import { placeName } from './placeName';
+import { ShareMenu } from './ShareMenu';
 
 interface ResultPanelProps {
   variable: string;
@@ -88,13 +89,32 @@ function Result({ dataset, origin, place, view }: ResultProps) {
     year: startYear,
   });
 
+  const confidence = verdict.direction !== 'verdict.flat' ? t(verdict.confidence) : '';
+  const badge = t(dataset.trend.significant ? 'badge.real' : 'badge.notProven');
+
+  const saveImage = () =>
+    saveCaseImage({
+      eyebrow: `${variableLabel}, ${name}`,
+      title: sentence,
+      subtitle: confidence,
+      badge,
+      series: shown,
+      slopePerStep,
+      source: `${t('source.label')}: ${dataset.source.provider}, ${dataset.source.product}`,
+      footer: 'Earth Trend Detective by Far Side of the Moon',
+      fileName: `trend-${dataset.variable.key.toLowerCase()}-${name.toLowerCase().replace(/\s+/g, '-')}.png`,
+    }).catch(() => undefined);
+
   return (
     <article className="result">
       <header className="result-header">
-        <span className="eyebrow">{name}</span>
+        <div className="result-meta">
+          <span className="eyebrow">{name}</span>
+          <span className={`result-badge ${dataset.trend.significant ? 'is-real' : ''}`}>{badge}</span>
+        </div>
         <p className="verdict">
           {sentence}
-          {verdict.direction !== 'verdict.flat' && <span className="verdict-confidence"> {t(verdict.confidence)}</span>}
+          {confidence && <span className="verdict-confidence"> {confidence}</span>}
         </p>
       </header>
 
@@ -103,7 +123,7 @@ function Result({ dataset, origin, place, view }: ResultProps) {
       <div className="card">
         <div className="card-header">
           <span>
-            {variableLabel} · {dataset.unit}
+            {variableLabel} ({dataset.unit})
           </span>
           <span className="legend">
             <i className="legend-line" /> {t('chart.observed')}
@@ -115,14 +135,16 @@ function Result({ dataset, origin, place, view }: ResultProps) {
             )}
           </span>
         </div>
-        <TimeSeriesChart series={shown} unit={dataset.unit} slopePerStep={slopePerStep} bands={bands} />
+        <TimeSeriesChart series={shown} unit={dataset.unit} slopePerStep={slopePerStep} bands={bands} height={210} />
       </div>
+
+      <TrendSummary dataset={dataset} />
 
       {decades && (
         <div className="decades">
           <div>
             <span className="control-label">
-              {decades.first.from}–{decades.first.to}
+              {t('range', { from: decades.first.from, to: decades.first.to })}
             </span>
             <strong>
               {decades.first.mean.toFixed(digits)} {dataset.unit}
@@ -133,7 +155,7 @@ function Result({ dataset, origin, place, view }: ResultProps) {
           </span>
           <div>
             <span className="control-label">
-              {decades.last.from}–{decades.last.to}
+              {t('range', { from: decades.last.from, to: decades.last.to })}
             </span>
             <strong>
               {decades.last.mean.toFixed(digits)} {dataset.unit}
@@ -149,7 +171,13 @@ function Result({ dataset, origin, place, view }: ResultProps) {
         </div>
       )}
 
-      <TrendSummary dataset={dataset} />
+      <div className="result-actions">
+        <ShareMenu text={sentence} />
+        <button type="button" className="button-secondary button-compact" onClick={saveImage}>
+          ↓ {t('chart.saveImage')}
+        </button>
+      </div>
+
       <SourceNote dataset={dataset} origin={origin} />
     </article>
   );

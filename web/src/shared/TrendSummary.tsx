@@ -7,10 +7,11 @@ interface TrendSummaryProps {
   dataset: Dataset;
 }
 
-function recordSpan(dataset: Dataset): string {
-  const first = dataset.series[0]?.t.slice(0, 4);
-  const last = dataset.series[dataset.series.length - 1]?.t.slice(0, 4);
-  return `${first}–${last}`;
+function recordSpan(dataset: Dataset) {
+  return {
+    from: dataset.series[0]?.t.slice(0, 4) ?? '',
+    to: dataset.series[dataset.series.length - 1]?.t.slice(0, 4) ?? '',
+  };
 }
 
 export function TrendSummary({ dataset }: TrendSummaryProps) {
@@ -51,7 +52,7 @@ export function TrendSummary({ dataset }: TrendSummaryProps) {
 
       <div className="stat">
         <span className="stat-label">{t('stats.record')}</span>
-        <strong className="stat-value stat-value-text">{recordSpan(dataset)}</strong>
+        <strong className="stat-value stat-value-text">{t('range', recordSpan(dataset))}</strong>
         <span className="stat-unit">{t('stats.points', { count: dataset.series.length })}</span>
       </div>
     </div>

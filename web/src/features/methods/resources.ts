@@ -61,6 +61,21 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     ],
   },
   {
+    title: { en: 'Map data', th: 'ข้อมูลแผนที่' },
+    items: [
+      {
+        title: 'geoBoundaries',
+        url: 'https://www.geoboundaries.org/',
+        note: { en: "Thailand's 77 province boundaries (CC BY 4.0).", th: 'ขอบเขต 77 จังหวัดของไทย (CC BY 4.0)' },
+      },
+      {
+        title: 'Natural Earth',
+        url: 'https://www.naturalearthdata.com/',
+        note: { en: 'Outlines of neighbouring countries (public domain).', th: 'ขอบเขตประเทศเพื่อนบ้าน (สาธารณสมบัติ)' },
+      },
+    ],
+  },
+  {
     title: { en: 'Partner agencies', th: 'หน่วยงานพันธมิตร' },
     items: [
       {

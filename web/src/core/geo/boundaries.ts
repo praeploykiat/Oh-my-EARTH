@@ -18,8 +18,20 @@ export interface Place extends GeoPoint {
 }
 
 const BOUNDARIES_URL = `${import.meta.env.BASE_URL}geo/thailand-provinces.json`;
+const NEIGHBORS_URL = `${import.meta.env.BASE_URL}geo/region-neighbors.json`;
+
+export type RegionCollection = FeatureCollection<Polygon | MultiPolygon, { name: string }>;
 
 let cached: Promise<ProvinceCollection> | null = null;
+let neighbors: Promise<RegionCollection> | null = null;
+
+export function loadRegionNeighbors(): Promise<RegionCollection> {
+  neighbors ??= fetch(NEIGHBORS_URL).then((response) => {
+    if (!response.ok) throw new Error(`Failed to load ${NEIGHBORS_URL}: ${response.status}`);
+    return response.json() as Promise<RegionCollection>;
+  });
+  return neighbors;
+}
 
 export function loadProvinceBoundaries(): Promise<ProvinceCollection> {
   cached ??= fetch(BOUNDARIES_URL).then((response) => {

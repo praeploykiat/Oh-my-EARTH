@@ -9,8 +9,18 @@ export interface Provider {
   url: string;
 }
 
+export type EarthLayer = 'atmosphere' | 'ground' | 'surface';
+
+export const EARTH_LAYERS: EarthLayer[] = ['atmosphere', 'ground', 'surface'];
+
+export const SATELLITES = ['Terra', 'Aqua', 'GPM'] as const;
+
+export type Satellite = (typeof SATELLITES)[number];
+
 export interface VariableDefinition {
   key: string;
+  layer: EarthLayer;
+  satellites: Satellite[];
   unit: string;
   source: VariableSource;
   provider: Provider;
@@ -23,6 +33,8 @@ const POWER: Provider = { provider: 'NASA POWER', product: 'MERRA-2 monthly poin
 export const VARIABLES: VariableDefinition[] = [
   {
     key: 'T2M',
+    layer: 'ground',
+    satellites: [],
     source: 'power',
     provider: POWER,
     unit: '°C',
@@ -34,6 +46,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'T2M_MAX',
+    layer: 'ground',
+    satellites: [],
     source: 'power',
     provider: POWER,
     unit: '°C',
@@ -45,6 +59,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'T2M_MIN',
+    layer: 'ground',
+    satellites: [],
     source: 'power',
     provider: POWER,
     unit: '°C',
@@ -56,6 +72,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'PRECTOTCORR',
+    layer: 'atmosphere',
+    satellites: [],
     source: 'power',
     provider: POWER,
     unit: 'mm/day',
@@ -67,6 +85,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'RH2M',
+    layer: 'ground',
+    satellites: [],
     source: 'power',
     provider: POWER,
     unit: '%',
@@ -78,6 +98,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'WS2M',
+    layer: 'ground',
+    satellites: [],
     source: 'power',
     provider: POWER,
     unit: 'm/s',
@@ -89,6 +111,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'ALLSKY_SFC_SW_DWN',
+    layer: 'atmosphere',
+    satellites: ['Terra', 'Aqua'],
     source: 'power',
     provider: POWER,
     unit: 'kWh/m²/day',
@@ -100,6 +124,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'IMERG_RAIN',
+    layer: 'atmosphere',
+    satellites: ['GPM'],
     source: 'giovanni',
     provider: { provider: 'NASA Giovanni', product: 'GPM IMERG monthly precipitation (V07)', url: GIOVANNI_HOME },
     unit: 'mm/day',
@@ -111,6 +137,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'AOD',
+    layer: 'atmosphere',
+    satellites: ['Terra', 'Aqua'],
     source: 'giovanni',
     provider: { provider: 'NASA Giovanni', product: 'MERRA-2 aerosol optical depth, 550 nm (M2TMNXAER)', url: GIOVANNI_HOME },
     unit: 'AOD',
@@ -122,8 +150,10 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'SOIL_MOISTURE',
+    layer: 'surface',
+    satellites: [],
     source: 'giovanni',
-    provider: { provider: 'NASA Giovanni', product: 'GLDAS Noah 0.25° monthly, soil moisture 0–10 cm', url: GIOVANNI_HOME },
+    provider: { provider: 'NASA Giovanni', product: 'GLDAS Noah 0.25° monthly, soil moisture 0 to 10 cm', url: GIOVANNI_HOME },
     unit: 'kg/m²',
     label: { en: 'Soil moisture', th: 'ความชื้นในดิน' },
     description: {
@@ -133,6 +163,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'RUNOFF',
+    layer: 'surface',
+    satellites: [],
     source: 'datarods',
     provider: { provider: 'NASA Hydrology Time Series', product: 'GLDAS Noah 0.25° 3-hourly, surface runoff', url: HYDROLOGY_HOME },
     unit: 'mm/day',
@@ -144,6 +176,8 @@ export const VARIABLES: VariableDefinition[] = [
   },
   {
     key: 'EVAPOTRANSPIRATION',
+    layer: 'surface',
+    satellites: [],
     source: 'datarods',
     provider: { provider: 'NASA Hydrology Time Series', product: 'GLDAS Noah 0.25° 3-hourly, evapotranspiration', url: HYDROLOGY_HOME },
     unit: 'mm/day',

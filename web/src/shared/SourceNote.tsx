@@ -1,4 +1,4 @@
-import { crossCheckUrl, type Dataset, type Origin } from '../core/data';
+import { crossCheckUrl, variableByKey, type Dataset, type Origin } from '../core/data';
 import { useI18n } from '../core/i18n';
 
 interface SourceNoteProps {
@@ -10,6 +10,7 @@ export function SourceNote({ dataset, origin }: SourceNoteProps) {
   const { t } = useI18n();
   const { provider, product, url, synthetic } = dataset.source;
   const checkUrl = crossCheckUrl(dataset);
+  const satellites = variableByKey(dataset.variable.key)?.satellites ?? [];
 
   return (
     <div className="source-note">
@@ -22,6 +23,9 @@ export function SourceNote({ dataset, origin }: SourceNoteProps) {
         <span>{provider}</span>
       )}
       <span>{product}</span>
+      <span className="source-satellites">
+        {satellites.length > 0 ? t('source.satellites', { satellites: satellites.join(', ') }) : t('source.model')}
+      </span>
       {origin === 'live' && <span className="badge badge-live">{t('source.live')}</span>}
       {origin === 'saved' && <span className="badge">{t('source.saved')}</span>}
       {synthetic && <span className="badge">{t('source.synthetic')}</span>}

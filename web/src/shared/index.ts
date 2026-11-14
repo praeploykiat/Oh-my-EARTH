@@ -1,5 +1,6 @@
 export { BrandMark } from './BrandMark';
 export { Footer } from './Footer';
+export { Icon } from './Icon';
 export { InfoTip } from './InfoTip';
 export { LanguageSwitcher } from './LanguageSwitcher';
 export { SourceNote } from './SourceNote';
@@ -9,3 +10,4 @@ export type { MapMarker } from './ThailandMap';
 export { TimeSeriesChart } from './TimeSeriesChart';
 export type { ChartBand } from './TimeSeriesChart';
 export { TrendSummary } from './TrendSummary';
+export { saveCaseImage } from './caseImage';

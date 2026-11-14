@@ -4,9 +4,11 @@ import { loadFeaturedCases, type FeaturedCase } from '../../core/data';
 import type { Place } from '../../core/geo';
 import { useI18n, type MessageKey } from '../../core/i18n';
 import { parseState, serializeState, splitHash, type WorkbenchState } from '../../core/url';
-import { InfoTip } from '../../shared';
-import { PlacePicker, VariablePicker } from './Controls';
+import { InfoTip, type MapMarker } from '../../shared';
+import { PlacePicker } from './Controls';
 import { FeaturedCases } from './FeaturedCases';
+import { LayerScene } from './LayerScene';
+import { placeName } from './placeName';
 import { ResultPanel } from './ResultPanel';
 
 const DEFAULT_VARIABLE = 'T2M';
@@ -36,11 +38,11 @@ function samePlace(a: Place | null, b: Place | null): boolean {
 }
 
 export function Workbench() {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const [state, setState] = useState<WorkbenchState>(readStateFromUrl);
   const [comparing, setComparing] = useState(Boolean(state.compare));
   const [activeCase, setActiveCase] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [target, setTarget] = useState<'place' | 'compare'>('place');
 
   useEffect(() => writeStateToUrl(state), [state]);
 
@@ -72,84 +74,101 @@ export function Workbench() {
     setActiveCase(featured.id);
   }
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  };
-
   const variable = state.variable ?? DEFAULT_VARIABLE;
   const places = [state.place, comparing ? state.compare : null].filter((p): p is Place => p !== null);
+  const mapTarget = comparing ? target : 'place';
+  const otherPlace = mapTarget === 'place' ? (comparing ? state.compare : null) : state.place;
+  const markers: MapMarker[] = otherPlace
+    ? [{ id: 'other', label: placeName(otherPlace, language), lat: otherPlace.lat, lon: otherPlace.lon }]
+    : [];
+
+  const startCompare = () => {
+    setComparing(true);
+    setTarget('compare');
+  };
+
+  const stopCompare = () => {
+    setComparing(false);
+    setTarget('place');
+    update({ compare: null });
+  };
+
+  const placeControls = (
+    <>
+      <PlacePicker
+        label={t('workbench.place')}
+        value={state.place}
+        active={comparing && mapTarget === 'place'}
+        onFocus={() => setTarget('place')}
+        onChange={(place) => update({ place })}
+      />
+      {comparing ? (
+        <PlacePicker
+          label={t('workbench.comparePlace')}
+          value={state.compare}
+          active={mapTarget === 'compare'}
+          onFocus={() => setTarget('compare')}
+          onChange={(compare) => update({ compare })}
+          onRemove={stopCompare}
+        />
+      ) : (
+        <button type="button" className="button-secondary button-compact add-compare" onClick={startCompare}>
+          + {t('workbench.compare')}
+        </button>
+      )}
+      {comparing && <p className="map-target-hint">{t('workbench.mapTarget')}</p>}
+    </>
+  );
 
   return (
-    <section className="section workbench">
-      <header className="workbench-intro">
-        <span className="eyebrow">{t('workbench.title')}</span>
-        <h1>{t('workbench.question')}</h1>
-        <p>{t('workbench.intro')}</p>
+    <section className="workbench">
+      <header className="workbench-top">
+        <div className="workbench-title">
+          <h1>{t('workbench.question')}</h1>
+          <p>{t('workbench.intro')}</p>
+        </div>
+        <FeaturedCases activeId={activeCase} onOpen={openCase} />
       </header>
 
-      <FeaturedCases activeId={activeCase} onOpen={openCase} />
+      <div className="bench">
+        <LayerScene
+          variable={variable}
+          onVariable={(key) => update({ variable: key })}
+          selected={mapTarget === 'place' ? state.place : state.compare}
+          markers={markers}
+          onPlace={(place) => update(mapTarget === 'place' ? { place } : { compare: place })}
+          placeControls={placeControls}
+        />
 
-      <div className="controls">
-        <VariablePicker value={variable} onChange={(key) => update({ variable: key })} />
-        <div className="place-controls">
-          <PlacePicker label={t('workbench.place')} value={state.place} onChange={(place) => update({ place })} />
-          {comparing ? (
-            <PlacePicker
-              label={t('workbench.comparePlace')}
-              value={state.compare}
-              onChange={(compare) => update({ compare })}
-              onRemove={() => {
-                setComparing(false);
-                update({ compare: null });
-              }}
-            />
+        <div className="bench-results">
+          {places.length === 0 ? (
+            <div className="result-state">{t('workbench.pickPlace')}</div>
           ) : (
-            <button type="button" className="button-secondary button-compact add-compare" onClick={() => setComparing(true)}>
-              + {t('workbench.compare')}
-            </button>
+            <>
+              <div className="segmented" role="radiogroup" aria-label={t('view.label')}>
+                {VIEWS.map(({ view, label }) => (
+                  <button
+                    key={view}
+                    type="button"
+                    role="radio"
+                    aria-checked={state.view === view}
+                    onClick={() => setState((current) => ({ ...current, view }))}
+                  >
+                    {t(label)}
+                  </button>
+                ))}
+                <InfoTip text={t('info.anomaly')} />
+              </div>
+
+              {places.map((place, i) =>
+                i > 0 && samePlace(place, places[0]) ? null : (
+                  <ResultPanel key={`${place.lat},${place.lon}`} variable={variable} place={place} view={state.view} />
+                ),
+              )}
+            </>
           )}
         </div>
       </div>
-
-      {places.length === 0 ? (
-        <div className="result-state">{t('workbench.pickPlace')}</div>
-      ) : (
-        <>
-          <div className="toolbar">
-            <div className="segmented" role="radiogroup" aria-label={t('view.label')}>
-              {VIEWS.map(({ view, label }) => (
-                <button
-                  key={view}
-                  type="button"
-                  role="radio"
-                  aria-checked={state.view === view}
-                  onClick={() => setState((current) => ({ ...current, view }))}
-                >
-                  {t(label)}
-                </button>
-              ))}
-              <InfoTip text={t('info.anomaly')} />
-            </div>
-            <button type="button" className="button-secondary button-compact" onClick={copyLink}>
-              {copied ? t('workbench.copied') : t('workbench.share')}
-            </button>
-          </div>
-
-          <div className={`results ${places.length > 1 ? 'is-compare' : ''}`}>
-            {places.map((place, i) =>
-              i > 0 && samePlace(place, places[0]) ? null : (
-                <ResultPanel key={`${place.lat},${place.lon}`} variable={variable} place={place} view={state.view} />
-              ),
-            )}
-          </div>
-        </>
-      )}
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import type { SeriesPoint } from '../core/data';
 import { decimalsFor } from '../core/analysis/format';
+import { trendIntercept } from '../core/analysis/series';
 import { useI18n } from '../core/i18n';
 
 export interface ChartBand {
@@ -38,14 +39,6 @@ function useElementWidth<T extends HTMLElement>() {
 function niceTicks(min: number, max: number, count: number): number[] {
   const step = (max - min) / (count - 1 || 1);
   return Array.from({ length: count }, (_, i) => min + step * i);
-}
-
-function trendIntercept(series: SeriesPoint[], slope: number): number {
-  const residuals = series
-    .map((p, i) => (p.value === null ? null : p.value - slope * i))
-    .filter((v): v is number => v !== null)
-    .sort((a, b) => a - b);
-  return residuals[Math.floor(residuals.length / 2)];
 }
 
 export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height = 300 }: TimeSeriesChartProps) {
