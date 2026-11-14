@@ -1,25 +1,43 @@
 import type { SeriesPoint } from './types';
 
-export type RemoteService = 'giovanni' | 'datarods';
+export type RemoteService = 'giovanni';
 
-export interface RemoteDataset {
-  service: RemoteService;
+export interface RemoteProduct {
   id: string;
   scale: number;
 }
 
+export interface RemoteDataset {
+  service: RemoteService;
+  products: RemoteProduct[];
+}
+
 export const GIOVANNI_HOME = 'https://giovanni.gsfc.nasa.gov/giovanni/';
-export const HYDROLOGY_HOME = 'https://disc.gsfc.nasa.gov/information/tools?title=Hydrology%20Time%20Series';
 
 const GIOVANNI_API = 'https://api.giovanni.earthdata.nasa.gov/timeseries';
-const DATARODS_API = 'https://hydro1.gesdisc.eosdis.nasa.gov/daac-bin/access/timeseries.cgi';
+
+const giovanni = (...products: RemoteProduct[]): RemoteDataset => ({ service: 'giovanni', products });
 
 export const REMOTE_DATASETS: Record<string, RemoteDataset> = {
-  AOD: { service: 'giovanni', id: 'M2TMNXAER_5_12_4_TOTEXTTAU', scale: 1 },
-  IMERG_RAIN: { service: 'giovanni', id: 'GPM_3IMERGM_07_precipitation', scale: 24 },
-  SOIL_MOISTURE: { service: 'giovanni', id: 'GLDAS_NOAH025_M_2_1_SoilMoi0_10cm_inst', scale: 1 },
-  RUNOFF: { service: 'datarods', id: 'GLDAS2:GLDAS_NOAH025_3H_v2.1:Qs_acc', scale: 8 },
-  EVAPOTRANSPIRATION: { service: 'datarods', id: 'GLDAS2:GLDAS_NOAH025_3H_v2.1:Evap_tavg', scale: 86400 },
+  AOD: giovanni(
+    { id: 'M2TMNXAER_5_12_4_TOTEXTTAU', scale: 1 },
+    { id: 'MOD08_M3_6_1_AOD_550_Dark_Target_Deep_Blue_Combined_Mean_Mean', scale: 1 },
+    { id: 'MYD08_M3_6_1_AOD_550_Dark_Target_Deep_Blue_Combined_Mean_Mean', scale: 1 },
+    { id: 'M2T1NXAER_5_12_4_TOTEXTTAU', scale: 1 },
+  ),
+  IMERG_RAIN: giovanni(
+    { id: 'GPM_3IMERGM_07_precipitation', scale: 24 },
+    { id: 'GPM_3IMERGDF_07_precipitation', scale: 1 },
+  ),
+  SOIL_MOISTURE: giovanni({ id: 'GLDAS_NOAH025_M_2_1_SoilMoi0_10cm_inst', scale: 1 }),
+  RUNOFF: giovanni(
+    { id: 'GLDAS_NOAH025_M_2_1_Qs_acc', scale: 8 },
+    { id: 'GLDAS_NOAH025_3H_2_1_Qs_acc', scale: 8 },
+  ),
+  EVAPOTRANSPIRATION: giovanni(
+    { id: 'GLDAS_NOAH025_M_2_1_Evap_tavg', scale: 86400 },
+    { id: 'GLDAS_NOAH025_3H_2_1_Evap_tavg', scale: 86400 },
+  ),
 };
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}/;
@@ -71,24 +89,13 @@ export function fillMonths(series: SeriesPoint[], startYear: number, endYear: nu
 
 // Upstream requests
 
-export function upstreamUrl(dataset: RemoteDataset, lat: number, lon: number, startYear: number, endYear: number): string {
-  if (dataset.service === 'giovanni') {
-    const params = new URLSearchParams({
-      data: dataset.id,
-      location: `[${lat.toFixed(4)},${lon.toFixed(4)}]`,
-      time: `${startYear}-01-01T00:00:00/${endYear}-12-31T23:59:59`,
-    });
-    return `${GIOVANNI_API}?${params}`;
-  }
-
+export function upstreamUrl(productId: string, lat: number, lon: number, startYear: number, endYear: number): string {
   const params = new URLSearchParams({
-    variable: dataset.id,
-    location: `GEOM:POINT(${lon.toFixed(4)}, ${lat.toFixed(4)})`,
-    startDate: `${startYear}-01-01T00`,
-    endDate: `${endYear}-12-31T21`,
-    type: 'asc2',
+    data: productId,
+    location: `[${lat.toFixed(4)},${lon.toFixed(4)}]`,
+    time: `${startYear}-01-01T00:00:00/${endYear}-12-31T23:59:59`,
   });
-  return `${DATARODS_API}?${params}`;
+  return `${GIOVANNI_API}?${params}`;
 }
 
 // Links

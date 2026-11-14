@@ -21,12 +21,7 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         title: 'Giovanni',
         url: 'https://giovanni.gsfc.nasa.gov/',
-        note: { en: 'Haze, satellite rainfall and soil moisture time series.', th: 'อนุกรมเวลาหมอกควัน ฝนจากดาวเทียม และความชื้นในดิน' },
-      },
-      {
-        title: 'Hydrology Time Series',
-        url: 'https://disc.gsfc.nasa.gov/information/tools?title=Hydrology%20Time%20Series',
-        note: { en: 'Runoff and evaporation from the GLDAS land model.', th: 'น้ำไหลบ่าและการคายระเหยน้ำจากแบบจำลอง GLDAS' },
+        note: { en: 'Haze, satellite rainfall, soil moisture, runoff and evaporation time series.', th: 'อนุกรมเวลาหมอกควัน ฝนจากดาวเทียม ความชื้นในดิน น้ำไหลบ่า และการคายระเหยน้ำ' },
       },
       {
         title: 'AppEEARS',

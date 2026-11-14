@@ -13,13 +13,13 @@ const GIOVANNI_CSV = [
   '2001-03-01 00:00:00,-9999',
 ].join('\n');
 
-const DATARODS_ASC = [
-  'Metadata for Requested Time Series:',
-  'prod_name=GLDAS_NOAH025_3H_v2.1',
-  '      Date&Time        Data',
-  '2001-01-01T00:00:00\t0.5',
-  '2001-01-01T03:00:00\t1.5',
-  '2001-02-01T00:00:00\t2.0',
+const SUBDAILY_CSV = [
+  'prod_name,GLDAS_NOAH025_3H.2.1',
+  '',
+  'Timestamp (UTC),Data',
+  '2001-01-01 00:00,0.5',
+  '2001-01-01 03:00,1.5',
+  '2001-02-01 00:00,2.0',
 ].join('\n');
 
 describe('remote time series parsing', () => {
@@ -31,8 +31,8 @@ describe('remote time series parsing', () => {
     ]);
   });
 
-  it('averages sub-daily data rods into months and applies the scale', () => {
-    expect(parseTimeSeriesText(DATARODS_ASC, 8)).toEqual([
+  it('averages sub-daily values into months and applies the scale', () => {
+    expect(parseTimeSeriesText(SUBDAILY_CSV, 8)).toEqual([
       { t: '2001-01', value: 8 },
       { t: '2001-02', value: 16 },
     ]);
@@ -49,17 +49,15 @@ describe('remote time series parsing', () => {
 describe('remote urls', () => {
   it('routes each variable to its own proxy', () => {
     expect(proxyUrl('AOD', 18.79, 98.98)).toBe('/api/giovanni?variable=AOD&lat=18.7900&lon=98.9800');
-    expect(proxyUrl('RUNOFF', 18.79, 98.98)).toMatch(/^\/api\/datarods\?/);
+    expect(proxyUrl('RUNOFF', 18.79, 98.98)).toMatch(/^\/api\/giovanni\?/);
     expect(proxyUrl('T2M', 18.79, 98.98)).toBeNull();
   });
 
-  it('builds upstream requests for both services', () => {
-    const giovanni = new URL(upstreamUrl(REMOTE_DATASETS.AOD, 18.79, 98.98, 2001, 2024));
-    expect(giovanni.searchParams.get('location')).toBe('[18.7900,98.9800]');
-    expect(giovanni.searchParams.get('time')).toBe('2001-01-01T00:00:00/2024-12-31T23:59:59');
-
-    const rods = new URL(upstreamUrl(REMOTE_DATASETS.RUNOFF, 18.79, 98.98, 2001, 2024));
-    expect(rods.searchParams.get('location')).toBe('GEOM:POINT(98.9800, 18.7900)');
+  it('builds Giovanni time series requests', () => {
+    const url = new URL(upstreamUrl(REMOTE_DATASETS.AOD.products[0].id, 18.79, 98.98, 2001, 2024));
+    expect(url.searchParams.get('data')).toBe('M2TMNXAER_5_12_4_TOTEXTTAU');
+    expect(url.searchParams.get('location')).toBe('[18.7900,98.9800]');
+    expect(url.searchParams.get('time')).toBe('2001-01-01T00:00:00/2024-12-31T23:59:59');
   });
 
   it('links to Giovanni with a small box around the point', () => {

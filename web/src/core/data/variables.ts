@@ -1,7 +1,7 @@
-import { GIOVANNI_HOME, HYDROLOGY_HOME } from './remote';
+import { GIOVANNI_HOME } from './remote';
 import { POWER_HOME } from './power';
 
-export type VariableSource = 'power' | 'giovanni' | 'datarods';
+export type VariableSource = 'power' | 'giovanni';
 
 export interface Provider {
   provider: string;
@@ -165,8 +165,8 @@ export const VARIABLES: VariableDefinition[] = [
     key: 'RUNOFF',
     layer: 'surface',
     satellites: [],
-    source: 'datarods',
-    provider: { provider: 'NASA Hydrology Time Series', product: 'GLDAS Noah 0.25° 3-hourly, surface runoff', url: HYDROLOGY_HOME },
+    source: 'giovanni',
+    provider: { provider: 'NASA Giovanni', product: 'GLDAS Noah 0.25° monthly, surface runoff', url: GIOVANNI_HOME },
     unit: 'mm/day',
     label: { en: 'Runoff', th: 'น้ำไหลบ่า' },
     description: {
@@ -178,8 +178,8 @@ export const VARIABLES: VariableDefinition[] = [
     key: 'EVAPOTRANSPIRATION',
     layer: 'surface',
     satellites: [],
-    source: 'datarods',
-    provider: { provider: 'NASA Hydrology Time Series', product: 'GLDAS Noah 0.25° 3-hourly, evapotranspiration', url: HYDROLOGY_HOME },
+    source: 'giovanni',
+    provider: { provider: 'NASA Giovanni', product: 'GLDAS Noah 0.25° monthly, evapotranspiration', url: GIOVANNI_HOME },
     unit: 'mm/day',
     label: { en: 'Evaporation', th: 'การคายระเหยน้ำ' },
     description: {

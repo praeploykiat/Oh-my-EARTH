@@ -82,7 +82,7 @@ The site is hosted on [Vercel](https://vercel.com/) with **Root Directory** set 
 
 | Variable | Needed by | Notes |
 | --- | --- | --- |
-| `EARTHDATA_TOKEN` | `web/api/giovanni.ts`, `web/api/datarods.ts` | NASA Earthdata user token, stored as a Secret. Expires after about 60 days. |
+| `EARTHDATA_TOKEN` | `web/api/giovanni.ts` | NASA Earthdata user token, stored as a Secret. Expires after about 60 days. |
 
 `npm run dev` does not run the functions in `web/api/`. Use `npx vercel dev` to test them locally.
 
@@ -98,8 +98,7 @@ The workbench offers 12 variables in three Earth system layers. All series are m
 | How it is reached | Source | Variables | Code |
 | --- | --- | --- | --- |
 | Browser calls NASA directly | [NASA POWER](https://power.larc.nasa.gov/) monthly point API (MERRA-2; sunlight from CERES) | Air temperature, daily high, daily low, rainfall, humidity, wind speed, sunlight | `web/src/core/data/power.ts` |
-| Our function `/api/giovanni` | [NASA Giovanni](https://giovanni.gsfc.nasa.gov/) time series API | Haze (MERRA-2 AOD 550 nm), satellite rainfall (GPM IMERG V07), soil moisture (GLDAS Noah 0 to 10 cm) | `web/api/giovanni.ts`, `web/api/_proxy.ts`, `web/src/core/data/remote.ts` |
-| Our function `/api/datarods` | [NASA Hydrology Time Series](https://disc.gsfc.nasa.gov/information/tools?title=Hydrology%20Time%20Series) (data rods) | Runoff, evaporation (GLDAS Noah 3-hourly, averaged to months) | `web/api/datarods.ts`, `web/api/_proxy.ts` |
+| Our function `/api/giovanni` | [NASA Giovanni](https://giovanni.gsfc.nasa.gov/) time series API | Haze (AOD 550 nm, MERRA-2 with MODIS Terra and Aqua as fallbacks), satellite rainfall (GPM IMERG V07), soil moisture, runoff and evaporation (GLDAS Noah 2.1) | `web/api/giovanni.ts`, `web/api/_proxy.ts`, `web/src/core/data/remote.ts` |
 | Static file | `web/public/datasets/` | Featured cases and offline fallback | `web/src/core/data/resolve.ts` |
 | Static file | [geoBoundaries](https://www.geoboundaries.org/) (CC BY 4.0) | Thailand province boundaries | `web/public/geo/thailand-provinces.json` |
 | Static file | [Natural Earth](https://www.naturalearthdata.com/) via `world-atlas` (public domain) | Neighbouring countries on the map | `web/public/geo/region-neighbors.json` |
@@ -114,7 +113,7 @@ Not connected yet: FIRMS fire hotspots, AppEEARS, NOAA Climate Data Online, SWOT
 
 Verify live data (blocking)
 - [ ] Open the deployed site, pick a province that is not a featured case, and confirm the "Live" badge (NASA POWER works from the browser).
-- [ ] Open `/api/giovanni?variable=AOD&lat=18.79&lon=98.98` and `/api/datarods?variable=RUNOFF&lat=18.79&lon=98.98` on the deployed site. Fix dataset IDs or the token header if they return an error.
+- [ ] Open `/api/giovanni?variable=AOD&lat=18.79&lon=98.98` and `/api/giovanni?variable=RUNOFF&lat=18.79&lon=98.98` on the deployed site and note which `product` each one used. The Hydrology Data Rods service was retired, so runoff and evaporation now come through Giovanni.
 
 Real data
 - [ ] Replace the three synthetic files in `web/public/datasets/` with real exports (`python export.py`).
