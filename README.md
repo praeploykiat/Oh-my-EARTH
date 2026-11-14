@@ -73,7 +73,9 @@ The page reuses the POWER monthly point connector, time-series chart, anomaly tr
 
 Observations represent NASA grid data at the listed capital coordinate, not national averages or local station measurements. The global explorer uses day-weighted annual means for temperature, humidity, and daily solar energy, and derives annual rainfall totals by summing each monthly daily rate multiplied by its calendar days (including leap days). Annual values require all 12 valid months; incomplete years remain gaps and are never scaled or filled. Derived rainfall totals inherit the precision of the rounded monthly rates. The Thailand workbench retains its existing aggregation.
 
-Within the selected period, monthly/anomaly views and annual means use deseasonalized monthly observations for statistics. Annual rainfall view uses complete annual totals, so its chart and trend both use `mm/year`. This change of analysis basis is labeled next to the results. Anomaly baselines follow the selected period. Inference is withheld unless the selection covers at least 10 years, observations occur in at least 10 distinct years, and at least 80% of monthly observations are valid; annual rainfall additionally requires 10 complete years. These are explicit MVP display safeguards, not statistical guarantees, and autocorrelation remains uncorrected.
+Within the selected period, monthly/anomaly views and annual means use seasonal Kendall comparisons and Sen slopes within matching calendar months. Annual rainfall uses complete annual totals, so its chart and trend both use `mm/year`. Anomaly baselines follow the selected period. Inference is withheld unless the selection covers at least 10 years, observations occur in at least 10 distinct years, and at least 80% of monthly observations are valid; annual rainfall additionally requires 10 complete years. These are explicit MVP display safeguards, not statistical guarantees.
+
+The global explorer now uses **seasonal-sen-cbb-v1**, a whole-year residual block bootstrap for approximate 95% slope intervals and Kendall score p-values. A background worker keeps the page responsive. Results include plain-English explanations, residual autocorrelation diagnostics, and sensitivity to block length. Gaps, strong persistence, or records shorter than 15 years are marked provisional. The method is numerically verified against an independent NumPy/SciPy reference, but simulations still show under-coverage in some dependent and incomplete records; it remains an exploratory method. See the [full statistical method and validation](docs/global-trend-method.md), [parity report](docs/global-trend-validation.json), and [simulation report](docs/global-trend-simulation.json). Run `npm run validate:trend` in `web/` to reproduce the numerical comparison.
 
 The **Data quality and provenance** panel reports all four variables for the selected years, including source units, valid/missing/rejected month counts, requested and API response coordinates, source products, and retrieval time. Runtime validation rejects malformed response structure, missing variable metadata, incompatible units, unexpected months/years, and location mismatches. Missing/fill values remain missing; nonnumeric, nonfinite, or implausible values are excluded and counted separately. See [validation rules and live pilot](docs/global-data-validation.md).
 
@@ -94,7 +96,7 @@ Bundled geography and source attribution:
 
 Country/capital names retain the English source labels in both UI languages; controls and explanations are translated. No extra mapping or chart dependency, database, or backend service is required for this page.
 
-## Method
+## Workbench method
 
 1. Monthly series per location from the sources listed under [Data](#data).
 2. Seasonal cycle removed by subtracting each calendar month's mean.
@@ -103,7 +105,7 @@ Country/capital names retain the English source labels in both UI languages; con
 
 Both the Python and TypeScript implementations are checked against `fixtures/trend-cases.json`, which is cross-checked with `pymannkendall` (`python make_fixtures.py`).
 
-Known limitation: the test does not yet correct for serial autocorrelation, which can overstate significance.
+Known limitation of the Thailand workbench/legacy pipeline: the test does not yet correct for serial autocorrelation, which can overstate significance. The global explorer uses the separate method described above.
 
 ## Deployment
 
@@ -114,7 +116,9 @@ The site is hosted on [Vercel](https://vercel.com/) with **Root Directory** set 
 | `EARTHDATA_TOKEN` | `web/api/giovanni.ts` | NASA Earthdata user token, stored as a Secret. Expires after about 60 days. |
 | `SPHERE_KEY` | `web/api/flood.ts` | GISTDA sphere API key (free sign up at sphere.gistda.or.th), stored as a Secret. |
 
-`npm run dev` does not run the functions in `web/api/`. Use `npx vercel dev` to test them locally.
+`npm run dev` now runs the existing `web/api/` handlers through a development-only Vite adapter (`web/scripts/local-api.ts`). Requests to `/api/giovanni`, `/api/flood`, and `/api/questions` are handled before Vite's source transforms. Local server credentials are read from `web/.env`/`.env.local` (or the shell environment) and are not exposed as client variables. Restart the dev process after changing credentials. `npx vercel dev` remains an option for checking Vercel-specific routing; production continues to use the existing Vercel functions.
+
+An `Invalid loader value: "2000"` error for `api/giovanni.ts` was caused by sending API query URLs through Vite's TypeScript transform instead of executing the server handler. The adapter keeps query strings on the HTTP request and loads only an explicit, query-free server module ID. Regression tests cover decimal coordinates, JSON request bodies, response errors, and the three API routes. See the [dependency and page regression audit](docs/dependency-regression-audit.md).
 
 - Every push to `main` deploys to production.
 - Every pull request gets its own preview URL.
@@ -128,13 +132,20 @@ The workbench offers 12 variables in three Earth system layers. All series are m
 | How it is reached | Source | Variables | Code |
 | --- | --- | --- | --- |
 | Browser calls NASA directly | [NASA POWER](https://power.larc.nasa.gov/) monthly point API (MERRA-2; sunlight from CERES) | Air temperature, daily high, daily low, rainfall, humidity, wind speed, sunlight | `web/src/core/data/power.ts` |
-| Our function `/api/giovanni` | [NASA Giovanni](https://giovanni.gsfc.nasa.gov/) time series API | Haze (AOD 550 nm, MERRA-2 with MODIS Terra and Aqua as fallbacks), satellite rainfall (GPM IMERG V07), soil moisture, runoff and evaporation (GLDAS Noah 2.1) | `web/api/giovanni.ts`, `web/api/_proxy.ts`, `web/src/core/data/remote.ts` |
+| Our function `/api/giovanni` | [NASA Giovanni](https://giovanni.gsfc.nasa.gov/) time series API | Haze (AOD 550 nm, hourly MERRA-2 averaged monthly), satellite rainfall (GPM IMERG V07), soil moisture, runoff and evaporation (GLDAS Noah 2.1) | `web/api/giovanni.ts`, `web/api/_proxy.ts`, `web/src/core/data/remote.ts` |
 | Our function `/api/flood` | [GISTDA sphere](https://sphere.gistda.or.th/docs/web-service/disaster-information) flood recurrence API | Years each subdistrict flooded, 2011 to 2023. Shown under rainfall, satellite rainfall and runoff for context, not trend tested | `web/api/flood.ts`, `web/src/core/data/flood.ts`, `web/src/features/workbench/FloodHistory.tsx` |
 | Static file | `web/public/datasets/` | Featured cases and offline fallback | `web/src/core/data/resolve.ts` |
 | Static file | [geoBoundaries](https://www.geoboundaries.org/) (CC BY 4.0) | Thailand province boundaries | `web/public/geo/thailand-provinces.json` |
 | Static file | [Natural Earth](https://www.naturalearthdata.com/) via `world-atlas` (public domain) | Neighbouring countries on the map | `web/public/geo/region-neighbors.json` |
 
 If a live request fails, the app falls back to a saved dataset for the same place and shows a "Saved copy" badge.
+
+Giovanni investigation: the generated-token request still returns HTTP 500 when
+called directly outside the application, including NASA's published example.
+Unsupported haze product IDs were corrected using the live catalog; further
+credential/upstream work is deferred at the user's request. See the
+[investigation and evidence](docs/giovanni-investigation.md). The generated token
+was preserved, and this integration is not yet marked live-verified.
 
 Sample datasets in `web/public/datasets/` are synthetic until replaced by `python export.py`. Each file marks this with `source.synthetic`.
 

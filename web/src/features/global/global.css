@@ -65,6 +65,16 @@
 .global-result .card-header { flex-wrap: wrap; gap: 10px; }
 .global-result .legend { font-size: 11px; }
 .global-result .stats { margin-top: 16px; }
+.global-insight { margin-top: 20px; border-left: 3px solid var(--accent); background: var(--surface); padding: 20px; border-radius: 0 10px 10px 0; }
+.global-insight h3 { font-size: 18px; margin-bottom: 12px; }
+.global-insight p { font-size: 13px; color: var(--fg-soft); margin-bottom: 10px; }
+.global-insight p:last-child { margin-bottom: 0; }
+.global-trend .stats { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.global-trend-details { font-size: 12px; margin-top: 16px; }
+.global-trend-details summary { cursor: pointer; color: var(--fg-soft); margin-bottom: 12px; }
+.global-trend-details table { width: 100%; text-align: left; border-collapse: collapse; }
+.global-trend-details td, .global-trend-details th { padding: 8px; border-bottom: 1px solid var(--line); }
+.global-trend-details caption { text-align: left; padding-bottom: 8px; color: var(--accent); }
 .global-source { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 11px; margin: 16px 0 8px; }
 .global-source a { color: var(--accent); }
 .global-caution { font-size: 12px; }

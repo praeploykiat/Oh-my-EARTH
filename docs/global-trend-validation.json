@@ -1,0 +1,92 @@
+{
+  "method": "seasonal-sen-cbb-v1",
+  "tolerance": 1e-8,
+  "replicates": 999,
+  "reference": {
+    "python": "3.14.0",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1"
+  },
+  "scope": "Numerical parity with an independently implemented NumPy/SciPy reference. Not a guarantee of statistical coverage or correctness for every environmental process.",
+  "cases": [
+    {
+      "name": "constant",
+      "passed": true,
+      "maximumAbsoluteDifference": 0,
+      "mismatches": []
+    },
+    {
+      "name": "season-only",
+      "passed": true,
+      "maximumAbsoluteDifference": 0,
+      "mismatches": []
+    },
+    {
+      "name": "increasing",
+      "passed": true,
+      "maximumAbsoluteDifference": 3.469446951953614e-17,
+      "mismatches": []
+    },
+    {
+      "name": "decreasing",
+      "passed": true,
+      "maximumAbsoluteDifference": 4.163336342344337e-17,
+      "mismatches": []
+    },
+    {
+      "name": "correlated-null",
+      "passed": true,
+      "maximumAbsoluteDifference": 1.1368683772161603e-13,
+      "mismatches": []
+    },
+    {
+      "name": "correlated-trend",
+      "passed": true,
+      "maximumAbsoluteDifference": 0,
+      "mismatches": []
+    },
+    {
+      "name": "persistent-null",
+      "passed": true,
+      "maximumAbsoluteDifference": 0,
+      "mismatches": []
+    },
+    {
+      "name": "ties",
+      "passed": true,
+      "maximumAbsoluteDifference": 1.3877787807814457e-17,
+      "mismatches": []
+    },
+    {
+      "name": "annual-totals",
+      "passed": true,
+      "maximumAbsoluteDifference": 1.4210854715202004e-14,
+      "mismatches": []
+    },
+    {
+      "name": "minimum-ten-years",
+      "passed": true,
+      "maximumAbsoluteDifference": 1.3877787807814457e-17,
+      "mismatches": []
+    },
+    {
+      "name": "opposing-months",
+      "passed": true,
+      "maximumAbsoluteDifference": 1.1102230246251565e-16,
+      "mismatches": []
+    },
+    {
+      "name": "calendar-gaps",
+      "passed": true,
+      "maximumAbsoluteDifference": 5.684341886080802e-14,
+      "mismatches": []
+    },
+    {
+      "name": "annual-gaps",
+      "passed": true,
+      "maximumAbsoluteDifference": 1.1102230246251565e-16,
+      "mismatches": []
+    }
+  ],
+  "passed": true
+}

@@ -1,4 +1,4 @@
-import { computeTrend, toAnomaly, type View } from '../../core/analysis';
+import { toAnomaly, type View } from '../../core/analysis';
 import type { SeriesPoint } from '../../core/data';
 import { START_YEAR, END_YEAR } from '../../core/data/range';
 
@@ -74,11 +74,8 @@ export function prepareGlobalAnalysis(record: SeriesPoint[], variable: GlobalVar
     && observedYears >= MIN_TREND_YEARS
     && coverage.fraction >= MIN_MONTHLY_COVERAGE
     && (!annualRain || completeYears >= MIN_TREND_YEARS);
-  const trend = eligible ? computeTrend(analysisSeries, annualRain ? 'annual' : 'monthly') : null;
-  if (trend && annualRain) trend.method = "Mann-Kendall on complete annual rainfall totals, Sen's slope";
   return {
-    monthly, annual, shown, coverage, completeYears, annualRain, analysisSeries, trend,
+    monthly, annual, shown, coverage, completeYears, annualRain, analysisSeries, eligible,
     unit: annualRain ? 'mm/year' : undefined,
-    slopePerStep: trend ? trend.slopePerDecade / (view === 'annual' ? 10 : 120) : undefined,
   };
 }

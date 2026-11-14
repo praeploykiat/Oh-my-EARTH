@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { View } from '../../core/analysis';
 import { START_YEAR, END_YEAR } from '../../core/data/range';
-import { useAsync, variableByKey, type Dataset } from '../../core/data';
+import { useAsync, variableByKey } from '../../core/data';
 import { CAPITALS, capitalByCode, type Capital } from '../../core/geo/capitals';
 import { useI18n } from '../../core/i18n';
 import { splitHash } from '../../core/url';
-import { TimeSeriesChart, TrendSummary } from '../../shared';
+import { TimeSeriesChart } from '../../shared';
 import { WorldMap } from './WorldMap';
 import { GLOBAL_VARIABLES, YEARS, parseYearRange, prepareGlobalAnalysis, recordCoverage, completeMonthlyRecord, type GlobalVariable, type YearRange } from './data';
 import { fetchGlobalRecord, globalRequestUrl, type GlobalRecord } from './powerRecord';
+import { useGlobalTrend } from './useGlobalTrend';
+import { GlobalTrendSummary } from './GlobalTrendSummary';
 import './global.css';
 
 const VIEWS: View[] = ['monthly', 'annual', 'anomaly'];
@@ -120,14 +122,11 @@ function GlobalResult({ capital, variable, view, range }: { capital: Capital; va
 function GlobalChart({ record, capital, variable, view, range, label, monthlyUnit }: { record: GlobalRecord; capital: Capital; variable: GlobalVariable; view: View; range: YearRange; label: string; monthlyUnit: string }) {
   const { t } = useI18n();
   const analysis = useMemo(() => prepareGlobalAnalysis(record.variables[variable].series, variable, range, view), [record, variable, range.start, range.end, view]);
-  const { shown, coverage, completeYears, annualRain, trend, slopePerStep } = analysis;
+  const { shown, coverage, completeYears, annualRain } = analysis;
+  const inference = useGlobalTrend(analysis.analysisSeries, annualRain, analysis.eligible);
+  const trend = inference.status === 'ready' ? inference.result : null;
+  const slopePerStep = trend ? trend.slopePerDecade / (view === 'annual' ? 10 : 120) : undefined;
   const unit = analysis.unit ?? monthlyUnit;
-  const dataset: Dataset | null = trend ? {
-    id: `global-${capital.code}-${variable}`, variable: { key: variable, label }, unit,
-    source: { provider: 'NASA POWER', product: record.sources.join(', ') || 'Monthly point data' },
-    region: { name: capital.city, lat: capital.lat, lon: capital.lon },
-    resolution: annualRain ? 'annual' : 'monthly', series: analysis.analysisSeries, trend,
-  } : null;
   return <article className="global-result">
     <div className="global-coverage" role="status">
       <strong>{range.start}–{range.end}</strong>
@@ -138,7 +137,8 @@ function GlobalChart({ record, capital, variable, view, range, label, monthlyUni
       <TimeSeriesChart series={shown} unit={unit} slopePerStep={slopePerStep} height={260} />
     </div>
     <p className="global-aggregation-note">{t(view === 'annual' ? annualRain ? 'global.rainAggregation' : 'global.meanAggregation' : view === 'anomaly' ? 'global.anomalyBaseline' : 'global.monthlyValues', { start: range.start, end: range.end })}</p>
-    {dataset ? <TrendSummary dataset={dataset} /> : <p className="global-insufficient" role="status">{t('global.insufficient')}</p>}
+    {trend ? <GlobalTrendSummary result={trend} unit={unit} variable={label} city={capital.city} start={range.start} end={range.end} />
+      : <p className="global-insufficient" role="status">{t(inference.status === 'loading' ? 'global.trend.calculating' : inference.status === 'error' ? 'global.trend.failed' : 'global.insufficient')}</p>}
     <p className="global-analysis-basis">{t(annualRain ? 'global.annualTrendBasis' : 'global.monthlyTrendBasis')}</p>
     <p className="global-source"><a href={record.requestUrl} target="_blank" rel="noreferrer">{t('global.source')}</a></p>
     <p className="global-caution">{t('global.caution')}</p>

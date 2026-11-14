@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "validate:data": "node scripts/validate-datasets.mjs",
-    "validate:global:live": "node scripts/validate-global-live.mjs"
+    "validate:global:live": "node scripts/validate-global-live.mjs",
+    "validate:trend": "node scripts/validate-global-trend.mjs"
   },
   "dependencies": {
     "@upstash/redis": "1.40.0",

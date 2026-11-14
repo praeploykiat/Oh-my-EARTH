@@ -20,9 +20,7 @@ const giovanni = (...products: RemoteProduct[]): RemoteDataset => ({ service: 'g
 
 export const REMOTE_DATASETS: Record<string, RemoteDataset> = {
   AOD: giovanni(
-    { id: 'M2TMNXAER_5_12_4_TOTEXTTAU', scale: 1 },
-    { id: 'MOD08_M3_6_1_AOD_550_Dark_Target_Deep_Blue_Combined_Mean_Mean', scale: 1 },
-    { id: 'MYD08_M3_6_1_AOD_550_Dark_Target_Deep_Blue_Combined_Mean_Mean', scale: 1 },
+    // NASA's point-service catalog lists hourly MERRA-2, not monthly MERRA-2/MODIS.
     { id: 'M2T1NXAER_5_12_4_TOTEXTTAU', scale: 1 },
   ),
   IMERG_RAIN: giovanni(

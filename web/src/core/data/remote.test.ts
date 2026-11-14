@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fillMonths, giovanniLink, parseTimeSeriesText, proxyUrl, REMOTE_DATASETS, upstreamUrl } from './remote';
 import { VARIABLES } from './variables';
+import configured from '../../../../fixtures/giovanni-configured-variables.json';
 
 const GIOVANNI_CSV = [
   'prod_name,M2TMNXAER',
@@ -55,7 +56,7 @@ describe('remote urls', () => {
 
   it('builds Giovanni time series requests', () => {
     const url = new URL(upstreamUrl(REMOTE_DATASETS.AOD.products[0].id, 18.79, 98.98, 2001, 2024));
-    expect(url.searchParams.get('data')).toBe('M2TMNXAER_5_12_4_TOTEXTTAU');
+    expect(url.searchParams.get('data')).toBe('M2T1NXAER_5_12_4_TOTEXTTAU');
     expect(url.searchParams.get('location')).toBe('[18.7900,98.9800]');
     expect(url.searchParams.get('time')).toBe('2001-01-01T00:00:00/2024-12-31T23:59:59');
   });
@@ -67,6 +68,12 @@ describe('remote urls', () => {
   it('has a remote dataset for every remote variable', () => {
     for (const variable of VARIABLES.filter((v) => v.source !== 'power')) {
       expect(REMOTE_DATASETS[variable.key]?.service, variable.key).toBe(variable.source);
+    }
+  });
+  it('only requests products in the NASA point-service catalog captured on 2026-11-15', () => {
+    const supported = new Set(configured.configured_variables);
+    for (const dataset of Object.values(REMOTE_DATASETS)) {
+      for (const product of dataset.products) expect(supported.has(product.id), product.id).toBe(true);
     }
   });
 });

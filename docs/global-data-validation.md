@@ -74,12 +74,14 @@ without year parameters retain the full record. Coverage, annual values, anomaly
 baselines, chart inputs, and trend inputs all follow the selected period.
 
 For annual rainfall, statistics operate on annual totals and report mm/year per
-decade. Other views use deseasonalized monthly data and the source measurement unit
+decade. Other views use within-calendar-month comparisons and the source measurement unit
 per decade. Trend inference requires 10 selected calendar years, observations in
 10 distinct years, and 80% valid monthly coverage; annual rainfall also requires
 10 complete annual totals. These thresholds are product safeguards, not a published
-power calculation. Seasonality is removed with the existing calendar-month mean
-method, and serial autocorrelation is still uncorrected.
+power calculation. The subsequent [trend-analysis milestone](global-trend-method.md)
+adds seasonal Sen/Kendall estimates, dependence-aware block resampling, approximate
+confidence limits, and explicit provisional-result safeguards. Anomaly plotting
+still uses the calendar-month mean baseline over the selected period.
 
 The unit suite covers validation failures, unit mismatch, cache restoration and
 refresh, missing years, leap-year weighting, annual rainfall units, short/sparse

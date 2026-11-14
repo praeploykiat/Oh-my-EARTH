@@ -90,24 +90,24 @@ describe('range and analysis consistency', () => {
     expect(result.shown.at(-1)?.t).toBe('2019-12');
     expect(result.coverage).toEqual({ valid: 120, total: 120, fraction: 1 });
     expect(result.completeYears).toBe(10);
-    expect(result.trend?.slopePerDecade).toBeGreaterThan(0);
+    expect(result.eligible).toBe(true);
     const changedOutsideRange = record.map((p) => ({ ...p, value: p.t < '2010' || p.t >= '2020' ? 5000 : p.value }));
-    expect(prepareGlobalAnalysis(changedOutsideRange, 'T2M', { start: 2010, end: 2019 }, 'monthly').trend).toEqual(result.trend);
+    expect(prepareGlobalAnalysis(changedOutsideRange, 'T2M', { start: 2010, end: 2019 }, 'monthly').analysisSeries).toEqual(result.analysisSeries);
     const annualRain = prepareGlobalAnalysis(record, 'PRECTOTCORR', { start: 2010, end: 2019 }, 'annual');
     expect(annualRain.unit).toBe('mm/year');
     expect(annualRain.analysisSeries).toEqual(annualRain.annual);
-    expect(annualRain.trend).not.toBeNull();
+    expect(annualRain.eligible).toBe(true);
   });
   it('withholds inference for short periods, low coverage and insufficient complete rainfall years', () => {
-    expect(prepareGlobalAnalysis(record, 'T2M', { start: 2020, end: 2024 }, 'annual').trend).toBeNull();
+    expect(prepareGlobalAnalysis(record, 'T2M', { start: 2020, end: 2024 }, 'annual').eligible).toBe(false);
     const partial = record.map((p, i) => ({ ...p, value: i % 12 === 0 ? null : p.value }));
-    expect(prepareGlobalAnalysis(partial, 'PRECTOTCORR', { start: 2001, end: 2024 }, 'annual').trend).toBeNull();
+    expect(prepareGlobalAnalysis(partial, 'PRECTOTCORR', { start: 2001, end: 2024 }, 'annual').eligible).toBe(false);
     const sparse = record.map((p, i) => ({ ...p, value: i % 2 ? null : p.value }));
-    expect(prepareGlobalAnalysis(sparse, 'T2M', { start: 2001, end: 2024 }, 'monthly').trend).toBeNull();
-    expect(prepareGlobalAnalysis([], 'T2M', { start: 2001, end: 2024 }, 'monthly').trend).toBeNull();
+    expect(prepareGlobalAnalysis(sparse, 'T2M', { start: 2001, end: 2024 }, 'monthly').eligible).toBe(false);
+    expect(prepareGlobalAnalysis([], 'T2M', { start: 2001, end: 2024 }, 'monthly').eligible).toBe(false);
     const eightYears = record.filter((p) => p.t < '2009');
     expect(prepareGlobalAnalysis(eightYears, 'T2M', { start: 2001, end: 2010 }, 'monthly').coverage.fraction).toBe(0.8);
-    expect(prepareGlobalAnalysis(eightYears, 'T2M', { start: 2001, end: 2010 }, 'monthly').trend).toBeNull();
+    expect(prepareGlobalAnalysis(eightYears, 'T2M', { start: 2001, end: 2010 }, 'monthly').eligible).toBe(false);
   });
   it('recomputes anomaly baselines within the selected years', () => {
     const result = prepareGlobalAnalysis(record, 'T2M', { start: 2010, end: 2011 }, 'anomaly');
