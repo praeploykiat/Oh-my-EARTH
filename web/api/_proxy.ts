@@ -1,5 +1,5 @@
-import { END_YEAR, START_YEAR } from '../src/core/data/range';
-import { fillMonths, parseTimeSeriesText, REMOTE_DATASETS, upstreamUrl, type RemoteService } from '../src/core/data/remote';
+import { END_YEAR, START_YEAR } from '../src/core/data/range.js';
+import { fillMonths, parseTimeSeriesText, REMOTE_DATASETS, upstreamUrl, type RemoteService } from '../src/core/data/remote.js';
 
 const CACHE_HEADER = 'public, s-maxage=604800, stale-while-revalidate=86400';
 
@@ -27,10 +27,17 @@ export async function proxy(request: Request, service: RemoteService): Promise<R
   const token = process.env.EARTHDATA_TOKEN;
   if (!token) return json({ error: 'EARTHDATA_TOKEN is not configured' }, 500);
 
-  const upstream = await fetch(upstreamUrl(dataset, lat, lon, START_YEAR, END_YEAR), {
-    headers: { authorization: `Bearer ${token}`, authorizationtoken: token },
-  });
-  const text = await upstream.text();
+  let upstream: Response;
+  let text: string;
+  try {
+    upstream = await fetch(upstreamUrl(dataset, lat, lon, START_YEAR, END_YEAR), {
+      headers: { authorization: `Bearer ${token}`, authorizationtoken: token },
+      signal: AbortSignal.timeout(55_000),
+    });
+    text = await upstream.text();
+  } catch (error) {
+    return json({ error: `${service} could not be reached`, detail: String(error) }, 502);
+  }
   if (!upstream.ok) return json({ error: `${service} returned ${upstream.status}`, detail: text.slice(0, 500) }, 502);
 
   const series = parseTimeSeriesText(text, dataset.scale);

@@ -141,7 +141,7 @@ function useGeometry(ref: RefObject<HTMLDivElement>): Geometry | null {
               x0: space.left - origin.left,
               y0: space.top - origin.top,
               x1: space.right - origin.left,
-              y1: space.bottom - origin.top,
+              y1: Math.min(space.bottom, origin.bottom - 24, window.innerHeight - 24) - origin.top,
             }
           : null,
       });

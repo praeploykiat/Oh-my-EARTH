@@ -1,4 +1,4 @@
-import { proxy } from './_proxy';
+import { proxy } from './_proxy.js';
 
 export const maxDuration = 60;
 
