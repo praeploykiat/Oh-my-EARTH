@@ -1,0 +1,64 @@
+.global-explorer { padding: 40px var(--gutter); max-width: 1360px; margin: 0 auto; }
+.global-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.global-heading h1 { font-size: clamp(30px, 4vw, 46px); margin-bottom: 12px; }
+.global-heading p { max-width: 680px; }
+.global-heading .eyebrow { color: var(--accent); }
+.global-period { flex-shrink: 0; text-align: right; }
+.global-period strong { display: block; font: 24px var(--font-mono); }
+.global-period span { font-size: 12px; color: var(--muted); }
+.global-scope { padding: 14px 18px; border-left: 3px solid var(--accent); background: var(--surface); color: var(--fg-soft); font-size: 13px; margin: 12px 0 24px; }
+.global-layout { display: grid; grid-template-columns: 265px minmax(0, 1fr); gap: 24px; align-items: start; }
+.global-controls { padding: 22px; position: sticky; top: 84px; }
+.global-controls h2 { font-size: 20px; }
+.global-controls > label, .global-controls legend { display: block; font-size: 12px; font-weight: 600; color: var(--fg-soft); margin: 16px 0 8px; }
+.global-controls input[type='search'], .global-controls select { width: 100%; min-width: 0; padding: 10px; color: var(--fg); background: var(--bg-deep); border: 1px solid var(--line-strong); border-radius: 8px; font: inherit; font-size: 13px; }
+.global-controls fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.global-controls .global-variable { display: flex; align-items: center; gap: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font-size: 13px; }
+.global-variable.is-active { background: rgba(79, 209, 165, .08); border-color: var(--accent); }
+.global-variable input { accent-color: var(--accent); }
+.global-variable small { display: block; color: var(--muted); margin-top: 3px; font-family: var(--font-mono); }
+.global-controls-note, .global-search-count { font-size: 12px; margin: 12px 0 0; }
+.global-content { min-width: 0; }
+.global-map { position: relative; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #1a3033, #101c20); }
+.global-map-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; color: var(--muted); font-size: 12px; }
+.global-map-toolbar > div { display: flex; gap: 5px; }
+.global-map button, .global-views button { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 6px; color: var(--fg); padding: 6px 10px; cursor: pointer; font: inherit; }
+.global-map button:disabled { opacity: .4; cursor: default; }
+.global-map svg { display: block; width: 100%; height: auto; }
+.global-ocean { fill: transparent; }
+.global-graticule { fill: none; stroke: #345052; stroke-width: .5; vector-effect: non-scaling-stroke; }
+.global-country { fill: #304744; stroke: #718a7d; stroke-width: .45; vector-effect: non-scaling-stroke; cursor: pointer; }
+.global-country:hover { fill: #467467; }
+.global-country.is-selected { fill: #3a9276; }
+.global-capital { fill: #b1d7c7; fill-opacity: .8; stroke: #0e2823; stroke-width: .6; cursor: pointer; vector-effect: non-scaling-stroke; }
+.global-capital:hover, .global-capital.is-selected { fill: #ffbc72; fill-opacity: 1; }
+.global-capital-halo { fill: #ffbc7240; pointer-events: none; }
+.global-map-caption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line-strong); font-size: 11px; color: var(--muted); }
+.global-map-caption strong { color: var(--fg-soft); font-weight: 400; font-family: var(--font-mono); }
+.global-map-caption i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #b1d7c7; margin-right: 5px; }
+.global-map-loading { position: absolute; top: 50%; left: 45%; font-size: 12px; }
+.global-map-error { min-height: 220px; display: grid; place-content: center; gap: 12px; padding: 20px; }
+.global-result-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 28px 0 16px; }
+.global-result-heading .eyebrow { margin-bottom: 6px; font-size: 10px; }
+.global-result-heading h2 { margin: 0; font-size: 27px; }
+.global-views { display: flex; gap: 4px; font-size: 12px; flex-wrap: wrap; }
+.global-views button[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.global-result .card { padding: 16px; }
+.global-result .card-header { flex-wrap: wrap; gap: 10px; }
+.global-result .legend { font-size: 11px; }
+.global-result .stats { margin-top: 16px; }
+.global-source { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 11px; margin: 16px 0 8px; }
+.global-source a { color: var(--accent); }
+.global-caution { font-size: 12px; }
+.global-methods { border-top: 1px solid var(--line); margin-top: 28px; padding: 20px 0; font-size: 13px; }
+.global-methods summary { cursor: pointer; color: var(--fg-soft); margin-bottom: 12px; }
+.global-methods p { max-width: 850px; }
+.global-explorer :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 740px) {
+  .header { gap: 12px; }
+  .nav-links { min-width: 0; overflow-x: auto; gap: 16px; }
+  .nav-links a { flex-shrink: 0; white-space: nowrap; }
+  .header > :last-child { flex-shrink: 0; }
+}
+@media (max-width: 900px) { .global-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; } .global-controls { padding: 16px; } .global-result .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .global-period { display: none; } }
+@media (max-width: 640px) { .global-layout { grid-template-columns: 1fr; } .global-controls { position: static; } .global-controls fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .global-controls legend { grid-column: 1 / -1; } .global-controls .global-variable { margin: 0; padding: 10px; } .global-result-heading { align-items: flex-start; flex-direction: column; } .global-map-toolbar { padding: 10px; } .global-explorer { padding-top: 24px; } }

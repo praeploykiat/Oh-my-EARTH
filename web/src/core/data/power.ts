@@ -17,6 +17,7 @@ export interface PowerRequest {
 
 interface PowerResponse {
   properties: { parameter: Record<string, Record<string, number>> };
+  header?: { fill_value?: number };
 }
 
 // Parsing
@@ -26,11 +27,11 @@ export function parsePowerMonthly(body: PowerResponse, parameter: string): Serie
   if (!raw) throw new Error(`NASA POWER response has no ${parameter}`);
 
   return Object.keys(raw)
-    .filter((key) => key.slice(4) !== '13')
+    .filter((key) => /^\d{4}(0[1-9]|1[0-2])$/.test(key))
     .sort()
     .map((key) => ({
       t: `${key.slice(0, 4)}-${key.slice(4)}`,
-      value: raw[key] === MISSING ? null : raw[key],
+      value: typeof raw[key] !== 'number' || !Number.isFinite(raw[key]) || raw[key] === (body.header?.fill_value ?? MISSING) ? null : raw[key],
     }));
 }
 

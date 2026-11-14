@@ -65,6 +65,21 @@ pytest
 
 Add or change datasets in `SPECS` inside `pipeline/export.py`.
 
+## Global explorer
+
+Open `#/global` from **Global explorer** in the navigation. This separate page provides a clickable world map and searchable catalog of 195 representative capital-city locations. The four initial variables are air temperature (`T2M`), corrected precipitation (`PRECTOTCORR`), relative humidity (`RH2M`), and solar radiation (`ALLSKY_SFC_SW_DWN`).
+
+The page reuses the POWER monthly point connector, session cache, time-series chart, annual/anomaly transformations, and trend summary. It requests only the selected variable and location for 2001–2024. Selection and view are stored in the URL, for example `#/global?country=TH&v=T2M&view=annual`. Failed requests show a retry action; this page does not substitute synthetic featured datasets. Missing months retain their calendar positions for analysis.
+
+Observations represent NASA grid data at the listed capital coordinate, not national averages or local station measurements. Annual values use the existing unweighted mean of at least 10 valid monthly values; rainfall remains a daily rate, not an annual total. Statistics always use the monthly record, including in annual view, and retain the autocorrelation limitation described below.
+
+Bundled geography and source attribution:
+
+- `web/public/geo/capitals.json`: derived from [REST Countries countriesV3.1.json](https://github.com/restcountries/restcountries/blob/master/src/main/resources/countriesV3.1.json), retrieved November 15, 2026. Includes the 195 entries marked `independent: true` with capital coordinates; uses the first listed capital (Pretoria for South Africa). Names and coordinates reflect this source snapshot, not a continuously updated political gazetteer. The derived JSON is distributed as source under MPL-2.0; a copy of the upstream license is included at `web/public/licenses/rest-countries-MPL-2.0.txt`.
+- `web/public/geo/world-countries.json`: derived from [Natural Earth 1:110m country boundaries](https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_110m_admin_0_countries.geojson), retrieved November 15, 2026; public domain. Properties are reduced to display name and country code. Small islands may have a marker without a boundary polygon.
+
+Country/capital names retain the English source labels in both UI languages; controls and explanations are translated. No extra mapping or chart dependency, database, or backend service is required for this page.
+
 ## Method
 
 1. Monthly series per location from the sources listed under [Data](#data).
