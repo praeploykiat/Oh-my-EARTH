@@ -24,6 +24,11 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         note: { en: 'Haze, satellite rainfall, soil moisture, runoff and evaporation time series.', th: 'อนุกรมเวลาหมอกควัน ฝนจากดาวเทียม ความชื้นในดิน น้ำไหลบ่า และการคายระเหยน้ำ' },
       },
       {
+        title: 'GISTDA sphere',
+        url: 'https://sphere.gistda.or.th/docs/web-service/disaster-information',
+        note: { en: 'Yearly flood history for each subdistrict, shown next to rain and runoff.', th: 'ประวัติน้ำท่วมรายปีของแต่ละตำบล แสดงคู่กับฝนและน้ำไหลบ่า' },
+      },
+      {
         title: 'AppEEARS',
         url: 'https://appeears.earthdatacloud.nasa.gov/',
         note: { en: 'Satellite land products such as vegetation and land surface temperature.', th: 'ข้อมูลผิวโลกจากดาวเทียม เช่น พืชพรรณและอุณหภูมิผิวดิน' },

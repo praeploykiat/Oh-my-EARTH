@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { compareDecades, seriesForView, slopeDecimals, stepsPerDecade, valueDecimals, verdictKeys, type View } from '../../core/analysis';
-import { NoDataError, resolveQuery, useAsync, variableByKey, type Dataset, type Origin } from '../../core/data';
+import { FLOOD_CONTEXT_VARIABLES, NoDataError, resolveQuery, useAsync, variableByKey, type Dataset, type Origin } from '../../core/data';
 import type { Place } from '../../core/geo';
 import { useI18n } from '../../core/i18n';
 import { saveCaseImage, SourceNote, TimeSeriesChart, TrendSummary, type ChartBand } from '../../shared';
+import { FloodHistory } from './FloodHistory';
 import { placeName } from './placeName';
 import { ShareMenu } from './ShareMenu';
 
@@ -170,6 +171,8 @@ function Result({ dataset, origin, place, view }: ResultProps) {
           </div>
         </div>
       )}
+
+      {FLOOD_CONTEXT_VARIABLES.includes(dataset.variable.key) && <FloodHistory place={place} />}
 
       <div className="result-actions">
         <ShareMenu text={sentence} />

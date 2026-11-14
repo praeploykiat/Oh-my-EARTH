@@ -133,6 +133,11 @@ export const en = {
   'share.copied': 'Link copied',
   'chart.saveImage': 'Save image',
   'range': '{from} to {to}',
+  'flood.title': 'Flood years',
+  'flood.thisArea': 'This subdistrict',
+  'flood.summary': '{place} flooded in {count} of {total} years ({years}).',
+  'flood.none': '{place} had no recorded floods from {from} to {to}.',
+  'flood.note': 'Flood maps from GISTDA satellites, shown for context. Not part of the trend test.',
 } as const;
 
 export type MessageKey = keyof typeof en;

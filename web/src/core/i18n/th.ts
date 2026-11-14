@@ -135,4 +135,9 @@ export const th: Record<MessageKey, string> = {
   'share.copied': 'คัดลอกแล้ว',
   'chart.saveImage': 'บันทึกรูป',
   'range': '{from} ถึง {to}',
+  'flood.title': 'ปีที่น้ำท่วม',
+  'flood.thisArea': 'ตำบลนี้',
+  'flood.summary': '{place} น้ำท่วม {count} จาก {total} ปี ({years})',
+  'flood.none': '{place} ไม่มีบันทึกน้ำท่วมช่วง {from} ถึง {to}',
+  'flood.note': 'แผนที่น้ำท่วมจากดาวเทียมของ GISTDA แสดงประกอบ ไม่ได้ใช้ในการทดสอบแนวโน้ม',
 };

@@ -1,6 +1,7 @@
 export * from './types';
 export * from './loadDataset';
 export * from './crossCheck';
+export * from './flood';
 export * from './remote';
 export * from './power';
 export * from './proxy';
