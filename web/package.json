@@ -12,6 +12,7 @@
     "validate:data": "node scripts/validate-datasets.mjs"
   },
   "dependencies": {
+    "@upstash/redis": "1.40.0",
     "d3-geo": "3.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1"

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useI18n } from './core/i18n';
 import { splitHash } from './core/url';
 import { Experience } from './features/experience';
+import { Game } from './features/game';
+import { GameAdmin } from './features/game/admin';
 import { Methods } from './features/methods';
 import { Workbench } from './features/workbench';
 import { BrandMark, Footer, LanguageSwitcher } from './shared';
@@ -9,6 +11,8 @@ import { BrandMark, Footer, LanguageSwitcher } from './shared';
 const ROUTES = {
   '/': Experience,
   '/workbench': Workbench,
+  '/game': Game,
+  '/game/admin': GameAdmin,
   '/methods': Methods,
 } as const;
 
@@ -47,6 +51,9 @@ export function App() {
           </a>
           <a href="#/workbench" aria-current={route === '/workbench'}>
             {t('nav.workbench')}
+          </a>
+          <a href="#/game" aria-current={route === '/game'}>
+            {t('nav.game')}
           </a>
           <a href="#/methods" aria-current={route === '/methods'}>
             {t('nav.methods')}
