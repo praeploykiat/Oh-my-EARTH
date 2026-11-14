@@ -4,7 +4,8 @@ export interface Axis {
   ticks: number[];
 }
 
-export function niceAxis(values: number[], steps = 5): Axis {
+export function niceAxis(input: (number | null)[], steps = 5): Axis {
+  const values = input.filter((v): v is number => v !== null);
   const lo = Math.min(...values);
   const hi = Math.max(...values);
   const pad = (hi - lo || 1) * 0.25;
@@ -36,32 +37,39 @@ export interface Feedback {
   meanError: number;
   peak: { guess: number; actual: number };
   low: { guess: number; actual: number };
-  trough: 'right' | 'close' | 'off';
   crest: 'right' | 'close' | 'off';
+  trough: 'right' | 'close' | 'off';
 }
 
-const argmax = (v: number[]) => v.indexOf(Math.max(...v));
-const argmin = (v: number[]) => v.indexOf(Math.min(...v));
+function extreme(values: (number | null)[], pick: (a: number, b: number) => boolean): number {
+  let best = -1;
+  values.forEach((v, i) => {
+    if (v !== null && (best < 0 || pick(v, values[best]!))) best = i;
+  });
+  return best;
+}
 
-function monthGap(a: number, b: number): number {
-  const d = Math.abs(a - b) % 12;
-  return Math.min(d, 12 - d);
+function stepGap(a: number, b: number, length: number, cyclic: boolean): number {
+  const d = Math.abs(a - b);
+  return cyclic ? Math.min(d, length - d) : d;
 }
 
 const verdict = (gap: number) => (gap === 0 ? 'right' : gap === 1 ? 'close' : 'off');
 
-export function judge(guess: number[], actual: number[], axis: Axis): Feedback {
+export function judge(guess: number[], actual: (number | null)[], axis: Axis, cyclic: boolean): Feedback {
   const span = axis.max - axis.min || 1;
-  const meanError = guess.reduce((sum, g, i) => sum + Math.abs(g - actual[i]), 0) / guess.length;
+  const pairs = actual.flatMap((a, i) => (a === null ? [] : [Math.abs(guess[i] - a)]));
+  const meanError = pairs.reduce((sum, e) => sum + e, 0) / (pairs.length || 1);
   const score = Math.round(Math.max(0, 1 - meanError / (0.3 * span)) * 100);
-  const peak = { guess: argmax(guess), actual: argmax(actual) };
-  const low = { guess: argmin(guess), actual: argmin(actual) };
+  const masked = guess.map((g, i) => (actual[i] === null ? null : g));
+  const peak = { guess: extreme(masked, (a, b) => a > b), actual: extreme(actual, (a, b) => a > b) };
+  const low = { guess: extreme(masked, (a, b) => a < b), actual: extreme(actual, (a, b) => a < b) };
   return {
     score,
     meanError,
     peak,
     low,
-    crest: verdict(monthGap(peak.guess, peak.actual)),
-    trough: verdict(monthGap(low.guess, low.actual)),
+    crest: verdict(stepGap(peak.guess, peak.actual, actual.length, cyclic)),
+    trough: verdict(stepGap(low.guess, low.actual, actual.length, cyclic)),
   };
 }

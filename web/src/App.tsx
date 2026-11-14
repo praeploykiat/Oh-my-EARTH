@@ -3,6 +3,7 @@ import { useI18n } from './core/i18n';
 import { splitHash } from './core/url';
 import { Experience } from './features/experience';
 import { Game } from './features/game';
+import { GameAdmin } from './features/game/admin';
 import { Methods } from './features/methods';
 import { Workbench } from './features/workbench';
 import { BrandMark, Footer, LanguageSwitcher } from './shared';
@@ -11,6 +12,7 @@ const ROUTES = {
   '/': Experience,
   '/workbench': Workbench,
   '/game': Game,
+  '/game/admin': GameAdmin,
   '/methods': Methods,
 } as const;
 

@@ -1,24 +1,17 @@
 import { useMemo, useState } from 'react';
-import { variableByKey } from '../../core/data';
+import { useAsync } from '../../core/data';
 import { useI18n } from '../../core/i18n';
+import { StatusMessage } from '../../shared';
+import { Answer } from './answer';
+import { fetchRounds } from './api';
 import { DrawChart, GivenChart } from './GameChart';
-import { ROUNDS, type GameRound } from './rounds';
 import { fillGaps, judge, niceAxis, type Feedback } from './score';
+import { formatTime, timeKind } from './time';
+import type { GameRound } from './types';
 
-const MIN_TOUCHED = 6;
+const MIN_TOUCHED_SHARE = 0.5;
 
-function startGuess(round: GameRound): (number | null)[] {
-  const guess = Array<number | null>(12).fill(null);
-  guess[round.hidden.hint] = round.hidden.values[round.hidden.hint];
-  return guess;
-}
-
-function useMonths(language: string, style: 'short' | 'long'): string[] {
-  return useMemo(() => {
-    const format = new Intl.DateTimeFormat(language === 'th' ? 'th-TH' : 'en-GB', { month: style });
-    return Array.from({ length: 12 }, (_, m) => format.format(new Date(2001, m, 1)));
-  }, [language, style]);
-}
+const emptyGuess = (round: GameRound) => Array<number | null>(round.time.length).fill(null);
 
 function formatValue(value: number): string {
   return Math.abs(value) >= 10 ? value.toFixed(0) : value.toFixed(1);
@@ -29,14 +22,13 @@ function formatValue(value: number): string {
 interface ResultProps {
   round: GameRound;
   feedback: Feedback;
-  unit: string;
-  isLast: boolean;
   onNext: () => void;
+  nextLabel?: string;
 }
 
-function Result({ round, feedback, unit, isLast, onNext }: ResultProps) {
+export function Result({ round, feedback, onNext, nextLabel }: ResultProps) {
   const { language, t } = useI18n();
-  const months = useMonths(language, 'long');
+  const when = (i: number) => formatTime(round.time[i], language, 'long');
   const headline = feedback.score >= 80 ? t('game.great') : feedback.score >= 50 ? t('game.good') : t('game.tryAgain');
 
   return (
@@ -49,135 +41,82 @@ function Result({ round, feedback, unit, isLast, onNext }: ResultProps) {
         <h3>{headline}</h3>
         <ul>
           <li className={`is-${feedback.crest}`}>
-            {t('game.peak', { actual: months[feedback.peak.actual], guess: months[feedback.peak.guess] })}{' '}
+            {t('game.peak', { actual: when(feedback.peak.actual), guess: when(feedback.peak.guess) })}{' '}
             <em>{t(`game.verdict.${feedback.crest}`)}</em>
           </li>
           <li className={`is-${feedback.trough}`}>
-            {t('game.lowest', { actual: months[feedback.low.actual], guess: months[feedback.low.guess] })}{' '}
+            {t('game.lowest', { actual: when(feedback.low.actual), guess: when(feedback.low.guess) })}{' '}
             <em>{t(`game.verdict.${feedback.trough}`)}</em>
           </li>
-          <li>{t('game.gap', { value: formatValue(feedback.meanError), unit })}</li>
+          <li>{t('game.gap', { value: formatValue(feedback.meanError), unit: round.hidden.unit })}</li>
         </ul>
         <div className="game-why">
           <h4>{t('game.why')}</h4>
-          <p>{round.why[language]}</p>
+          <Answer text={round.answer[language]} />
         </div>
         <p className="game-how">{t('game.how')}</p>
       </div>
       <button type="button" className="button game-next" onClick={onNext}>
-        {isLast ? t('game.finish') : t('game.next')}
+        {nextLabel ?? t('game.next')}
       </button>
     </section>
   );
 }
 
-function Summary({ scores, onAgain }: { scores: number[]; onAgain: () => void }) {
-  const { language, t } = useI18n();
-  const total = scores.reduce((a, b) => a + b, 0);
+// One question, also used as the admin preview
 
-  return (
-    <section className="game-card game-summary">
-      <p className="game-kicker">{t('game.doneKicker')}</p>
-      <h2>{t('game.done', { score: total, max: scores.length * 100 })}</h2>
-      <ol className="game-score-list">
-        {ROUNDS.map((round, i) => (
-          <li key={round.id}>
-            <span>
-              {variableByKey(round.given.variable)?.label[language]} → {variableByKey(round.hidden.variable)?.label[language]},{' '}
-              {round.place[language]}
-            </span>
-            <strong>{scores[i]}</strong>
-          </li>
-        ))}
-      </ol>
-      <div className="game-actions">
-        <button type="button" className="button" onClick={onAgain}>
-          {t('game.again')}
-        </button>
-        <a href="#/workbench" className="button button-secondary">
-          {t('game.explore')}
-        </a>
-      </div>
-    </section>
-  );
+interface RoundViewProps {
+  round: GameRound;
+  kicker: string;
+  guess: (number | null)[];
+  onGuess: (guess: (number | null)[]) => void;
+  feedback: Feedback | null;
+  onSubmit: () => void;
+  onReset: () => void;
 }
 
-// Page
-
-export function Game() {
+export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, onReset }: RoundViewProps) {
   const { language, t } = useI18n();
-  const months = useMonths(language, 'short');
-  const [index, setIndex] = useState(0);
-  const [guess, setGuess] = useState(() => startGuess(ROUNDS[0]));
-  const [results, setResults] = useState<Feedback[]>([]);
-
-  const finished = index >= ROUNDS.length;
-  const round = ROUNDS[Math.min(index, ROUNDS.length - 1)];
-  const feedback = results[index] ?? null;
-  const givenAxis = useMemo(() => niceAxis(round.given.values), [round]);
-  const hiddenAxis = useMemo(() => niceAxis(round.hidden.values), [round]);
-  const given = variableByKey(round.given.variable)?.label[language] ?? round.given.variable;
-  const hidden = variableByKey(round.hidden.variable)?.label[language] ?? round.hidden.variable;
+  const times = useMemo(() => round.time.map((x) => formatTime(x, language)), [round.time, language]);
+  const givenAxis = useMemo(() => niceAxis(round.given.values), [round.given.values]);
+  const hiddenAxis = useMemo(() => niceAxis(round.hidden.values), [round.hidden.values]);
+  const given = round.given.label[language];
+  const hidden = round.hidden.label[language];
   const touched = guess.filter((g) => g !== null).length;
 
-  const submit = () => {
-    const filled = fillGaps(guess);
-    setGuess(filled);
-    setResults((all) => [...all, judge(filled, round.hidden.values, hiddenAxis)]);
-  };
-
-  const go = (next: number) => {
-    setIndex(next);
-    if (next < ROUNDS.length) setGuess(startGuess(ROUNDS[next]));
-  };
-
-  const again = () => {
-    setResults([]);
-    go(0);
-  };
-
-  if (finished) {
-    return (
-      <div className="game">
-        <Summary scores={results.map((r) => r.score)} onAgain={again} />
-      </div>
-    );
-  }
-
   return (
-    <div className="game">
+    <>
       <header className="game-head">
         <p className="game-kicker">
-          {t('game.round', { n: index + 1, total: ROUNDS.length })} · {round.place[language]}
+          {kicker} · {round.place[language]}
         </p>
-        <h1>{t('game.question', { given, hidden, place: round.place[language] })}</h1>
+        <h1>{t('game.question', { given, hidden })}</h1>
       </header>
 
-      <section className="game-step" key={`${round.id}-given`}>
+      <section className="game-step">
         <p className="game-step-label">{t('game.stepGiven')}</p>
         <GivenChart
           values={round.given.values}
           axis={givenAxis}
-          months={months}
+          times={times}
           title={`${given} (${round.given.unit})`}
-          label={t('game.monthAxis')}
+          label={round.timeLabel[language]}
         />
       </section>
 
-      <section className="game-step" key={`${round.id}-draw`}>
+      <section className="game-step">
         <p className="game-step-label">{feedback ? t('game.stepAnswer') : t('game.stepDraw')}</p>
         <h2 className="game-draw-title">{feedback ? t('game.answerTitle') : t('game.drawTitle')}</h2>
         <DrawChart
           axis={hiddenAxis}
-          months={months}
+          times={times}
           title={`${hidden} (${round.hidden.unit})`}
-          label={t('game.monthAxis')}
+          label={round.timeLabel[language]}
           tip={t('game.tip')}
-          hint={{ month: round.hidden.hint, value: round.hidden.values[round.hidden.hint] }}
           guess={guess}
-          onGuess={setGuess}
+          onGuess={onGuess}
           actual={feedback ? round.hidden.values : null}
-          marks={feedback ? [{ month: feedback.peak.actual, text: t('game.realPeak') }] : []}
+          marks={feedback ? [{ index: feedback.peak.actual, text: t('game.realPeak') }] : []}
         />
         {feedback ? (
           <div className="game-legend">
@@ -186,19 +125,97 @@ export function Game() {
           </div>
         ) : (
           <div className="game-actions">
-            <button type="button" className="button game-done" onClick={submit} disabled={touched < MIN_TOUCHED}>
+            <button
+              type="button"
+              className="button game-done"
+              onClick={onSubmit}
+              disabled={touched < Math.ceil(guess.length * MIN_TOUCHED_SHARE)}
+            >
               {t('game.submit')}
             </button>
-            <button type="button" className="button button-secondary" onClick={() => setGuess(startGuess(round))}>
+            <button type="button" className="button button-secondary" onClick={onReset}>
               {t('game.startOver')}
             </button>
           </div>
         )}
+        {round.source && <p className="game-source">{t('game.source', { source: round.source })}</p>}
       </section>
+    </>
+  );
+}
 
-      {feedback && (
-        <Result round={round} feedback={feedback} unit={round.hidden.unit} isLast={index + 1 === ROUNDS.length} onNext={() => go(index + 1)} />
-      )}
+export function scoreRound(round: GameRound, guess: (number | null)[]): { filled: number[]; feedback: Feedback } {
+  const filled = fillGaps(guess);
+  const feedback = judge(filled, round.hidden.values, niceAxis(round.hidden.values), timeKind(round.time) === 'month-of-year');
+  return { filled, feedback };
+}
+
+// Page
+
+function shuffle(count: number, avoidFirst: number | null): number[] {
+  const order = Array.from({ length: count }, (_, i) => i);
+  for (let i = count - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  if (count > 1 && order[0] === avoidFirst) [order[0], order[1]] = [order[1], order[0]];
+  return order;
+}
+
+function Play({ rounds }: { rounds: GameRound[] }) {
+  const { t } = useI18n();
+  const [order, setOrder] = useState(() => shuffle(rounds.length, null));
+  const [position, setPosition] = useState(0);
+  const [guess, setGuess] = useState(() => emptyGuess(rounds[order[0]]));
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [scores, setScores] = useState<number[]>([]);
+
+  const round = rounds[order[position]];
+  const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+
+  const submit = () => {
+    const result = scoreRound(round, guess);
+    setGuess(result.filled);
+    setFeedback(result.feedback);
+    setScores((all) => [...all, result.feedback.score]);
+  };
+
+  const next = () => {
+    let nextOrder = order;
+    let nextPosition = position + 1;
+    if (nextPosition >= order.length) {
+      nextOrder = shuffle(rounds.length, order[position]);
+      nextPosition = 0;
+      setOrder(nextOrder);
+    }
+    setPosition(nextPosition);
+    setGuess(emptyGuess(rounds[nextOrder[nextPosition]]));
+    setFeedback(null);
+  };
+
+  return (
+    <>
+      {average !== null && <p className="game-stats">{t('game.stats', { n: scores.length, average })}</p>}
+      <RoundView
+        key={`${round.id}-${scores.length + (feedback ? 0 : 1)}`}
+        round={round}
+        kicker={t('game.question.n', { n: scores.length + (feedback ? 0 : 1) })}
+        guess={guess}
+        onGuess={setGuess}
+        feedback={feedback}
+        onSubmit={submit}
+        onReset={() => setGuess(emptyGuess(round))}
+      />
+      {feedback && <Result round={round} feedback={feedback} onNext={next} />}
+    </>
+  );
+}
+
+export function Game() {
+  const state = useAsync(fetchRounds, []);
+  return (
+    <div className="game">
+      {state.status === 'ready' ? <Play rounds={state.data.rounds} /> : <StatusMessage state={state} />}
     </div>
   );
 }

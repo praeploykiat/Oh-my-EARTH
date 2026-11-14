@@ -13,7 +13,7 @@ describe('game scoring', () => {
   });
 
   it('gives 100 and the right peak for a perfect line', () => {
-    const result = judge(actual, actual, axis);
+    const result = judge(actual, actual, axis, true);
     expect(result.score).toBe(100);
     expect(result.crest).toBe('right');
     expect(result.peak.actual).toBe(8);
@@ -21,8 +21,15 @@ describe('game scoring', () => {
 
   it('marks a peak one month off as close, wrapping around the year', () => {
     const shifted = [...actual.slice(1), actual[0]];
-    expect(judge(shifted, actual, axis).crest).toBe('close');
-    expect(judge(shifted, actual, axis).score).toBeLessThan(100);
+    expect(judge(shifted, actual, axis, true).crest).toBe('close');
+    expect(judge(shifted, actual, axis, true).score).toBeLessThan(100);
+  });
+
+  it('does not wrap around for yearly series and skips missing values', () => {
+    const years = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    expect(judge([...years.slice(1), 1], years, niceAxis(years), false).trough).toBe('off');
+    expect(judge([...years.slice(1), 1], years, niceAxis(years), true).trough).toBe('close');
+    expect(judge([1, 2, 3], [1, null, 3], niceAxis([1, 3]), false).score).toBe(100);
   });
 
   it('fills untouched months by straight lines', () => {
