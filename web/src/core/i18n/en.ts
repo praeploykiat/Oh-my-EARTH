@@ -211,6 +211,7 @@ export const en = {
   'game.why': 'Why it works like this',
   'game.how': 'Score: 100 means your line sits on the real one. Points drop as the average gap grows, and reach 0 when the gap is 30% of the chart’s height.',
   'game.next': 'Next question',
+  'game.skip': 'Skip this question',
   'game.question.n': 'Question {n}',
   'game.stats': '{n} played · average score {average}',
   'source.crossCheck': 'Cross-check',

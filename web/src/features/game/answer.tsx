@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react';
 
+export function withUnit(label: string, unit: string): string {
+  return unit.trim() ? `${label} (${unit.trim()})` : label;
+}
+
 function inline(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
     part.startsWith('**') && part.endsWith('**') && part.length > 4 ? <strong key={i}>{part.slice(2, -2)}</strong> : part,

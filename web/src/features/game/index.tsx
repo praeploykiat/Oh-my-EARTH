@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAsync } from '../../core/data';
 import { useI18n } from '../../core/i18n';
 import { StatusMessage } from '../../shared';
-import { Answer } from './answer';
+import { Answer, withUnit } from './answer';
 import { fetchRounds } from './api';
 import { DrawChart, GivenChart } from './GameChart';
 import { fillGaps, judge, niceAxis, type Feedback } from './score';
@@ -63,6 +63,38 @@ export function Result({ round, feedback, onNext, nextLabel }: ResultProps) {
   );
 }
 
+// What players see after submitting, without a score (admin preview)
+
+export function ResultPeek({ round }: { round: GameRound }) {
+  const { language, t } = useI18n();
+  const points = round.hidden.values.flatMap((v, i) => (v === null ? [] : [{ v, i }]));
+  if (points.length === 0) return null;
+  const high = points.reduce((a, b) => (b.v > a.v ? b : a));
+  const low = points.reduce((a, b) => (b.v < a.v ? b : a));
+  const when = (i: number) => formatTime(round.time[i], language, 'long');
+
+  return (
+    <section className="game-result is-peek">
+      <div className="game-score">
+        <strong>–</strong>
+        <span>{t('game.outOf')}</span>
+      </div>
+      <div className="game-feedback">
+        <h3>After players submit</h3>
+        <ul>
+          <li>Highest point: really {when(high.i)}</li>
+          <li>Lowest point: really {when(low.i)}</li>
+        </ul>
+        <div className="game-why">
+          <h4>{t('game.why')}</h4>
+          <Answer text={round.answer[language]} />
+        </div>
+        <p className="game-how">{t('game.how')}</p>
+      </div>
+    </section>
+  );
+}
+
 // One question, also used as the admin preview
 
 interface RoundViewProps {
@@ -73,9 +105,10 @@ interface RoundViewProps {
   feedback: Feedback | null;
   onSubmit: () => void;
   onReset: () => void;
+  onSkip?: () => void;
 }
 
-export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, onReset }: RoundViewProps) {
+export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, onReset, onSkip }: RoundViewProps) {
   const { language, t } = useI18n();
   const times = useMemo(() => round.time.map((x) => formatTime(x, language)), [round.time, language]);
   const givenAxis = useMemo(() => niceAxis(round.given.values), [round.given.values]);
@@ -99,7 +132,7 @@ export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, o
           values={round.given.values}
           axis={givenAxis}
           times={times}
-          title={`${given} (${round.given.unit})`}
+          title={withUnit(given, round.given.unit)}
           label={round.timeLabel[language]}
         />
       </section>
@@ -110,7 +143,7 @@ export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, o
         <DrawChart
           axis={hiddenAxis}
           times={times}
-          title={`${hidden} (${round.hidden.unit})`}
+          title={withUnit(hidden, round.hidden.unit)}
           label={round.timeLabel[language]}
           tip={t('game.tip')}
           guess={guess}
@@ -136,6 +169,11 @@ export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, o
             <button type="button" className="button button-secondary" onClick={onReset}>
               {t('game.startOver')}
             </button>
+            {onSkip && (
+              <button type="button" className="game-skip" onClick={onSkip}>
+                {t('game.skip')}
+              </button>
+            )}
           </div>
         )}
         {round.source && <p className="game-source">{t('game.source', { source: round.source })}</p>}
@@ -169,6 +207,7 @@ function Play({ rounds }: { rounds: GameRound[] }) {
   const [guess, setGuess] = useState(() => emptyGuess(rounds[order[0]]));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [scores, setScores] = useState<number[]>([]);
+  const [skipped, setSkipped] = useState(0);
 
   const round = rounds[order[position]];
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -197,7 +236,7 @@ function Play({ rounds }: { rounds: GameRound[] }) {
     <>
       {average !== null && <p className="game-stats">{t('game.stats', { n: scores.length, average })}</p>}
       <RoundView
-        key={`${round.id}-${scores.length + (feedback ? 0 : 1)}`}
+        key={`${round.id}-${scores.length + (feedback ? 0 : 1)}-${skipped}`}
         round={round}
         kicker={t('game.question.n', { n: scores.length + (feedback ? 0 : 1) })}
         guess={guess}
@@ -205,6 +244,14 @@ function Play({ rounds }: { rounds: GameRound[] }) {
         feedback={feedback}
         onSubmit={submit}
         onReset={() => setGuess(emptyGuess(round))}
+        onSkip={
+          rounds.length > 1
+            ? () => {
+                setSkipped((n) => n + 1);
+                next();
+              }
+            : undefined
+        }
       />
       {feedback && <Result round={round} feedback={feedback} onNext={next} />}
     </>
