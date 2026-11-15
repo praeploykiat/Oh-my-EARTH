@@ -1,68 +1,105 @@
 export const en = {
-  'global.mapNavigation': 'Drag to pan · Scroll or pinch to zoom · Focus map: arrow keys to pan, +/− to zoom, Home to reset',
-"global.co2.descriptive": "Descriptive trend estimate",
-"global.co2.minimum": "Choose at least three complete calendar years to estimate a descriptive rate. Incomplete records remain unavailable.",
-"global.co2.rateNote": "Estimated from {years} observed years ({start}–{end}), with the rate rescaled to ten years for comparison. This is not ten years of observations or a forecast.",
-"global.co2.trendMethod": "Seasonal Sen’s slope compares matching calendar months between years and takes the median of their pairwise rates. The same monthly estimator is used for monthly, annual and anomaly views.",
-"global.co2.noInference": "Short record: no confidence interval, p-value or statistically supported direction is reported. The existing significance method requires at least ten complete years.",
-"global.co2.mapNote": "Blue = decreasing; red = increasing descriptive rate in ppm per decade. All markers are hollow: direction is not statistically established. Rate comes from matching-month seasonal Sen slopes; a per-decade unit does not imply ten observed years.",
-"global.co2.chartNote": "Monthly mean CO₂ in the selected calendar year. Gold points mark monthly extrema. Select Trend per decade for a descriptive rate over a selected period.",
+  "global.mapNavigation":
+    "Drag to pan · Scroll or pinch to zoom · Focus map: arrow keys to pan, +/− to zoom, Home to reset",
+  "global.co2.descriptive": "Descriptive trend estimate",
+  "global.co2.minimum":
+    "Choose at least three complete calendar years to estimate a descriptive rate. Incomplete records remain unavailable.",
+  "global.co2.rateNote":
+    "Estimated from {years} observed years ({start}–{end}), with the rate rescaled to ten years for comparison. This is not ten years of observations or a forecast.",
+  "global.co2.trendMethod":
+    "Seasonal Sen’s slope compares matching calendar months between years and takes the median of their pairwise rates. The same monthly estimator is used for monthly, annual and anomaly views.",
+  "global.co2.noInference":
+    "Short record: no confidence interval, p-value or statistically supported direction is reported. The existing significance method requires at least ten complete years.",
+  "global.co2.mapNote":
+    "Blue = decreasing; red = increasing descriptive rate in ppm per decade. All markers are hollow: direction is not statistically established. Rate comes from matching-month seasonal Sen slopes; a per-decade unit does not imply ten observed years.",
+  "global.co2.chartNote":
+    "Monthly mean CO₂ in the selected calendar year. Gold points mark monthly extrema. Select Trend per decade for a descriptive rate over a selected period.",
 
-"global.co2.quality": "OCO-2 GEOS column-average CO₂: source product, DOI, units, actual grid centre and calendar completeness are validated. Monthly means require every daily value. Fill values remain gaps; there is no interpolation. These are numerical screening checks, not retrieval-level QA or a scientific accuracy guarantee.",
+  "global.co2.quality":
+    "OCO-2 GEOS column-average CO₂: source product, DOI, units, actual grid centre and calendar completeness are validated. Monthly means require every daily value. Fill values remain gaps; there is no interpolation. These are numerical screening checks, not retrieval-level QA or a scientific accuracy guarantee.",
 
-  'global.co2.source': 'NASA OCO-2 GEOS · Product documentation',
-  "global.co2.noTrend": "CO₂ trends are disabled: only seven complete years (2015–2021) are available; the trend method requires at least ten.",
-  "global.co2.note": "OCO-2 GEOS assimilated dry-air column-average CO₂, in ppm. This combines satellite retrievals and atmospheric modelling; it is not surface concentration, local air pollution or national emissions. Annual averages are weighted by calendar days and require 12 complete months. Lowest/highest refer to monthly means, not daily extremes.",
+  "global.co2.source": "NASA OCO-2 GEOS · Product documentation",
+  "global.co2.noTrend":
+    "CO₂ trends are disabled: only seven complete years (2015–2021) are available; the trend method requires at least ten.",
+  "global.co2.note":
+    "OCO-2 GEOS assimilated dry-air column-average CO₂, in ppm. This combines satellite retrievals and atmospheric modelling; it is not surface concentration, local air pollution or national emissions. Annual averages are weighted by calendar days and require 12 complete months. Lowest/highest refer to monthly means, not daily extremes.",
 
-  'global.giovanni.eyebrow': 'NASA Giovanni · Model and reanalysis data',
-  'global.giovanni.source': 'NASA Giovanni · Source request ↗',
-  'global.giovanni.etTotal': 'Annual evapotranspiration total',
-  'global.giovanni.etMissing': 'This GLDAS cell has no valid evapotranspiration data for 2001–2024. Coastal and island cells may lack model land coverage. Missing values are not zeros, and no neighbouring cell has been substituted.',
-  'global.giovanni.etBasis': 'Trend and significance use complete annual evapotranspiration totals, in mm/year per decade. Monthly and anomaly views instead test monthly mean daily rates.',
-  'global.giovanni.etNote': 'GLDAS Noah 2.1 modelled evapotranspiration: monthly mean rates in mm/day, annual totals in mm/year. Lowest/highest months compare monthly totals in mm/month. Signed rates are preserved: negative values can represent net condensation. Complete months and all 12 months are required for yearly summaries. These are grid-cell estimates, not measured crop water use or drought diagnoses.',
-  'global.giovanni.aodNote': 'MERRA-2 reanalysis aerosol optical depth at 550 nm, dimensionless. Every expected hourly value must be valid before a monthly mean is published. Annual averages are weighted by calendar days. This describes the atmospheric aerosol column, not surface PM2.5 or an air-quality index. The quality panel reports the actual 0.5° × 0.625° cell centre.',
-  'global.giovanni.quality': 'Giovanni access to separately identified MERRA-2 and GLDAS datasets. Product, parameter, units, period and exact source grid cell are checked. Missing/fill values remain gaps; invalid values are excluded. AOD requires complete hourly coverage for each monthly mean. ET is converted from kg/m²/s to mm/day. These screening checks do not establish scientific accuracy. No neighbouring cells are substituted.',
-  'global.gldas.eyebrow': 'NASA GLDAS · Modelled soil moisture',
-  'global.gldas.modelled': 'Modelled',
-  'global.gldas.missing': 'This GLDAS cell has no valid soil-moisture values for 2001–2024. Coarse model land coverage can leave coastal and island capitals without data. These gaps are not zeros, and no neighbouring cell has been substituted.',
-  'global.gldas.source': 'GLDAS Noah 2.1 · Giovanni source request ↗',
-  'global.gldas.scope': 'Modelled water stored in the top 0–10 cm of soil, in kg/m², not a percentage. Monthly values represent a 0.25° GLDAS cell containing the capital coordinate. The quality panel shows its actual centre. These are model estimates, not direct satellite or field measurements; they do not describe national conditions or establish drought. Lowest and highest refer to monthly means, not daily extremes.',
-  'global.gldas.quality': 'GLDAS Noah 2.1 monthly soil moisture (0–10 cm). Product, units, dates and the containing grid cell are validated. Fill values remain missing; nonfinite or out-of-range values are rejected. Screening uses 0–100 kg/m² and is not a scientific accuracy guarantee. Giovanni supplies no per-month quality flags here. Neighbouring cells are never substituted. Frozen soils, model forcing and land representation can affect interpretation.',
-"cache.reload": "Reload published data",
-"cache.calculateMap": "Calculate map for this range",
-"cache.coverage": "Published coverage: {count}/{total} capital coordinates.",
-"cache.mapReady": "Prepared map loaded · {count} capitals have usable values.",
-"cache.mapLoading": "Loading prepared map…",
-"cache.mapError": "The prepared map could not be loaded. Reload published data to retry.",
-"cache.published": "Data release published: {date}. Reload to check for a newer published release.",
-"cache.loadingNote": "Maps and monthly records load from saved, validated observations. Default-period trends and annual maps are prepared in advance. Custom-range maps calculate from saved records; normal exploration never starts a NASA extraction.",
-"cache.controls": "Choose a location and period to explore saved observations. New data appears when an updated dataset is published.",
-"cache.loadingCapital": "Loading saved observations for {place}…",
-"cache.unavailable": "This location has no published observations for the selected variable yet. Explore an available location while background ingestion prepares more coverage.",
-"cache.unavailablePoint": "Observations not published for this location yet.",
-"cache.openAvailable": "Explore saved data at {city}",
-"cache.failed": "Saved observations could not be loaded.",
-"cache.retryHelp": "Retry or reload the published release. The last validated release remains available while source updates are processed.",
-"cache.quality": "Validated POWER observations from the published database release. Source screening, missing values and retrieval timestamps are preserved.",
-"cache.units": "Stored units",
-"cache.snapshot": "Published release: {date}. Reloading checks for a newer release; it does not request new observations from NASA.",
-"cache.download": "Download saved monthly data",
-"global.ndvi.availability": "Published NDVI coverage: {count}/{total} capital coordinates. Unpublished locations remain unavailable; no neighboring point is substituted.",
-"global.ndvi.unavailablePoint": "NDVI extraction not published for this capital yet.",
-"global.ndvi.unavailable": "This capital has no published NDVI extraction yet. The current snapshot is a pilot; choose an available location to inspect real observations.",
-"global.ndvi.openAvailable": "Explore NDVI at {city}",
-'global.ndvi.qualityTitle': "NDVI data quality and provenance",
-'global.ndvi.source': "NASA MODIS · AppEEARS source ↗",
-'global.ndvi.download': "Download validated NDVI snapshot",
-"global.ndvi.eyebrow": "Terra MODIS · NDVI pilot · Monthly observations",
-"global.ndvi.scope": "NDVI is a unitless vegetation-greenness index for the sampled approximately 1 km pixel at the capital coordinate. That pixel may include urban land. It is not national vegetation cover or a direct drought measurement. Cloud, snow, water and poor-quality observations remain gaps.",
-"global.ndvi.quality": "MOD13A3.061 monthly NDVI composites from AppEEARS. Values are already scaled. Conservative QA retains only reliability 0, good MODLAND quality, land pixels, and no adjacent/mixed cloud, snow/ice or shadow flags. Missing and rejected months are never interpolated.",
-"global.ndvi.snapshot": "Source: validated AppEEARS extraction snapshot, not a new live extraction. The coordinates below are requested sampling coordinates, not a pixel centroid. Rebuild the snapshot in the Python pipeline to update NASA observations.",
-"global.ndvi.reload": "Reload published NDVI snapshot",
-"global.ndvi.meanNote": "Each annual average uses the year’s 12 monthly NDVI composites, weighted by calendar days. All 12 must pass validation and QA. NDVI is unitless; fixed scale −0.2 to 1.",
-"global.ndvi.extremeNote": "Lowest/highest monthly NDVI composite in the selected year, not an individual daily extreme. All 12 months must pass validation and QA; tied months are listed. Fixed scale −0.2 to 1.",
-"global.ndvi.monthlyNote": "Monthly NDVI composites; cloud and QA exclusions remain gaps. Values are unitless and are not multiplied by the source scale factor again.",
-"global.ndvi.loadingNote": "NDVI loads from a published, validated NASA AppEEARS extraction snapshot. Load all reuses that file; it does not submit 195 extraction jobs. Updates require rebuilding the snapshot.",
+  "global.giovanni.eyebrow": "NASA Giovanni · Model and reanalysis data",
+  "global.giovanni.source": "NASA Giovanni · Source request ↗",
+  "global.giovanni.etTotal": "Annual evapotranspiration total",
+  "global.giovanni.etMissing":
+    "This GLDAS cell has no valid evapotranspiration data for 2001–2024. Coastal and island cells may lack model land coverage. Missing values are not zeros, and no neighbouring cell has been substituted.",
+  "global.giovanni.etBasis":
+    "Trend and significance use complete annual evapotranspiration totals, in mm/year per decade. Monthly and anomaly views instead test monthly mean daily rates.",
+  "global.giovanni.etNote":
+    "GLDAS Noah 2.1 modelled evapotranspiration: monthly mean rates in mm/day, annual totals in mm/year. Lowest/highest months compare monthly totals in mm/month. Signed rates are preserved: negative values can represent net condensation. Complete months and all 12 months are required for yearly summaries. These are grid-cell estimates, not measured crop water use or drought diagnoses.",
+  "global.giovanni.aodNote":
+    "MERRA-2 reanalysis aerosol optical depth at 550 nm, dimensionless. Every expected hourly value must be valid before a monthly mean is published. Annual averages are weighted by calendar days. This describes the atmospheric aerosol column, not surface PM2.5 or an air-quality index. The quality panel reports the actual 0.5° × 0.625° cell centre.",
+  "global.giovanni.quality":
+    "Giovanni access to separately identified MERRA-2 and GLDAS datasets. Product, parameter, units, period and exact source grid cell are checked. Missing/fill values remain gaps; invalid values are excluded. AOD requires complete hourly coverage for each monthly mean. ET is converted from kg/m²/s to mm/day. These screening checks do not establish scientific accuracy. No neighbouring cells are substituted.",
+  "global.gldas.eyebrow": "NASA GLDAS · Modelled soil moisture",
+  "global.gldas.modelled": "Modelled",
+  "global.gldas.missing":
+    "This GLDAS cell has no valid soil-moisture values for 2001–2024. Coarse model land coverage can leave coastal and island capitals without data. These gaps are not zeros, and no neighbouring cell has been substituted.",
+  "global.gldas.source": "GLDAS Noah 2.1 · Giovanni source request ↗",
+  "global.gldas.scope":
+    "Modelled water stored in the top 0–10 cm of soil, in kg/m², not a percentage. Monthly values represent a 0.25° GLDAS cell containing the capital coordinate. The quality panel shows its actual centre. These are model estimates, not direct satellite or field measurements; they do not describe national conditions or establish drought. Lowest and highest refer to monthly means, not daily extremes.",
+  "global.gldas.quality":
+    "GLDAS Noah 2.1 monthly soil moisture (0–10 cm). Product, units, dates and the containing grid cell are validated. Fill values remain missing; nonfinite or out-of-range values are rejected. Screening uses 0–100 kg/m² and is not a scientific accuracy guarantee. Giovanni supplies no per-month quality flags here. Neighbouring cells are never substituted. Frozen soils, model forcing and land representation can affect interpretation.",
+  "cache.reload": "Reload published data",
+  "cache.calculateMap": "Calculate map for this range",
+  "cache.coverage": "Published coverage: {count}/{total} capital coordinates.",
+  "cache.mapReady":
+    "Prepared map loaded · {count} capitals have usable values.",
+  "cache.mapLoading": "Loading prepared map…",
+  "cache.mapError":
+    "The prepared map could not be loaded. Reload published data to retry.",
+  "cache.published":
+    "Data release published: {date}. Reload to check for a newer published release.",
+  "cache.loadingNote":
+    "Maps and monthly records load from saved, validated observations. Default-period trends and annual maps are prepared in advance. Custom-range maps calculate from saved records; normal exploration never starts a NASA extraction.",
+  "cache.controls":
+    "Choose a location and period to explore saved observations. New data appears when an updated dataset is published.",
+  "cache.loadingCapital": "Loading saved observations for {place}…",
+  "cache.unavailable":
+    "This location has no published observations for the selected variable yet. Explore an available location while background ingestion prepares more coverage.",
+  "cache.unavailablePoint": "Observations not published for this location yet.",
+  "cache.openAvailable": "Explore saved data at {city}",
+  "cache.failed": "Saved observations could not be loaded.",
+  "cache.retryHelp":
+    "Retry or reload the published release. The last validated release remains available while source updates are processed.",
+  "cache.quality":
+    "Validated POWER observations from the published database release. Source screening, missing values and retrieval timestamps are preserved.",
+  "cache.units": "Stored units",
+  "cache.snapshot":
+    "Published release: {date}. Reloading checks for a newer release; it does not request new observations from NASA.",
+  "cache.download": "Download saved monthly data",
+  "global.ndvi.availability":
+    "Published NDVI coverage: {count}/{total} capital coordinates. Unpublished locations remain unavailable; no neighboring point is substituted.",
+  "global.ndvi.unavailablePoint":
+    "NDVI extraction not published for this capital yet.",
+  "global.ndvi.unavailable":
+    "This capital has no published NDVI extraction yet. The current snapshot is a pilot; choose an available location to inspect real observations.",
+  "global.ndvi.openAvailable": "Explore NDVI at {city}",
+  "global.ndvi.qualityTitle": "NDVI data quality and provenance",
+  "global.ndvi.source": "NASA MODIS · AppEEARS source ↗",
+  "global.ndvi.download": "Download validated NDVI snapshot",
+  "global.ndvi.eyebrow": "Terra MODIS · NDVI pilot · Monthly observations",
+  "global.ndvi.scope":
+    "NDVI is a unitless vegetation-greenness index for the sampled approximately 1 km pixel at the capital coordinate. That pixel may include urban land. It is not national vegetation cover or a direct drought measurement. Cloud, snow, water and poor-quality observations remain gaps.",
+  "global.ndvi.quality":
+    "MOD13A3.061 monthly NDVI composites from AppEEARS. Values are already scaled. Conservative QA retains only reliability 0, good MODLAND quality, land pixels, and no adjacent/mixed cloud, snow/ice or shadow flags. Missing and rejected months are never interpolated.",
+  "global.ndvi.snapshot":
+    "Source: validated AppEEARS extraction snapshot, not a new live extraction. The coordinates below are requested sampling coordinates, not a pixel centroid. Rebuild the snapshot in the Python pipeline to update NASA observations.",
+  "global.ndvi.reload": "Reload published NDVI snapshot",
+  "global.ndvi.meanNote":
+    "Each annual average uses the year’s 12 monthly NDVI composites, weighted by calendar days. All 12 must pass validation and QA. NDVI is unitless; fixed scale −0.2 to 1.",
+  "global.ndvi.extremeNote":
+    "Lowest/highest monthly NDVI composite in the selected year, not an individual daily extreme. All 12 months must pass validation and QA; tied months are listed. Fixed scale −0.2 to 1.",
+  "global.ndvi.monthlyNote":
+    "Monthly NDVI composites; cloud and QA exclusions remain gaps. Values are unitless and are not multiplied by the source scale factor again.",
+  "global.ndvi.loadingNote":
+    "NDVI loads from a published, validated NASA AppEEARS extraction snapshot. Load all reuses that file; it does not submit 195 extraction jobs. Updates require rebuilding the snapshot.",
   "global.map.total": "Annual rainfall total",
   "global.map.lowest": "Lowest month",
   "global.map.highest": "Highest month",
@@ -102,96 +139,139 @@ export const en = {
   "global.map.insufficient": "Insufficient data for this summary.",
   "global.map.pending": "Not loaded or calculating.",
 
-  'global.trend.title': 'What does this record suggest?',
-  'global.trend.up': 'At the {city} capital coordinate, {variable} increased at an estimated {rate} {unit} per decade over {start}–{end}.',
-  'global.trend.down': 'At the {city} capital coordinate, {variable} decreased at an estimated {rate} {unit} per decade over {start}–{end}.',
-  'global.trend.flat': 'At the {city} capital coordinate, the estimated rate of change in {variable} is {rate} {unit} per decade over {start}–{end}.',
-  'global.trend.increase': 'The resampling analysis supports an increase under the tested block lengths. This does not establish its cause.',
-  'global.trend.decrease': 'The resampling analysis supports a decrease under the tested block lengths. This does not establish its cause.',
-  'global.trend.inconclusive': 'The evidence is inconclusive: the interval includes zero or the resampling test does not support a clear direction. This is not proof that nothing changed.',
-  'global.trend.limited': 'This record has limitations that make the interval and p-value provisional. A confident direction is not assigned, even if the numerical test passes a threshold.',
-  'global.trend.warning.gaps': 'Missing observations are resampled with their year blocks. Simulation checks found weaker interval coverage with gaps, so treat these results cautiously.',
-  'global.trend.warning.persistence': 'Residual correlation is very strong (absolute lag-1 ≥ 0.8). The tested blocks may not capture longer dependence; uncertainty can still be understated.',
-  'global.trend.warning.short': 'Fewer than 15 years provide few independent year blocks. These exploratory limits are especially uncertain.',
-  'global.trend.sensitive': 'The conclusion changes with the block length used to represent serial dependence. Treat the direction as uncertain.',
-  'global.trend.intervalExplanation': 'The approximate 95% interval for the rate is {lower} to {upper} {unit} per decade. It describes uncertainty in the estimated trend, not the range of future observations.',
-  'global.trend.interval': 'Approximate 95% slope interval',
-  'global.trend.pValue': 'Block-bootstrap p-value',
-  'global.trend.testName': 'Two-sided Kendall score test',
-  'global.trend.diagnostics': 'Method, serial dependence, and sensitivity',
-  'global.trend.seasonalMethod': 'Monthly comparisons match January with January, February with February, and so on. The pooled seasonal Sen estimate uses only these within-month slopes; different months may still behave differently.',
-  'global.trend.annualMethod': 'Annual rainfall totals use non-seasonal Sen’s slope and a Kendall score. Missing years retain their elapsed-time positions.',
-  'global.trend.bootstrap': 'For each tested block length, {count} resamples keep consecutive {years}-year blocks of detrended residuals together for the primary result. This preserves local serial dependence and cross-month relationships within blocks.',
-  'global.trend.lag1': 'Lag-1 correlation of detrended, season-adjusted residuals: {value}. Missing observations are never joined as adjacent pairs.',
-  'global.trend.undefined': 'undefined for constant or insufficient residual pairs',
-  'global.trend.monthRange': 'Descriptive month-specific slopes range from {lower} to {upper} {unit} per decade.',
-  'global.trend.opposingMonths': 'Month-specific point estimates include both signs. The pooled slope can hide seasonal differences; this is not a formal test of differences between months.',
-  'global.trend.sensitivity': 'Sensitivity to block length (* primary result)',
-  'global.trend.blockYears': 'Years per block',
-  'global.trend.primaryNote': 'The displayed interval and p-value use the primary block length. Direction is described as supported only when p < 0.05 and the interval excludes zero for every tested block length, without gap, strong-persistence, or short-record flags. These extra flags are conservative product safeguards.',
-  'global.trend.version': 'Method: {method}. Reproducible random seed: {seed}.',
-  'global.trend.reference': 'Seasonal slope reference · SciPy',
-  'global.trend.calculating': 'Estimating trend uncertainty with year-block resampling… The chart remains available.',
-  'global.trend.failed': 'Uncertainty could not be estimated for this record. Try a longer period or another location; no uncorrected significance result has been substituted.',
-  'global.locationData': 'Capital coordinate source data',
-  'global.timeRange': 'Analysis period',
-  'global.startYear': 'Start year',
-  'global.endYear': 'End year',
-  'global.rangeAvailable': 'Available: {start}–{end}. Changing years reuses the loaded record.',
-  'global.yearlyTotal': 'Yearly total',
-  'global.completeYears': '{count} of {total} years are complete',
-  'global.rainAggregation': 'Annual rainfall total: monthly daily rates × days in each month, summed in mm/year. Requires all 12 valid months; incomplete years are gaps.',
-  'global.meanAggregation': 'Annual mean weighted by days in each month, including leap years. Requires all 12 valid months; incomplete years are gaps.',
-  'global.anomalyBaseline': 'Anomalies are relative to each calendar month’s mean within {start}–{end}. The baseline changes with the selected period.',
-  'global.monthlyValues': 'Monthly observations for {start}–{end}. Missing and rejected values remain gaps.',
-  'global.insufficient': 'Trend statistics withheld: select at least 10 years with 80% valid months. Annual rainfall trends also require 10 complete years. You can still explore the available observations.',
-  'global.annualTrendBasis': 'Trend and significance use complete annual rainfall totals, in mm/year per decade. They differ from trends in monthly daily rainfall rates.',
-  'global.monthlyTrendBasis': 'Trend estimation compares matching calendar months within the selected period, including when the chart shows annual means. The anomaly baseline affects the display, not the seasonal trend test.',
-  'global.qualityTitle': 'Data quality and provenance',
-  'global.qualityIntro': 'Checks cover response structure, location, units, month keys, missing values, finite numbers, and broad plausibility bounds. Rejected values are excluded. These checks do not establish measurement accuracy.',
-  'global.qualityPeriod': 'Selected period: {start}–{end}',
-  'global.sourceUnit': 'Source units',
-  'global.valid': 'Valid months',
-  'global.missing': 'Missing',
-  'global.rejected': 'Rejected',
-  'global.retrieved': 'Retrieved: {date}. This timestamp is preserved when the response is cached.',
-  'global.requestedCoordinates': 'Requested capital coordinate: {lat}, {lon}',
-  'global.responseCoordinates': 'API response coordinate: {lat}, {lon} (not a national average)',
-  'global.refresh': 'Refresh NASA data',
-  'global.eyebrow': 'NASA POWER · Global observations',
-  'global.title': 'A world of change to investigate',
-  'global.intro': 'Choose a capital city, explore its environmental record, and test the long-term trend.',
-  'global.period': 'Monthly historical record',
-  'global.scope': 'Each marker represents gridded observations at a capital-city coordinate. These are not country-wide averages or local weather-station measurements.',
-  'global.investigate': 'Start an investigation',
-  'global.search': 'Find a country or capital',
-  'global.searchPlaceholder': 'Search countries or cities…',
-  'global.location': 'Country · representative capital',
-  'global.matches': '{count} matching locations',
-  'global.variable': 'Environmental variable',
-  'global.onDemand': '{count} locations. Select a city to load its record, or choose Load all capitals for map comparisons.',
-  'global.view': 'Time-series view',
-  'global.mapHint': 'Select a country or capital marker',
-  'global.mapLabel': 'World map of representative capital cities. Use the country selector for keyboard selection.',
-  'global.zoomIn': 'Zoom in',
-  'global.zoomOut': 'Zoom out',
-  'global.reset': 'World',
-  'global.mapFailed': 'The map could not load. You can still select a country from the list.',
-  'global.capitalMarker': 'Capital-city location',
-  'global.fetchFailed': 'NASA POWER data is unavailable for this selection.',
-  'global.fetchHelp': 'The request may have timed out or failed validation of its structure, units, or location. Retry or inspect the source request.',
-  'global.source': 'NASA POWER · View source request ↗',
-  'global.validMonths': '{count} of {total} months have valid observations',
-  'global.caution': 'Intervals and p-values are approximate. Year-block resampling addresses local serial dependence, but assumes roughly stationary detrended residuals and a common long-term slope. Short records, persistent dependence, and structural changes can still mislead. These results do not describe a country-wide trend or establish causation.',
-  'global.about': 'About the locations, annual values, and trend method',
-  'global.method': 'Monthly records use within-calendar-month Kendall comparisons and a seasonal Sen slope. Annual rainfall uses annual comparisons. A circular residual bootstrap resamples whole-year blocks and calibrates the two-sided Kendall score test and approximate 95% Sen slope limits. Neighboring block lengths are checked for sensitivity. This is an exploratory block-bootstrap method, not the 3PW prewhitening algorithm.',
-  'global.annual': 'The global explorer requires 12 valid months for an annual value. Temperature, humidity, and daily solar energy use day-weighted annual means. Rainfall rates are multiplied by calendar days and summed to annual totals. Partial years are not scaled or filled. Anomalies use calendar-month means over the selected period. The Thailand workbench retains its existing aggregation.',
-  'global.geography': 'The bundled catalog uses the 195 entries marked independent in a REST Countries snapshot, with one representative capital coordinate per entry. For South Africa, Pretoria is used. Locations and simplified map boundaries are for exploration, not a statement about sovereignty. Small island locations remain selectable even where the map omits their outlines.',
-  'app.title': 'Earth Trend Detective',
-  'nav.experience': 'Experience',
-  'nav.workbench': 'Thailand explorer',
-  'nav.main': 'Main navigation',
-  'language.label': 'Language',
+  "global.trend.title": "What does this record suggest?",
+  "global.trend.up":
+    "At the {city} capital coordinate, {variable} increased at an estimated {rate} {unit} per decade over {start}–{end}.",
+  "global.trend.down":
+    "At the {city} capital coordinate, {variable} decreased at an estimated {rate} {unit} per decade over {start}–{end}.",
+  "global.trend.flat":
+    "At the {city} capital coordinate, the estimated rate of change in {variable} is {rate} {unit} per decade over {start}–{end}.",
+  "global.trend.increase":
+    "The resampling analysis supports an increase under the tested block lengths. This does not establish its cause.",
+  "global.trend.decrease":
+    "The resampling analysis supports a decrease under the tested block lengths. This does not establish its cause.",
+  "global.trend.inconclusive":
+    "The evidence is inconclusive: the interval includes zero or the resampling test does not support a clear direction. This is not proof that nothing changed.",
+  "global.trend.limited":
+    "This record has limitations that make the interval and p-value provisional. A confident direction is not assigned, even if the numerical test passes a threshold.",
+  "global.trend.warning.gaps":
+    "Missing observations are resampled with their year blocks. Simulation checks found weaker interval coverage with gaps, so treat these results cautiously.",
+  "global.trend.warning.persistence":
+    "Residual correlation is very strong (absolute lag-1 ≥ 0.8). The tested blocks may not capture longer dependence; uncertainty can still be understated.",
+  "global.trend.warning.short":
+    "Fewer than 15 years provide few independent year blocks. These exploratory limits are especially uncertain.",
+  "global.trend.sensitive":
+    "The conclusion changes with the block length used to represent serial dependence. Treat the direction as uncertain.",
+  "global.trend.intervalExplanation":
+    "The approximate 95% interval for the rate is {lower} to {upper} {unit} per decade. It describes uncertainty in the estimated trend, not the range of future observations.",
+  "global.trend.interval": "Approximate 95% slope interval",
+  "global.trend.pValue": "Block-bootstrap p-value",
+  "global.trend.testName": "Two-sided Kendall score test",
+  "global.trend.diagnostics": "Method, serial dependence, and sensitivity",
+  "global.trend.seasonalMethod":
+    "Monthly comparisons match January with January, February with February, and so on. The pooled seasonal Sen estimate uses only these within-month slopes; different months may still behave differently.",
+  "global.trend.annualMethod":
+    "Annual rainfall totals use non-seasonal Sen’s slope and a Kendall score. Missing years retain their elapsed-time positions.",
+  "global.trend.bootstrap":
+    "For each tested block length, {count} resamples keep consecutive {years}-year blocks of detrended residuals together for the primary result. This preserves local serial dependence and cross-month relationships within blocks.",
+  "global.trend.lag1":
+    "Lag-1 correlation of detrended, season-adjusted residuals: {value}. Missing observations are never joined as adjacent pairs.",
+  "global.trend.undefined":
+    "undefined for constant or insufficient residual pairs",
+  "global.trend.monthRange":
+    "Descriptive month-specific slopes range from {lower} to {upper} {unit} per decade.",
+  "global.trend.opposingMonths":
+    "Month-specific point estimates include both signs. The pooled slope can hide seasonal differences; this is not a formal test of differences between months.",
+  "global.trend.sensitivity": "Sensitivity to block length (* primary result)",
+  "global.trend.blockYears": "Years per block",
+  "global.trend.primaryNote":
+    "The displayed interval and p-value use the primary block length. Direction is described as supported only when p < 0.05 and the interval excludes zero for every tested block length, without gap, strong-persistence, or short-record flags. These extra flags are conservative product safeguards.",
+  "global.trend.version": "Method: {method}. Reproducible random seed: {seed}.",
+  "global.trend.reference": "Seasonal slope reference · SciPy",
+  "global.trend.calculating":
+    "Estimating trend uncertainty with year-block resampling… The chart remains available.",
+  "global.trend.failed":
+    "Uncertainty could not be estimated for this record. Try a longer period or another location; no uncorrected significance result has been substituted.",
+  "global.locationData": "Capital coordinate source data",
+  "global.timeRange": "Analysis period",
+  "global.startYear": "Start year",
+  "global.endYear": "End year",
+  "global.rangeAvailable":
+    "Available: {start}–{end}. Changing years reuses the loaded record.",
+  "global.yearlyTotal": "Yearly total",
+  "global.completeYears": "{count} of {total} years are complete",
+  "global.rainAggregation":
+    "Annual rainfall total: monthly daily rates × days in each month, summed in mm/year. Requires all 12 valid months; incomplete years are gaps.",
+  "global.meanAggregation":
+    "Annual mean weighted by days in each month, including leap years. Requires all 12 valid months; incomplete years are gaps.",
+  "global.anomalyBaseline":
+    "Anomalies are relative to each calendar month’s mean within {start}–{end}. The baseline changes with the selected period.",
+  "global.monthlyValues":
+    "Monthly observations for {start}–{end}. Missing and rejected values remain gaps.",
+  "global.insufficient":
+    "Trend statistics withheld: select at least 10 years with 80% valid months. Annual rainfall trends also require 10 complete years. You can still explore the available observations.",
+  "global.annualTrendBasis":
+    "Trend and significance use complete annual rainfall totals, in mm/year per decade. They differ from trends in monthly daily rainfall rates.",
+  "global.monthlyTrendBasis":
+    "Trend estimation compares matching calendar months within the selected period, including when the chart shows annual means. The anomaly baseline affects the display, not the seasonal trend test.",
+  "global.qualityTitle": "Data quality and provenance",
+  "global.qualityIntro":
+    "Checks cover response structure, location, units, month keys, missing values, finite numbers, and broad plausibility bounds. Rejected values are excluded. These checks do not establish measurement accuracy.",
+  "global.qualityPeriod": "Selected period: {start}–{end}",
+  "global.sourceUnit": "Source units",
+  "global.valid": "Valid months",
+  "global.missing": "Missing",
+  "global.rejected": "Rejected",
+  "global.retrieved":
+    "Retrieved: {date}. This timestamp is preserved when the response is cached.",
+  "global.requestedCoordinates": "Requested capital coordinate: {lat}, {lon}",
+  "global.responseCoordinates":
+    "API response coordinate: {lat}, {lon} (not a national average)",
+  "global.refresh": "Refresh NASA data",
+  "global.eyebrow": "NASA POWER · Global observations",
+  "global.title": "A world of change to investigate",
+  "global.intro":
+    "Choose a capital city, explore its environmental record, and test the long-term trend.",
+  "global.period": "Monthly historical record",
+  "global.scope":
+    "Each marker represents gridded observations at a capital-city coordinate. These are not country-wide averages or local weather-station measurements.",
+  "global.investigate": "Start an investigation",
+  "global.search": "Find a country or capital",
+  "global.searchPlaceholder": "Search countries or cities…",
+  "global.location": "Country · representative capital",
+  "global.matches": "{count} matching locations",
+  "global.variable": "Environmental variable",
+  "global.onDemand":
+    "{count} locations. Select a city to load its record, or choose Load all capitals for map comparisons.",
+  "global.view": "Time-series view",
+  "global.mapHint": "Select a country or capital marker",
+  "global.mapLabel":
+    "World map of representative capital cities. Use the country selector for keyboard selection.",
+  "global.zoomIn": "Zoom in",
+  "global.zoomOut": "Zoom out",
+  "global.reset": "World",
+  "global.mapFailed":
+    "The map could not load. You can still select a country from the list.",
+  "global.capitalMarker": "Capital-city location",
+  "global.fetchFailed": "NASA POWER data is unavailable for this selection.",
+  "global.fetchHelp":
+    "The request may have timed out or failed validation of its structure, units, or location. Retry or inspect the source request.",
+  "global.source": "NASA POWER · View source request ↗",
+  "global.validMonths": "{count} of {total} months have valid observations",
+  "global.caution":
+    "Intervals and p-values are approximate. Year-block resampling addresses local serial dependence, but assumes roughly stationary detrended residuals and a common long-term slope. Short records, persistent dependence, and structural changes can still mislead. These results do not describe a country-wide trend or establish causation.",
+  "global.about": "About the locations, annual values, and trend method",
+  "global.method":
+    "Monthly records use within-calendar-month Kendall comparisons and a seasonal Sen slope. Annual rainfall uses annual comparisons. A circular residual bootstrap resamples whole-year blocks and calibrates the two-sided Kendall score test and approximate 95% Sen slope limits. Neighboring block lengths are checked for sensitivity. This is an exploratory block-bootstrap method, not the 3PW prewhitening algorithm.",
+  "global.annual":
+    "The global explorer requires 12 valid months for an annual value. Temperature, humidity, and daily solar energy use day-weighted annual means. Rainfall rates are multiplied by calendar days and summed to annual totals. Partial years are not scaled or filled. Anomalies use calendar-month means over the selected period. The Thailand workbench retains its existing aggregation.",
+  "global.geography":
+    "The bundled catalog uses the 195 entries marked independent in a REST Countries snapshot, with one representative capital coordinate per entry. For South Africa, Pretoria is used. Locations and simplified map boundaries are for exploration, not a statement about sovereignty. Small island locations remain selectable even where the map omits their outlines.",
+  "app.title": "Earth Trend Detective",
+  "nav.experience": "Experience",
+  "nav.workbench": "Thailand explorer",
+  "nav.main": "Main navigation",
+  "language.label": "Language",
 
   "status.loading": "Loading…",
 
@@ -370,11 +450,11 @@ export const en = {
   "landing.playText":
     "Every question has a tested trend. See a record up to a year and draw what comes next, or see one measure and draw the one that moves with it.",
   "landing.playCta": "Start playing",
-  "landing.seeVerb": "Locate",
+  "landing.seeVerb": "Discover",
   "landing.seeText":
     "A globe of 632 places on land. The deepest red and blue dots are where change is clearest.",
   "landing.soon": "Coming soon",
-  "landing.investigateVerb": "Prove",
+  "landing.investigateVerb": "Investigate",
   "landing.investigateTitle": "World and Thailand explorers",
   "landing.investigateText":
     "Pick any place and measurement, see 20+ years of NASA data and test the trend in one click.",
