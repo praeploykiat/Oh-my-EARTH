@@ -851,7 +851,7 @@ export function GameAdmin() {
         </div>
       </header>
 
-      {touring && <Tour onClose={() => setTouring(false)} />}
+      {touring && <Tour onClose={() => setTouring(false)} onImport={setImporting} />}
 
       {notice && (
         <p className={`admin-status is-${notice.kind}`}>
@@ -943,7 +943,7 @@ export function GameAdmin() {
                     </p>
                   </div>
                   <div className="admin-head-tools">
-                    <button type="button" className={panel === 'json' ? 'is-on' : ''} onClick={() => setPanel(panel === 'json' ? null : 'json')}>
+                    <button type="button" data-tour="json-edit" className={panel === 'json' ? 'is-on' : ''} onClick={() => setPanel(panel === 'json' ? null : 'json')}>
                       Edit as JSON
                     </button>
                     <button
