@@ -6,7 +6,7 @@ import { htmlToMarkdown, markdownToHtml } from './richText';
 import type { Feedback } from './score';
 import { formatTime, monthsBetween, monthsOfYear, timeKind, yearsBetween } from './time';
 import type { GameRound, Localized, RoundSeries } from './types';
-import { roundProblem } from './validate';
+import { LIMITS, roundProblem } from './validate';
 
 const SAVE_DELAY_MS = 900;
 const REFRESH_MS = 8000;
@@ -25,6 +25,57 @@ interface Entry {
 const same = (a: GameRound, b: GameRound | undefined) => !!b && JSON.stringify(a) === JSON.stringify(b);
 const isDirty = (e: Entry) => !e.base || !same(e.draft, e.base.question);
 const newId = () => `q-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+// Unfinished work kept in this browser
+
+const DRAFTS_KEY = 'game-admin-drafts';
+
+interface SavedDraft {
+  draft: GameRound;
+  base: Stored | null;
+}
+
+function readDrafts(): SavedDraft[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DRAFTS_KEY) ?? '[]');
+    return Array.isArray(parsed) ? parsed.filter((d) => d && d.draft && typeof d.draft.id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDrafts(entries: Entry[]) {
+  try {
+    const drafts: SavedDraft[] = entries.filter(isDirty).map((e) => ({ draft: e.draft, base: e.base }));
+    if (drafts.length) localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+    else localStorage.removeItem(DRAFTS_KEY);
+  } catch {
+    // Storage can be full or blocked; saving to the database still works
+  }
+}
+
+function draftEntry(draft: GameRound, base: Stored | null): Entry {
+  const problem = roundProblem(draft);
+  return { draft, base, state: problem ? 'incomplete' : 'waiting', message: problem ?? undefined };
+}
+
+function restoreDrafts(remote: Stored[], drafts: SavedDraft[]): { entries: Entry[]; restored: number } {
+  const byId = new Map(drafts.map((d) => [d.draft.id, d]));
+  let restored = 0;
+  const entries: Entry[] = remote.map((r) => {
+    const d = byId.get(r.question.id);
+    byId.delete(r.question.id);
+    if (!d || same(d.draft, r.question)) return { draft: r.question, base: r, state: 'saved' };
+    restored += 1;
+    if (d.base && d.base.version === r.version) return draftEntry(d.draft, r);
+    return { draft: d.draft, base: d.base, state: 'conflict', remote: r };
+  });
+  for (const d of byId.values()) {
+    restored += 1;
+    entries.push(d.base ? { draft: d.draft, base: d.base, state: 'conflict', remote: null } : draftEntry(d.draft, null));
+  }
+  return { entries, restored };
+}
 
 function blankQuestion(): GameRound {
   const time = monthsOfYear();
@@ -86,38 +137,151 @@ function TextPair({ label, value, onChange, hint }: { label: string; value: Loca
 
 // Time axis
 
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MIN_YEAR = 1900;
+const MAX_YEAR = 2100;
+
+type AxisKind = 'month-of-year' | 'year' | 'month';
+
+interface YearMonth {
+  year: number;
+  month: number;
+}
+
+const validYear = (y: number) => Number.isInteger(y) && y >= MIN_YEAR && y <= MAX_YEAR;
+const ymText = (v: YearMonth) => `${v.year}-${String(v.month).padStart(2, '0')}`;
+const ymLabel = (v: YearMonth) => `${MONTH_NAMES[v.month - 1]} ${v.year}`;
+const parseYm = (t: string): YearMonth => ({ year: Number(t.slice(0, 4)), month: Number(t.slice(5, 7)) });
+
+function MonthPicker({ label, value, onChange }: { label: string; value: YearMonth; onChange: (v: YearMonth) => void }) {
+  return (
+    <span className="admin-month">
+      <select aria-label={`${label} month`} value={value.month} onChange={(e) => onChange({ ...value, month: Number(e.target.value) })}>
+        {MONTH_NAMES.map((name, i) => (
+          <option key={name} value={i + 1}>
+            {name}
+          </option>
+        ))}
+      </select>
+      <input
+        type="number"
+        aria-label={`${label} year`}
+        min={MIN_YEAR}
+        max={MAX_YEAR}
+        value={Number.isNaN(value.year) ? '' : value.year}
+        onChange={(e) => onChange({ ...value, year: e.target.value === '' ? NaN : Number(e.target.value) })}
+      />
+    </span>
+  );
+}
+
 function TimeEditor({ round, onChange }: { round: GameRound; onChange: (r: GameRound) => void }) {
-  const kind = timeKind(round.time);
-  const [years, setYears] = useState({ from: 2001, to: 2024 });
-  const [months, setMonths] = useState({ from: '2020-01', to: '2022-12' });
+  const current = timeKind(round.time);
+  const [kind, setKind] = useState<AxisKind>(current === 'other' ? 'month-of-year' : current);
+  const [years, setYears] = useState(() =>
+    current === 'year' ? { from: Number(round.time[0]), to: Number(round.time[round.time.length - 1]) } : { from: 2001, to: 2024 },
+  );
+  const [months, setMonths] = useState(() =>
+    current === 'month'
+      ? { from: parseYm(round.time[0]), to: parseYm(round.time[round.time.length - 1]) }
+      : { from: { year: 2020, month: 1 }, to: { year: 2022, month: 12 } },
+  );
+
+  let time: string[] = [];
+  let summary = '';
+  let problem: string | null = null;
+
+  if (kind === 'month-of-year') {
+    time = monthsOfYear();
+    summary = 'Jan to Dec, one value per month of the year (for example a 20-year average)';
+  } else if (kind === 'year') {
+    if (!validYear(years.from) || !validYear(years.to)) problem = `Type both years (${MIN_YEAR} to ${MAX_YEAR}).`;
+    else if (years.from > years.to) problem = 'The first year must come before the last year.';
+    else {
+      time = yearsBetween(years.from, years.to);
+      summary = `${years.from} to ${years.to}`;
+    }
+  } else {
+    if (!validYear(months.from.year) || !validYear(months.to.year)) problem = `Type both years (${MIN_YEAR} to ${MAX_YEAR}).`;
+    else if (ymText(months.from) > ymText(months.to)) problem = 'The first month must come before the last month.';
+    else {
+      time = monthsBetween(ymText(months.from), ymText(months.to));
+      summary = `${ymLabel(months.from)} to ${ymLabel(months.to)}`;
+    }
+  }
+  if (!problem && time.length > LIMITS.points) problem = `That is ${time.length} time points. The most is ${LIMITS.points}.`;
+
+  const inUse = !problem && time.join() === round.time.join();
+  const options: { kind: AxisKind; label: string }[] = [
+    { kind: 'month-of-year', label: '12 months of the year' },
+    { kind: 'year', label: 'Year by year' },
+    { kind: 'month', label: 'Month by month' },
+  ];
 
   return (
     <div className="admin-field">
       <span>Time axis</span>
-      <div className="admin-time">
-        <button type="button" className={kind === 'month-of-year' ? 'is-on' : ''} onClick={() => onChange(remap(round, monthsOfYear()))}>
-          12 months of the year
-        </button>
-        <div className={`admin-time-range ${kind === 'year' ? 'is-on' : ''}`}>
-          <span>Years</span>
-          <input type="number" aria-label="First year" value={years.from} onChange={(e) => setYears({ ...years, from: Number(e.target.value) })} />
-          <span>to</span>
-          <input type="number" aria-label="Last year" value={years.to} onChange={(e) => setYears({ ...years, to: Number(e.target.value) })} />
-          <button type="button" onClick={() => onChange(remap(round, yearsBetween(years.from, years.to).slice(0, 400)))}>
-            Use
+      <div className="admin-axis-kinds" role="radiogroup" aria-label="Kind of time axis">
+        {options.map((o) => (
+          <button key={o.kind} type="button" role="radio" aria-checked={kind === o.kind} className={kind === o.kind ? 'is-on' : ''} onClick={() => setKind(o.kind)}>
+            {o.label}
+            {current === o.kind && <small> · in use</small>}
           </button>
-        </div>
-        <div className={`admin-time-range ${kind === 'month' ? 'is-on' : ''}`}>
-          <span>Month by month</span>
-          <input type="month" aria-label="First month" value={months.from} onChange={(e) => setMonths({ ...months, from: e.target.value })} />
-          <span>to</span>
-          <input type="month" aria-label="Last month" value={months.to} onChange={(e) => setMonths({ ...months, to: e.target.value })} />
-          <button type="button" onClick={() => onChange(remap(round, monthsBetween(months.from, months.to).slice(0, 400)))}>
-            Use
-          </button>
+        ))}
+      </div>
+      <div className="admin-axis-panel">
+        {kind === 'year' && (
+          <div className="admin-axis-inputs">
+            <span>From</span>
+            <input
+              type="number"
+              aria-label="First year"
+              min={MIN_YEAR}
+              max={MAX_YEAR}
+              value={Number.isNaN(years.from) ? '' : years.from}
+              onChange={(e) => setYears({ ...years, from: e.target.value === '' ? NaN : Number(e.target.value) })}
+            />
+            <span>to</span>
+            <input
+              type="number"
+              aria-label="Last year"
+              min={MIN_YEAR}
+              max={MAX_YEAR}
+              value={Number.isNaN(years.to) ? '' : years.to}
+              onChange={(e) => setYears({ ...years, to: e.target.value === '' ? NaN : Number(e.target.value) })}
+            />
+          </div>
+        )}
+        {kind === 'month' && (
+          <div className="admin-axis-inputs">
+            <span>From</span>
+            <MonthPicker label="First" value={months.from} onChange={(from) => setMonths({ ...months, from })} />
+            <span>to</span>
+            <MonthPicker label="Last" value={months.to} onChange={(to) => setMonths({ ...months, to })} />
+          </div>
+        )}
+        <div className="admin-axis-apply">
+          {problem ? (
+            <small className="is-problem">{problem}</small>
+          ) : (
+            <small>
+              {summary} · <strong>{time.length} points</strong>
+            </small>
+          )}
+          {inUse ? (
+            <small className="admin-axis-current">This is the current time axis</small>
+          ) : (
+            <button type="button" className="button" disabled={!!problem} onClick={() => onChange(remap(round, time))}>
+              Use this time axis
+            </button>
+          )}
         </div>
       </div>
-      <small>{round.time.length} time points. Values that still match a time point are kept when you switch.</small>
+      <small>
+        Now: {round.time.length} time points
+        {round.time.length > 0 && ` (${formatTime(round.time[0], 'en')} to ${formatTime(round.time[round.time.length - 1], 'en')})`}. Numbers for time points that
+        stay the same are kept when you switch.
+      </small>
     </div>
   );
 }
@@ -351,7 +515,13 @@ const EXAMPLE = `[
   }
 ]`;
 
-function ImportPanel({ onDone, onClose }: { onDone: (stored: Stored[], message: string) => void; onClose: () => void }) {
+function ImportPanel({
+  onDone,
+  onClose,
+}: {
+  onDone: (stored: Stored[], imported: Set<string>, message: string) => void;
+  onClose: () => void;
+}) {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<ImportMode>('merge');
@@ -375,7 +545,7 @@ function ImportPanel({ onDone, onClose }: { onDone: (stored: Stored[], message: 
       const stored = await importQuestions(result.rounds, mode);
       const skipped = result.problems.length ? ` Skipped ${result.problems.length}: ${result.problems.join(' / ')}` : '';
       const what = mode === 'replace' ? `Replaced all questions with ${result.rounds.length} from the file.` : `Added or updated ${result.rounds.length} question(s).`;
-      onDone(stored, `${what}${skipped}`);
+      onDone(stored, new Set(result.rounds.map((r) => r.id)), `${what}${skipped}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -393,7 +563,10 @@ function ImportPanel({ onDone, onClose }: { onDone: (stored: Stored[], message: 
         </button>
         <button type="button" role="radio" aria-checked={mode === 'replace'} className={mode === 'replace' ? 'is-on' : ''} onClick={() => setMode('replace')}>
           <strong>Replace everything</strong>
-          <small>Removes all current questions and uses the ones in this file. Old versions stay in each question’s history.</small>
+          <small>
+            Removes all saved questions and uses the ones in this file. New questions you have not finished stay in the list. Old versions stay in
+            each question’s history.
+          </small>
         </button>
       </div>
       <p className="admin-note">
@@ -454,6 +627,7 @@ export function GameAdmin() {
   const commit = useCallback((next: Entry[]) => {
     entriesRef.current = next;
     setEntries(next);
+    writeDrafts(next);
   }, []);
 
   const patch = useCallback(
@@ -549,20 +723,25 @@ export function GameAdmin() {
   }, [commit]);
 
   useEffect(() => {
+    const drafts = readDrafts();
     fetchQuestions()
       .then((remote) => {
-        commit(remote.map((s) => ({ draft: s.question, base: s, state: 'saved' })));
-        if (remote.length === 0) {
+        const { entries: restoredEntries, restored } = restoreDrafts(remote, drafts);
+        commit(restoredEntries);
+        restoredEntries.filter((e) => e.state === 'waiting').forEach((e) => schedule(e.draft.id));
+        if (restored) {
+          setNotice({ kind: 'info', text: `Brought back ${restored} unfinished question(s) you left in this browser.` });
+        } else if (remote.length === 0) {
           setNotice({ kind: 'info', text: 'No questions yet. Until you add some, the game shows three example questions.' });
         }
-        setSelected((current) => current ?? remote[0]?.question.id ?? null);
+        setSelected((current) => current ?? restoredEntries[0]?.draft.id ?? null);
       })
       .catch(() => {
         setOffline(true);
-        commit([]);
+        commit(drafts.map((d) => ({ ...draftEntry(d.draft, d.base), state: 'error' as const, message: 'offline' })));
         setNotice({ kind: 'error', text: 'Could not reach the question database. Check that Upstash Redis is connected to the project in Vercel.' });
       });
-  }, [commit]);
+  }, [commit, schedule]);
 
   useEffect(() => {
     const tick = () => document.visibilityState === 'visible' && refresh();
@@ -575,13 +754,14 @@ export function GameAdmin() {
   }, [refresh]);
 
   const unsaved = useMemo(() => (entries ?? []).filter((e) => e.state !== 'saved').length, [entries]);
+  const sending = useMemo(() => (entries ?? []).some((e) => e.state === 'waiting' || e.state === 'saving'), [entries]);
 
   useEffect(() => {
-    if (!unsaved) return;
+    if (!sending) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [unsaved]);
+  }, [sending]);
 
   if (!entries) return <p className="status">Loading…</p>;
 
@@ -667,12 +847,19 @@ export function GameAdmin() {
       {importing && (
         <ImportPanel
           onClose={() => setImporting(false)}
-          onDone={(stored, message) => {
-            const local = entriesRef.current.filter((e) => !e.base && !stored.some((s) => s.question.id === e.draft.id));
-            commit([...stored.map((s) => ({ draft: s.question, base: s, state: 'saved' as const })), ...local]);
+          onDone={(stored, imported, message) => {
+            const current = new Map(entriesRef.current.map((e) => [e.draft.id, e]));
+            const kept: Entry[] = stored.map((s) => {
+              const e = current.get(s.question.id);
+              if (imported.has(s.question.id) || !e || !isDirty(e)) return { draft: s.question, base: s, state: 'saved' };
+              return e.base?.version === s.version ? e : { ...e, state: 'conflict', remote: s };
+            });
+            const unfinished = entriesRef.current.filter((e) => !e.base && !stored.some((s) => s.question.id === e.draft.id));
+            commit([...kept, ...unfinished]);
             setImporting(false);
-            setSelected(stored[0]?.question.id ?? null);
-            setNotice({ kind: 'ok', text: message });
+            setSelected(stored.find((s) => imported.has(s.question.id))?.question.id ?? stored[0]?.question.id ?? null);
+            const extra = unfinished.length ? ` ${unfinished.length} unfinished question(s) are still at the end of the list.` : '';
+            setNotice({ kind: 'ok', text: `${message}${extra}` });
           }}
         />
       )}
@@ -684,7 +871,9 @@ export function GameAdmin() {
               <li key={e.draft.id} className={e.draft.id === selected ? 'is-on' : ''}>
                 <button type="button" className="admin-list-main" onClick={() => setSelected(e.draft.id)}>
                   <strong>
-                    {e.draft.given.label.en || 'Untitled'} → {e.draft.hidden.label.en || '?'}
+                    {e.draft.given.label.en || e.draft.hidden.label.en
+                      ? `${e.draft.given.label.en || '?'} → ${e.draft.hidden.label.en || '?'}`
+                      : 'New question'}
                   </strong>
                   <small>{e.draft.place.en || 'No place yet'}</small>
                   <em className={`admin-state is-${e.state}`}>{STATE_LABEL[e.state]}</em>

@@ -2716,6 +2716,7 @@ button,
 }
 
 .admin input,
+.admin select,
 .admin textarea {
   width: 100%;
   padding: 9px 12px;
@@ -2727,6 +2728,7 @@ button,
 }
 
 .admin input:focus,
+.admin select:focus,
 .admin textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
@@ -2747,34 +2749,6 @@ button,
   display: grid;
   gap: 12px;
   align-content: start;
-}
-
-.admin-time {
-  display: grid;
-  gap: 8px;
-}
-
-.admin-time > button {
-  justify-self: start;
-}
-
-.admin-time-range {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-
-.admin-time-range.is-on {
-  border-color: var(--accent);
-}
-
-.admin-time-range input {
-  width: auto;
-  max-width: 190px;
 }
 
 .admin-table-wrap {
@@ -3019,4 +2993,64 @@ button,
   margin-left: 8px;
   padding: 2px 8px;
   font-size: 12px;
+}
+
+.admin-axis-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-axis-kinds small {
+  color: var(--muted);
+}
+
+.admin-axis-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+}
+
+.admin-axis-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-axis-inputs input[type='number'] {
+  width: 96px;
+}
+
+.admin-month {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.admin-month select {
+  width: auto;
+}
+
+.admin-axis-apply {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-axis-apply .is-problem {
+  color: #ff8a80;
+}
+
+.admin-axis-current {
+  color: var(--accent);
+}
+
+.admin button:not(.button):not(.admin-list-main).is-on {
+  border-color: var(--accent);
+  background: rgba(79, 209, 165, 0.14);
+  color: var(--accent);
 }
