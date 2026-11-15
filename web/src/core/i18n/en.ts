@@ -1,4 +1,18 @@
 export const en = {
+"global.co2.descriptive": "Descriptive trend estimate",
+"global.co2.minimum": "Choose at least three complete calendar years to estimate a descriptive rate. Incomplete records remain unavailable.",
+"global.co2.rateNote": "Estimated from {years} observed years ({start}–{end}), with the rate rescaled to ten years for comparison. This is not ten years of observations or a forecast.",
+"global.co2.trendMethod": "Seasonal Sen’s slope compares matching calendar months between years and takes the median of their pairwise rates. The same monthly estimator is used for monthly, annual and anomaly views.",
+"global.co2.noInference": "Short record: no confidence interval, p-value or statistically supported direction is reported. The existing significance method requires at least ten complete years.",
+"global.co2.mapNote": "Blue = decreasing; red = increasing descriptive rate in ppm per decade. All markers are hollow: direction is not statistically established. Rate comes from matching-month seasonal Sen slopes; a per-decade unit does not imply ten observed years.",
+"global.co2.chartNote": "Monthly mean CO₂ in the selected calendar year. Gold points mark monthly extrema. Select Trend per decade for a descriptive rate over a selected period.",
+
+"global.co2.quality": "OCO-2 GEOS column-average CO₂: source product, DOI, units, actual grid centre and calendar completeness are validated. Monthly means require every daily value. Fill values remain gaps; there is no interpolation. These are numerical screening checks, not retrieval-level QA or a scientific accuracy guarantee.",
+
+  'global.co2.source': 'NASA OCO-2 GEOS · Product documentation',
+  "global.co2.noTrend": "CO₂ trends are disabled: only seven complete years (2015–2021) are available; the trend method requires at least ten.",
+  "global.co2.note": "OCO-2 GEOS assimilated dry-air column-average CO₂, in ppm. This combines satellite retrievals and atmospheric modelling; it is not surface concentration, local air pollution or national emissions. Annual averages are weighted by calendar days and require 12 complete months. Lowest/highest refer to monthly means, not daily extremes.",
+
   'global.giovanni.eyebrow': 'NASA Giovanni · Model and reanalysis data',
   'global.giovanni.source': 'NASA Giovanni · Source request ↗',
   'global.giovanni.etTotal': 'Annual evapotranspiration total',

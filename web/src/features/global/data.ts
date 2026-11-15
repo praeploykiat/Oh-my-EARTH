@@ -5,9 +5,9 @@ import sourceSettings from './sourceSettings.json';
 
 export const GLOBAL_VARIABLES = ['T2M', 'PRECTOTCORR', 'RH2M', 'ALLSKY_SFC_SW_DWN'] as const;
 export type PowerVariable = typeof GLOBAL_VARIABLES[number];
-export type GlobalVariable = PowerVariable | 'NDVI' | 'SOIL_MOISTURE' | 'AOD' | 'EVAPOTRANSPIRATION';
+export type GlobalVariable = PowerVariable | 'NDVI' | 'SOIL_MOISTURE' | 'AOD' | 'EVAPOTRANSPIRATION' | 'XCO2';
 // Deferred source implementations remain testable, but are unavailable in this release.
-export const EXPLORER_VARIABLES: readonly GlobalVariable[] = ([...GLOBAL_VARIABLES,'SOIL_MOISTURE','AOD','EVAPOTRANSPIRATION'] as const).filter((key)=>sourceSettings.enabledVariables.includes(key));
+export const EXPLORER_VARIABLES: readonly GlobalVariable[] = ([...GLOBAL_VARIABLES,'SOIL_MOISTURE','AOD','EVAPOTRANSPIRATION','XCO2'] as const).filter((key)=>sourceSettings.enabledVariables.includes(key));
 export function isWaterFlux(variable: GlobalVariable) { return variable==='PRECTOTCORR' || variable==='EVAPOTRANSPIRATION'; }
 export interface YearRange { start: number; end: number }
 export const YEARS = Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => START_YEAR + i);
@@ -75,7 +75,7 @@ export function prepareGlobalAnalysis(record: SeriesPoint[], variable: GlobalVar
   const shown = view === 'annual' ? annual : view === 'anomaly' ? toAnomaly(monthly) : monthly;
   const analysisSeries = annualRain ? annual : monthly;
   // Explicit MVP display safeguards, not a guarantee of valid statistical inference.
-  const eligible = range.end - range.start + 1 >= MIN_TREND_YEARS
+  const eligible = variable!=='XCO2' && range.end - range.start + 1 >= MIN_TREND_YEARS
     && observedYears >= MIN_TREND_YEARS
     && coverage.fraction >= MIN_MONTHLY_COVERAGE
     && (!annualRain || completeYears >= MIN_TREND_YEARS);

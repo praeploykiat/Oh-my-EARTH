@@ -1,3 +1,4 @@
+import { resetCo2Cache, co2Manifest, loadCo2Record, loadCo2Map } from './co2Cache';
 import { capitalByCode, type Capital } from '../../core/geo/capitals';
 import { GLOBAL_TREND_METHOD, BOOTSTRAP_REPLICATES, BOOTSTRAP_SEED } from '../../core/stats/globalTrend';
 import { completeMonthlyRecord, EXPLORER_VARIABLES, type GlobalVariable, type YearRange } from './data';
@@ -21,8 +22,8 @@ interface StoredVariable {
 }
 interface CapitalFile { schemaVersion: 1; releaseId: string; code: string; requested: { lat: number; lon: number }; variables: Partial<Record<GlobalVariable, StoredVariable>> }
 const HASH = /^[a-f0-9]{64}$/;
-const UNITS: Record<GlobalVariable, string> = { T2M:'°C', PRECTOTCORR:'mm/day', RH2M:'%', ALLSKY_SFC_SW_DWN:'kWh/m²/day', NDVI:'1', SOIL_MOISTURE:'kg/m²',AOD:'1',EVAPOTRANSPIRATION:'mm/day' };
-const LIMITS: Record<GlobalVariable, [number,number]> = { T2M:[-100,70], PRECTOTCORR:[0,1000], RH2M:[0,100], ALLSKY_SFC_SW_DWN:[0,24], NDVI:[-0.2000001,1], SOIL_MOISTURE:[0,100],AOD:[0,100],EVAPOTRANSPIRATION:[-100,100] };
+const UNITS: Record<GlobalVariable, string> = { XCO2:'ppm', T2M:'°C', PRECTOTCORR:'mm/day', RH2M:'%', ALLSKY_SFC_SW_DWN:'kWh/m²/day', NDVI:'1', SOIL_MOISTURE:'kg/m²',AOD:'1',EVAPOTRANSPIRATION:'mm/day' };
+const LIMITS: Record<GlobalVariable, [number,number]> = { XCO2:[250,600], T2M:[-100,70], PRECTOTCORR:[0,1000], RH2M:[0,100], ALLSKY_SFC_SW_DWN:[0,24], NDVI:[-0.2000001,1], SOIL_MOISTURE:[0,100],AOD:[0,100],EVAPOTRANSPIRATION:[-100,100] };
 function fileRef(ref: FileRef, release: string) {
   if (!ref || !HASH.test(ref.sha256) || !new RegExp(`^releases/${release}/(?:capitals/[A-Z]{2}|maps/(?:T2M|PRECTOTCORR|RH2M|ALLSKY_SFC_SW_DWN|SOIL_MOISTURE|AOD|EVAPOTRANSPIRATION|NDVI)/(?:annual-20[0-9]{2}|trend-(?:monthly|annual)))\\.json$`).test(ref.path)) throw new Error('Unsafe published file reference');
 }
@@ -42,7 +43,7 @@ export function validateManifest(value: unknown): PublishedManifest {
 }
 let manifest: Promise<PublishedManifest> | undefined;
 const files=new Map<string, Promise<unknown>>();
-export function resetPublishedCache() { manifest=undefined; files.clear(); }
+export function resetPublishedCache() { manifest=undefined; files.clear(); resetCo2Cache(); }
 export function publishedManifest() {
   if (!manifest) {
     const pending=fetch(`${import.meta.env.BASE_URL}explorer-cache/manifest.json`,{cache:'no-cache'})
@@ -72,7 +73,7 @@ async function loadFile(ref: FileRef, release: string): Promise<unknown> {
 export class PublishedDataUnavailableError extends Error {
   constructor(public readonly available: string[]) {super('This location has no published observations for the selected variable');}
 }
-export async function publishedAvailability(variable: GlobalVariable) { return EXPLORER_VARIABLES.includes(variable) ? (await publishedManifest()).available[variable] ?? [] : []; }
+export async function publishedAvailability(variable: GlobalVariable) { if(variable==='XCO2')return (await co2Manifest()).capitals.map(r=>r.code!); return EXPLORER_VARIABLES.includes(variable) ? (await publishedManifest()).available[variable] ?? [] : []; }
 export function validateCapital(value: unknown, manifest: PublishedManifest, capital: Capital): CapitalFile {
   const d=value as CapitalFile;
   if (!d || d.schemaVersion!==1 || d.releaseId!==manifest.releaseId || d.code!==capital.code
@@ -109,6 +110,7 @@ export function validateCapital(value: unknown, manifest: PublishedManifest, cap
   return d;
 }
 export async function loadPublishedRecord(capital: Capital, variable: GlobalVariable): Promise<ExplorerRecord> {
+  if(variable==='XCO2')return loadCo2Record(capital);
   if(!EXPLORER_VARIABLES.includes(variable))throw new Error('NDVI is temporarily disabled');
   const m=await publishedManifest();
   if(!m.available[variable]?.includes(capital.code))throw new PublishedDataUnavailableError(m.available[variable]??[]);
@@ -124,6 +126,7 @@ export async function loadPublishedRecord(capital: Capital, variable: GlobalVari
 }
 export function hasCachedMap(mode: MapMode,range: YearRange) { return mode!=='trend' || range.start===2001 && range.end===2024; }
 export async function loadPublishedMap(variable: GlobalVariable,mode: MapMode,year: number,annualRain: boolean): Promise<Record<string,MapValue>> {
+  if(variable==='XCO2')return loadCo2Map(mode,year);
   if(!EXPLORER_VARIABLES.includes(variable))throw new Error('NDVI is temporarily disabled');
   const m=await publishedManifest();
   const group=m.maps[variable];if(!group)return {};

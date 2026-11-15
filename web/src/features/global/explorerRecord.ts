@@ -1,10 +1,11 @@
+import { loadCo2Record } from './co2Cache';
 import { capitalByCode, type Capital } from '../../core/geo/capitals';
 import { type GlobalRecord, type ValidatedVariable } from './powerRecord';
 import { loadPublishedRecord, publishedAvailability, PublishedDataUnavailableError } from './publishedCache';
 import { completeMonthlyRecord, type GlobalVariable } from './data';
 
 export type ExplorerRecord = Omit<GlobalRecord, 'variables'> & {
-  cache?: { releaseId: string; publishedAt: string; path: string };
+  cache?: { releaseId: string; publishedAt: string; path: string; base?: string };
   source: 'power' | 'modis' | 'gldas' | 'giovanni';
   variables: Partial<Record<GlobalVariable, ValidatedVariable>>;
 };
@@ -40,5 +41,5 @@ export function validateNDVIDataset(value: unknown): NDVIDataset {
 export async function ndviAvailability() { return publishedAvailability('NDVI'); }
 export { PublishedDataUnavailableError as NDVIUnavailableError };
 export async function fetchExplorerRecord(capital: Capital, variable: GlobalVariable, _refresh = false): Promise<ExplorerRecord> {
-  return loadPublishedRecord(capital,variable);
+  return variable==='XCO2'?loadCo2Record(capital):loadPublishedRecord(capital,variable);
 }

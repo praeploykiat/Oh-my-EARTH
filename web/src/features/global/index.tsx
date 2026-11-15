@@ -15,11 +15,17 @@ import { fetchExplorerRecord, recordVariable, type ExplorerRecord } from './expl
 import { useGlobalTrend } from './useGlobalTrend';
 import { mapModeLabel, parseMapSettings, type MapMode } from './mapData';
 import { SingleYearResult } from './SingleYearResult';
+import { Co2TrendChart } from './Co2TrendChart';
 import { GlobalTrendSummary } from './GlobalTrendSummary';
 import './global.css';
 
 const VIEWS: View[] = ['monthly', 'annual', 'anomaly'];
 
+function co2State(params:URLSearchParams){
+  const year=(key:string,fallback:number)=>/^\d{4}$/.test(params.get(key)??'')?Math.max(2015,Math.min(2021,Number(params.get(key)))):fallback;
+  const start=year('start',2015),end=year('end',2021);
+  return {mode:parseMapSettings(params).mode,year:year('year',2021),start:Math.min(start,end),end:Math.max(start,end)};
+}
 function initialState() {
   const params = new URLSearchParams(splitHash(window.location.hash).query);
   const variable=EXPLORER_VARIABLES.find((key) => key === params.get('v')) ?? 'T2M';
@@ -29,6 +35,7 @@ function initialState() {
     view: VIEWS.find((view) => view === params.get('view')) ?? (variable === 'NDVI' ? 'monthly' : 'annual'),
     ...parseYearRange(params),
     ...parseMapSettings(params),
+    ...(variable==='XCO2'?{...co2State(params)}:{}),
   };
 }
 
@@ -65,7 +72,7 @@ function GlobalExplorerPage({onReload}:{onReload:()=>void}) {
   return (
     <section className="global-explorer">
       <header className="global-heading">
-        <div><span className="eyebrow">{t(state.variable==='AOD'||state.variable==='EVAPOTRANSPIRATION'?'global.giovanni.eyebrow':state.variable==='SOIL_MOISTURE'?'global.gldas.eyebrow':state.variable === 'NDVI' ? 'global.ndvi.eyebrow' : 'global.eyebrow')}</span><h1>{t('global.title')}</h1><p>{t('global.intro')}</p></div>
+        <div><span className="eyebrow">{t(state.variable==='XCO2'||state.variable==='AOD'||state.variable==='EVAPOTRANSPIRATION'?'global.giovanni.eyebrow':state.variable==='SOIL_MOISTURE'?'global.gldas.eyebrow':state.variable === 'NDVI' ? 'global.ndvi.eyebrow' : 'global.eyebrow')}</span><h1>{t('global.title')}</h1><p>{t('global.intro')}</p></div>
         <div className="global-period"><strong>{state.mode === 'trend' ? `${state.start}—${state.end}` : state.year}</strong><span>{t(mapModeLabel(state.mode, state.variable))}</span></div>
       </header>
       <p className="global-scope">{t('global.scope')}</p>
@@ -83,7 +90,7 @@ function GlobalExplorerPage({onReload}:{onReload:()=>void}) {
             {EXPLORER_VARIABLES.map((key) => {
               const definition = variableByKey(key)!;
               return <label className={`global-variable ${key === state.variable ? 'is-active' : ''}`} key={key}>
-                <input type="radio" name="global-variable" value={key} checked={state.variable === key} onChange={() => setState((s) => ({ ...s, variable: key, view: key === 'NDVI' ? 'monthly' : s.view }))} />
+                <input type="radio" name="global-variable" value={key} checked={state.variable === key} onChange={() => setState((s) => ({ ...s, variable: key, view: key === 'NDVI' ? 'monthly' : s.view, ...(key==='XCO2'?{mode:'trend' as MapMode,year:2021,start:2015,end:2021}:s.variable==='XCO2'?{mode:'trend' as MapMode,start:2001,end:2024,year:2024}:{}) }))} />
                 <span>{definition.label[language]}<small>{definition.unit}</small></span>
               </label>;
             })}
@@ -93,19 +100,20 @@ function GlobalExplorerPage({onReload}:{onReload:()=>void}) {
             <select id="global-start" value={state.start} onChange={(event) => {
               const start = Number(event.target.value);
               setState((s) => ({ ...s, start, end: Math.max(start, s.end) }));
-            }}>{YEARS.map((year) => <option key={year} value={year}>{year}</option>)}</select>
+            }}>{(state.variable==='XCO2'?YEARS.filter(y=>y>=2015&&y<=2021):YEARS).map((year) => <option key={year} value={year}>{year}</option>)}</select>
             <label htmlFor="global-end">{t('global.endYear')}</label>
             <select id="global-end" value={state.end} onChange={(event) => {
               const end = Number(event.target.value);
               setState((s) => ({ ...s, end, start: Math.min(end, s.start) }));
-            }}>{YEARS.map((year) => <option key={year} value={year}>{year}</option>)}</select>
+            }}>{(state.variable==='XCO2'?YEARS.filter(y=>y>=2015&&y<=2021):YEARS).map((year) => <option key={year} value={year}>{year}</option>)}</select>
           </fieldset> : <fieldset className="global-year"><legend>{t('global.map.singleYear')}</legend>
             <label htmlFor="global-year">{t('global.map.year')}</label>
             <select id="global-year" value={state.year} onChange={(event) => setState((s) => ({ ...s, year: Number(event.target.value) }))}>
-              {YEARS.map((year) => <option key={year} value={year}>{year}</option>)}
+              {(state.variable==='XCO2'?YEARS.filter(y=>y>=2015&&y<=2021):YEARS).map((year) => <option key={year} value={year}>{year}</option>)}
             </select>
           </fieldset>}
-          <p className="global-range-note">{t('global.rangeAvailable', { start: START_YEAR, end: END_YEAR })}</p>
+          <p className="global-range-note">{t('global.rangeAvailable', { start: state.variable==='XCO2'?2015:START_YEAR, end: state.variable==='XCO2'?2021:END_YEAR })}</p>
+          {state.variable==='XCO2' && <p className="global-range-note" role="status">{t('global.co2.noInference')}</p>}
           <p className="global-controls-note">{t('cache.controls')}</p>
         </aside>
         <div className="global-content">
@@ -142,8 +150,9 @@ function GlobalResult({ capital, variable, view, range, onRecord, mode, year, on
   return <>
     {variable==='EVAPOTRANSPIRATION' && result.data.variables.EVAPOTRANSPIRATION?.series.every((p)=>p.value===null) && <p className="global-scope" role="status">{t('global.giovanni.etMissing')}</p>}
     {variable==='SOIL_MOISTURE' && result.data.variables.SOIL_MOISTURE?.series.every((p)=>p.value===null) && <p className="global-scope" role="status">{t('global.gldas.missing')}</p>}
-    {mode === 'trend' ? <GlobalChart record={result.data} capital={capital} variable={variable} view={view} range={range} label={definition.label[language]} monthlyUnit={definition.unit} /> : <SingleYearResult record={result.data} variable={variable} mode={mode} year={year} city={capital.city} />}
+    {mode === 'trend' && variable==='XCO2'?<Co2TrendChart record={result.data} range={range} view={view} city={capital.city}/>:mode === 'trend' ? <GlobalChart record={result.data} capital={capital} variable={variable} view={view} range={range} label={definition.label[language]} monthlyUnit={definition.unit} /> : <SingleYearResult record={result.data} variable={variable} mode={mode} year={year} city={capital.city} />}
     {(variable==='AOD'||variable==='EVAPOTRANSPIRATION') && <p className="global-scope">{t(variable==='AOD'?'global.giovanni.aodNote':'global.giovanni.etNote')}</p>}
+    {variable==='XCO2' && <p className="global-scope">{t('global.co2.note')}</p>}
     {variable==='SOIL_MOISTURE' && <p className="global-scope">{t('global.gldas.scope')}</p>}
     {variable === 'NDVI' && <p className="global-scope">{t('global.ndvi.scope')}</p>}
     <QualityPanel record={result.data} range={mode === 'trend' ? range : { start: year, end: year }} onRefresh={onReload} />
@@ -179,7 +188,7 @@ function GlobalChart({ record, capital, variable, view, range, label, monthlyUni
 function QualityPanel({ record, range, onRefresh }: { record: ExplorerRecord; range: YearRange; onRefresh: () => void }) {
   const { t, language } = useI18n();
   return <details className="global-quality"><summary>{t(record.source === 'modis' ? 'global.ndvi.qualityTitle' : 'global.qualityTitle')}</summary>
-    <p>{t(record.source==='giovanni'?'global.giovanni.quality':record.source==='gldas'?'global.gldas.quality':record.source === 'modis' ? 'global.ndvi.quality' : 'cache.quality')}</p>
+    <p>{t(record.variables.XCO2?'global.co2.quality':record.source==='giovanni'?'global.giovanni.quality':record.source==='gldas'?'global.gldas.quality':record.source === 'modis' ? 'global.ndvi.quality' : 'cache.quality')}</p>
     <div className="global-quality-scroll"><table><caption>{t('global.qualityPeriod', { start: range.start, end: range.end })}</caption><thead><tr>
       <th scope="col">{t('global.variable')}</th><th scope="col">{t('cache.units')}</th><th scope="col">{t('global.valid')}</th><th scope="col">{t('global.missing')}</th><th scope="col">{t('global.rejected')}</th>
     </tr></thead><tbody>{EXPLORER_VARIABLES.filter((key)=>record.variables[key]).map((key) => {
@@ -188,7 +197,7 @@ function QualityPanel({ record, range, onRefresh }: { record: ExplorerRecord; ra
       const inRange = (month: string) => Number(month.slice(0, 4)) >= range.start && Number(month.slice(0, 4)) <= range.end;
       return <tr key={key}><th scope="row">{variableByKey(key)!.label[language]}</th><td>{data.sourceUnit}</td><td>{coverage.valid}/{coverage.total}</td><td>{data.missing.filter(inRange).length}</td><td>{data.rejected.filter(inRange).length}</td></tr>;
     })}</tbody></table></div>
-    {record.cache && <><p>{t('cache.snapshot', { date:new Date(record.cache.publishedAt).toLocaleString(language==='th'?'th-TH':'en-GB') })}</p><a href={`${import.meta.env.BASE_URL}explorer-cache/${record.cache.path}`}>{t('cache.download')}</a></>}
+    {record.cache && <><p>{t('cache.snapshot', { date:new Date(record.cache.publishedAt).toLocaleString(language==='th'?'th-TH':'en-GB') })}</p><a href={`${import.meta.env.BASE_URL}${record.cache.base??'explorer-cache'}/${record.cache.path}`}>{t('cache.download')}</a></>}
     <p>{t('global.retrieved', { date: new Date(record.retrievedAt).toLocaleString(language === 'th' ? 'th-TH' : 'en-GB') })}</p>
     <p>{t('global.requestedCoordinates', { lat: record.requested.lat.toFixed(4), lon: record.requested.lon.toFixed(4) })}<br />
       {t('global.responseCoordinates', { lat: record.responseCoordinates.lat.toFixed(4), lon: record.responseCoordinates.lon.toFixed(4) })}</p>

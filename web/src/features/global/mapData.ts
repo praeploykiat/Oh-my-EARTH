@@ -14,7 +14,7 @@ export function parseMapSettings(params: URLSearchParams): { mode: MapMode; year
     year: raw && /^\d{4}$/.test(raw) ? Math.max(START_YEAR, Math.min(END_YEAR, Number(raw))) : END_YEAR,
   };
 }
-export type MapValue = { value: number | null; evidence?: GlobalTrendResult['evidence']; lower?: number; upper?: number; failed?: boolean; months?: string[] };
+export type MapValue = { value: number | null; descriptive?: boolean; evidence?: GlobalTrendResult['evidence']; lower?: number; upper?: number; failed?: boolean; months?: string[] };
 export function mapAnalysis(record: GlobalRecord | ExplorerRecord, variable: GlobalVariable, range: YearRange, view: View) {
   const analysis = prepareGlobalAnalysis(recordVariable(record, variable).series, variable, range, view);
   // A complete period prevents missing seasons from biasing cross-location comparisons.
@@ -61,8 +61,8 @@ export function mapModeLabel(mode: MapMode, variable: GlobalVariable) {
     : `global.map.${mode}` as const;
 }
 export function mapScale(variable: GlobalVariable, mode: MapMode, annualRain: boolean) {
-  const average: Record<GlobalVariable, [number, number]> = { AOD:[0,1], EVAPOTRANSPIRATION:[-100,1500], SOIL_MOISTURE:[0,50], NDVI: [-0.2, 1], T2M: [-20, 35], PRECTOTCORR: [0, annualRain ? 4000 : 12], RH2M: [0, 100], ALLSKY_SFC_SW_DWN: [0, 8] };
-  const extent = { AOD:0.1, EVAPOTRANSPIRATION:annualRain?100:.3, SOIL_MOISTURE:5, NDVI: 0.1, T2M: 1, PRECTOTCORR: annualRain ? 300 : 1, RH2M: 5, ALLSKY_SFC_SW_DWN: 0.5 }[variable];
+  const average: Record<GlobalVariable, [number, number]> = { XCO2:[390,430], AOD:[0,1], EVAPOTRANSPIRATION:[-100,1500], SOIL_MOISTURE:[0,50], NDVI: [-0.2, 1], T2M: [-20, 35], PRECTOTCORR: [0, annualRain ? 4000 : 12], RH2M: [0, 100], ALLSKY_SFC_SW_DWN: [0, 8] };
+  const extent = { XCO2:30, AOD:0.1, EVAPOTRANSPIRATION:annualRain?100:.3, SOIL_MOISTURE:5, NDVI: 0.1, T2M: 1, PRECTOTCORR: annualRain ? 300 : 1, RH2M: 5, ALLSKY_SFC_SW_DWN: 0.5 }[variable];
   if (mode === 'trend') return [-extent, extent] as [number, number];
   if(variable==='EVAPOTRANSPIRATION')return [-50,mode==='average'?1500:200] as [number,number];
   if (isWaterFlux(variable)) return [0, mode === 'average' ? 4000 : 700] as [number, number];

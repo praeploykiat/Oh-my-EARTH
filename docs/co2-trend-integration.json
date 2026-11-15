@@ -1,0 +1,28 @@
+{
+  "sourceReleaseId": "4423a5b567777114f2a15485e9e8f5bf246812826c5c39ca8034572a8330f333",
+  "method": "descriptive-seasonal-sen-v1",
+  "period": [
+    2015,
+    2021
+  ],
+  "unit": "ppm/decade",
+  "independentScipyCases": 211,
+  "scipyVersion": "1.18.1",
+  "webTestsPassed": 169,
+  "existingCacheFilesValidated": 372,
+  "co2CacheFilesValidated": 203,
+  "productionBuildWithInvalidDatabaseURL": "passed",
+  "browserVerified": [
+    "2015\u20132021 Bangkok +24.96 ppm/decade; 195 map values",
+    "2019\u20132021 Bangkok +25.45 ppm/decade; custom map loaded",
+    "2020\u20132021 slope unavailable with three-year minimum explanation",
+    "annual 2021 average remains 416.21 ppm",
+    "POWER restores normal trend inference",
+    "Workbench, Game, Hotspot and Methods render"
+  ],
+  "consoleErrors": 0,
+  "statisticalInferenceEnabled": false,
+  "databaseRequiredForExplorer": false,
+  "credentialScan": "passed",
+  "deployed": false
+}

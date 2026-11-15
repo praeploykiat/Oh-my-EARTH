@@ -1,3 +1,4 @@
+import { co2Manifest, loadCo2Map } from './co2Cache';
 import { isWaterFlux } from './data';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { View } from '../../core/analysis';
@@ -14,7 +15,7 @@ import { WorldMap } from './WorldMap';
 export function MapExplorer({ selected, onSelect, variable, range, view, recordUpdate, mode, year, onMode, onReload }: { onReload: () => void; mode: MapMode; year: number; onMode: (mode: MapMode) => void; recordUpdate?: { code: string; record: ExplorerRecord }; selected: Capital; onSelect: (code: string) => void; variable: GlobalVariable; range: YearRange; view: View }) {
   const { t, language } = useI18n();
   const [stored, setStored] = useState<Partial<Record<GlobalVariable, Record<string, ExplorerRecord>>>>({});
-  const group = variable === 'NDVI' ? 'NDVI' : variable==='SOIL_MOISTURE'?'SOIL_MOISTURE':variable==='AOD'?'AOD':variable==='EVAPOTRANSPIRATION'?'EVAPOTRANSPIRATION':'T2M';
+  const group = variable==='XCO2'?'XCO2':variable === 'NDVI' ? 'NDVI' : variable==='SOIL_MOISTURE'?'SOIL_MOISTURE':variable==='AOD'?'AOD':variable==='EVAPOTRANSPIRATION'?'EVAPOTRANSPIRATION':'T2M';
   const records = stored[group] ?? {};
   const setRecords = (update: (records: Record<string, ExplorerRecord>) => Record<string, ExplorerRecord>) => setStored((all) => ({ ...all, [group]: update(all[group] ?? {}) }));
   const [available, setAvailable] = useState<string[]>([]);
@@ -24,19 +25,19 @@ export function MapExplorer({ selected, onSelect, variable, range, view, recordU
   const generation = useRef(0);
   const annualRain = isWaterFlux(variable) && view === 'annual';
   const key = JSON.stringify([variable, mode, mode === 'trend' ? range : year, annualRain]);
-  const wanted = hasCachedMap(mode,range);
+  const wanted = variable==='XCO2' || hasCachedMap(mode,range);
   const [cached, setCached] = useState<{ key: string; values: Record<string,MapValue>; error?: boolean }>({ key:'', values:{} });
   const [trends, setTrends] = useState<{ key:string; values:Record<string,MapValue> }>({ key:'', values:{} });
   const trendCache = useRef(new Map<string,MapValue>());
   useEffect(() => {
     let active=true;
-    publishedManifest().then((m)=>{if(active){setAvailable(m.available[variable]??[]);setPublishedAt(m.publishedAt);}}).catch(()=>{});
+    (variable==='XCO2'?co2Manifest().then(m=>({available:{XCO2:m.capitals.map(r=>r.code!)} as Partial<Record<GlobalVariable,string[]>>,publishedAt:m.publishedAt})):publishedManifest()).then((m)=>{if(active){setAvailable(m.available[variable]??[]);setPublishedAt(m.publishedAt);}}).catch(()=>{});
     return()=>{active=false;};
   },[variable]);
   useEffect(() => {
     if(!wanted)return;
     let active=true;
-    loadPublishedMap(variable,mode,year,annualRain).then((values)=>{if(active)setCached({key,values});}).catch(()=>{if(active)setCached({key,values:{},error:true});});
+    (variable==='XCO2'?loadCo2Map(mode,year,range):loadPublishedMap(variable,mode,year,annualRain)).then((values)=>{if(active)setCached({key,values});}).catch(()=>{if(active)setCached({key,values:{},error:true});});
     return()=>{active=false;};
   },[key,wanted]);
   useEffect(() => {
@@ -95,9 +96,10 @@ export function MapExplorer({ selected, onSelect, variable, range, view, recordU
       <span>{unit}{mode === 'trend' ? ` / ${t('global.map.decade')}` : ''}</span>
       <div className="global-color-ramp" style={{ background: `linear-gradient(to right, ${Array.from({ length: 9 }, (_, i) => mapColor(domain[0] + (domain[1] - domain[0]) * i / 8, domain, mode)).join(',')})` }} />
       <div className="global-color-ticks"><span>≤ {domain[0]}</span><span>{(domain[0] + domain[1]) / 2}</span><span>≥ {domain[1]}</span></div>
-      <p>{t(variable==='EVAPOTRANSPIRATION' && mode!=='trend'?'global.giovanni.etNote':mode === 'trend' ? 'global.map.trendNote' : variable === 'NDVI' ? mode === 'average' ? 'global.ndvi.meanNote' : 'global.ndvi.extremeNote' : mode === 'average' ? isWaterFlux(variable) ? 'global.map.rainNote' : 'global.map.meanNote' : isWaterFlux(variable) ? 'global.map.rainExtremeNote' : 'global.map.extremeNote')}</p>
+      <p>{t(variable==='EVAPOTRANSPIRATION' && mode!=='trend'?'global.giovanni.etNote':mode === 'trend' ? variable==='XCO2'?'global.co2.mapNote':'global.map.trendNote' : variable === 'NDVI' ? mode === 'average' ? 'global.ndvi.meanNote' : 'global.ndvi.extremeNote' : mode === 'average' ? isWaterFlux(variable) ? 'global.map.rainNote' : 'global.map.meanNote' : isWaterFlux(variable) ? 'global.map.rainExtremeNote' : 'global.map.extremeNote')}</p>
       <p>{t('global.map.symbols')}</p>
-      <p>{t('cache.loadingNote')}</p>
+      <p>{t(variable==='XCO2'?'cache.controls':'cache.loadingNote')}</p>
+      {variable==='XCO2' && <p>{t('global.co2.note')}</p>}
       {variable==='SOIL_MOISTURE' && <p>{t('global.gldas.scope')}</p>}
     </div>
   </div>;
