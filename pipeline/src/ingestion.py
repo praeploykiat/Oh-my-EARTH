@@ -111,6 +111,24 @@ def ingest_gldas(conn,job):
     return doc
 
 
+def ingest_giovanni(conn,job):
+    import gzip
+    from .giovanni import fetch,observation_batch
+    cached=job['checkpoint'].get('artifact')
+    if artifact_ok(cached):return observation_batch(cached['path'])
+    variable=job['spec']['variable'];point=next(c for c in catalog() if c['code']==job['spec']['country'])
+    pilot=ROOT/'pipeline/raw/giovanni-expansion'/f"{variable}-{point['code']}.json"
+    if job['spec'].get('generation')=='initial' and pilot.exists():path=pilot
+    else:
+        csv=fetch(variable,point)
+        data={'variable':variable,'requested':point,'retrievedAt':datetime.now(timezone.utc).isoformat(),'csv':csv}
+        path=RAW/'giovanni'/f"{job['work_key']}-{job['lease_token']}.json.gz";path.parent.mkdir(parents=True,exist_ok=True)
+        partial=path.with_suffix('.part');partial.write_bytes(gzip.compress(json.dumps(data).encode(),mtime=0));os.replace(partial,path)
+    doc=observation_batch(path)
+    jobs.checkpoint(conn,job,{'artifact':{'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}})
+    return doc
+
+
 def ingest_ndvi(conn,job):
     cached=job['checkpoint'].get('artifact')
     if artifact_ok(cached): return ndvi_batch(cached['path'])
@@ -186,6 +204,7 @@ def run_one(conn,source=None,allowed_sources=None):
     try:
         if job['source']=='power':doc=ingest_power(conn,job)
         elif job['source']=='gldas':doc=ingest_gldas(conn,job)
+        elif job['source']=='giovanni':doc=ingest_giovanni(conn,job)
         else:doc=ingest_ndvi(conn,job)
         if doc is None:
             jobs.defer(conn,job)

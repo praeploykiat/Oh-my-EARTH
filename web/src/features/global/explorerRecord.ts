@@ -5,7 +5,7 @@ import { completeMonthlyRecord, type GlobalVariable } from './data';
 
 export type ExplorerRecord = Omit<GlobalRecord, 'variables'> & {
   cache?: { releaseId: string; publishedAt: string; path: string };
-  source: 'power' | 'modis' | 'gldas';
+  source: 'power' | 'modis' | 'gldas' | 'giovanni';
   variables: Partial<Record<GlobalVariable, ValidatedVariable>>;
 };
 export function recordVariable(record: Pick<ExplorerRecord, 'variables'>, variable: GlobalVariable): ValidatedVariable {

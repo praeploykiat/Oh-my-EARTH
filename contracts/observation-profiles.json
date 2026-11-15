@@ -78,5 +78,30 @@
         ]
       }
     }
+  },
+  "giovanni": {
+    "qa_policy": "giovanni-monthly-screen-v1",
+    "variables": {
+      "AOD": {
+        "unit": "1",
+        "temporal_kind": "monthly_mean",
+        "annual_aggregation": "day_weighted_mean",
+        "minimum": 0,
+        "maximum": 100,
+        "source_units": [
+          "1"
+        ]
+      },
+      "EVAPOTRANSPIRATION": {
+        "unit": "mm/day",
+        "temporal_kind": "mean_daily_rate",
+        "annual_aggregation": "sum_rate_by_calendar_days",
+        "minimum": -100,
+        "maximum": 100,
+        "source_units": [
+          "kg m-2 s-1"
+        ]
+      }
+    }
   }
 }

@@ -40,7 +40,7 @@ describe('database-published exploration',()=>{
     await expect(loadPublishedRecord(capitalByCode('TH')!,'NDVI')).rejects.toThrow('temporarily disabled');
     await expect(loadPublishedMap('NDVI','average',2024,false)).rejects.toThrow('temporarily disabled');
     expect(urls).toHaveLength(0);
-    expect(Object.keys(manifest.available).sort()).toEqual(['ALLSKY_SFC_SW_DWN','PRECTOTCORR','RH2M','SOIL_MOISTURE','T2M']);
+    expect(Object.keys(manifest.available).sort()).toEqual(['ALLSKY_SFC_SW_DWN','AOD','EVAPOTRANSPIRATION','PRECTOTCORR','RH2M','SOIL_MOISTURE','T2M']);
   });
   it('loads GLDAS from the same capital file without mixing POWER units or substituting an island cell',async()=>{
     const power=await loadPublishedRecord(capitalByCode('TH')!,'T2M');
@@ -60,6 +60,21 @@ describe('database-published exploration',()=>{
     await expect(loadPublishedRecord(capitalByCode('TH')!,'T2M')).rejects.toThrow('checksum');
     corrupt=false;
     await expect(loadPublishedRecord(capitalByCode('TH')!,'T2M')).resolves.toHaveProperty('cache.releaseId',manifest.releaseId);
+  });
+  it('keeps AOD and ET products separate while reusing one cached capital file',async()=>{
+    const aod=await loadPublishedRecord(capitalByCode('TH')!,'AOD');
+    const et=await loadPublishedRecord(capitalByCode('TH')!,'EVAPOTRANSPIRATION');
+    expect(aod.variables.EVAPOTRANSPIRATION).toBeUndefined();
+    expect(et.variables.AOD).toBeUndefined();
+    expect(aod.responseCoordinates).toEqual({lat:14,lon:100.625});
+    expect(et.responseCoordinates).toEqual({lat:13.875,lon:100.625});
+    expect(urls).toHaveLength(2);
+    const map=await loadPublishedMap('EVAPOTRANSPIRATION','average',2024,true);
+    expect(map.TH.value).toBe(yearSummary(et,'EVAPOTRANSPIRATION',2024,'average').value);
+    const islandAOD=await loadPublishedRecord(capitalByCode('MV')!,'AOD');
+    const islandET=await loadPublishedRecord(capitalByCode('MV')!,'EVAPOTRANSPIRATION');
+    expect(islandAOD.variables.AOD!.series.every(p=>p.value!==null)).toBe(true);
+    expect(islandET.variables.EVAPOTRANSPIRATION!.series.every(p=>p.value===null)).toBe(true);
   });
   it('pins one manifest until explicit reload',async()=>{
     expect(await publishedManifest()).toBe(await publishedManifest());

@@ -3,7 +3,7 @@ import { GLOBAL_TREND_METHOD, BOOTSTRAP_REPLICATES, BOOTSTRAP_SEED } from '../..
 import { completeMonthlyRecord, EXPLORER_VARIABLES, type GlobalVariable, type YearRange } from './data';
 import type { MapMode, MapValue } from './mapData';
 import type { ExplorerRecord } from './explorerRecord';
-import { globalSource,gldasCell,GLDAS_PARAMETER,sourceUrl } from './variables';
+import { globalSource,gldasCell,sourceUrl,merraCell,giovanniParameter } from './variables';
 
 export interface FileRef { path: string; sha256: string }
 export interface PublishedManifest {
@@ -15,15 +15,16 @@ export interface PublishedManifest {
 }
 interface StoredVariable {
   unit: string; values: (number | null)[]; missing: string[]; rejected: string[];
-  source: 'power' | 'modis' | 'gldas'; product: string; productVersion: string; qaPolicy: string; normalizationVersion: string;
+  source: 'power' | 'modis' | 'gldas' | 'giovanni'; product: string; productVersion: string; qaPolicy: string; normalizationVersion: string;
   retrievedAt: string; artifactSha256: string; responseCoordinates: { lat: number; lon: number }; sourceUrl: string; sources: string[];
+  sourceCoverage?: Record<string,{expected:number;present:number;valid:number}>;
 }
 interface CapitalFile { schemaVersion: 1; releaseId: string; code: string; requested: { lat: number; lon: number }; variables: Partial<Record<GlobalVariable, StoredVariable>> }
 const HASH = /^[a-f0-9]{64}$/;
-const UNITS: Record<GlobalVariable, string> = { T2M:'°C', PRECTOTCORR:'mm/day', RH2M:'%', ALLSKY_SFC_SW_DWN:'kWh/m²/day', NDVI:'1', SOIL_MOISTURE:'kg/m²' };
-const LIMITS: Record<GlobalVariable, [number,number]> = { T2M:[-100,70], PRECTOTCORR:[0,1000], RH2M:[0,100], ALLSKY_SFC_SW_DWN:[0,24], NDVI:[-0.2000001,1], SOIL_MOISTURE:[0,100] };
+const UNITS: Record<GlobalVariable, string> = { T2M:'°C', PRECTOTCORR:'mm/day', RH2M:'%', ALLSKY_SFC_SW_DWN:'kWh/m²/day', NDVI:'1', SOIL_MOISTURE:'kg/m²',AOD:'1',EVAPOTRANSPIRATION:'mm/day' };
+const LIMITS: Record<GlobalVariable, [number,number]> = { T2M:[-100,70], PRECTOTCORR:[0,1000], RH2M:[0,100], ALLSKY_SFC_SW_DWN:[0,24], NDVI:[-0.2000001,1], SOIL_MOISTURE:[0,100],AOD:[0,100],EVAPOTRANSPIRATION:[-100,100] };
 function fileRef(ref: FileRef, release: string) {
-  if (!ref || !HASH.test(ref.sha256) || !new RegExp(`^releases/${release}/(?:capitals/[A-Z]{2}|maps/(?:T2M|PRECTOTCORR|RH2M|ALLSKY_SFC_SW_DWN|SOIL_MOISTURE|NDVI)/(?:annual-20[0-9]{2}|trend-(?:monthly|annual)))\\.json$`).test(ref.path)) throw new Error('Unsafe published file reference');
+  if (!ref || !HASH.test(ref.sha256) || !new RegExp(`^releases/${release}/(?:capitals/[A-Z]{2}|maps/(?:T2M|PRECTOTCORR|RH2M|ALLSKY_SFC_SW_DWN|SOIL_MOISTURE|AOD|EVAPOTRANSPIRATION|NDVI)/(?:annual-20[0-9]{2}|trend-(?:monthly|annual)))\\.json$`).test(ref.path)) throw new Error('Unsafe published file reference');
 }
 export function validateManifest(value: unknown): PublishedManifest {
   const d=value as PublishedManifest;
@@ -82,21 +83,28 @@ export function validateCapital(value: unknown, manifest: PublishedManifest, cap
   for (const key of EXPLORER_VARIABLES) {
     const v=d.variables[key];if(!v)continue;
     const [low,high]=LIMITS[key];
-    const cell=key==='SOIL_MOISTURE'?gldasCell(capital):capital;
-    const tolerance=key==='SOIL_MOISTURE'?0.000001:0.01;
+    const cell=key==='AOD'?merraCell(capital):key==='SOIL_MOISTURE'||key==='EVAPOTRANSPIRATION'?gldasCell(capital):capital;
+    const tolerance=globalSource(key)==='power'?0.01:0.000001;
     if (v.unit!==UNITS[key] || !Array.isArray(v.values) || v.values.length!==288 || !v.values.every((x)=>x===null || typeof x==='number' && Number.isFinite(x) && x>=low && x<=high)
       || !Array.isArray(v.missing) || !Array.isArray(v.rejected) || !Number.isFinite(Date.parse(v.retrievedAt))
-      || v.source!==globalSource(key) || v.qaPolicy!==(key==='SOIL_MOISTURE'?'gldas-soil-screen-v1':key==='NDVI'?'good-land-clear-v1':'power-screen-v1')
-      || (key==='SOIL_MOISTURE' ? v.product!=='GLDAS_NOAH025_M' || v.productVersion!=='2.1' : key==='NDVI' ? v.product!=='MOD13A3' || v.productVersion!=='061' : v.product!=='NASA POWER monthly point RE' || !/^v\d+\.\d+\.\d+$/.test(v.productVersion))
+      || v.source!==globalSource(key) || v.qaPolicy!==(key==='AOD'||key==='EVAPOTRANSPIRATION'?'giovanni-monthly-screen-v1':key==='SOIL_MOISTURE'?'gldas-soil-screen-v1':key==='NDVI'?'good-land-clear-v1':'power-screen-v1')
+      || (key==='AOD' ? v.product!=='M2T1NXAER' || v.productVersion!=='5.12.4' : key==='SOIL_MOISTURE'||key==='EVAPOTRANSPIRATION' ? v.product!=='GLDAS_NOAH025_M' || v.productVersion!=='2.1' : key==='NDVI' ? v.product!=='MOD13A3' || v.productVersion!=='061' : v.product!=='NASA POWER monthly point RE' || !/^v\d+\.\d+\.\d+$/.test(v.productVersion))
       || v.normalizationVersion!=='monthly-observation-v1' || !HASH.test(v.artifactSha256)
       || !Array.isArray(v.sources) || !v.sources.every((s)=>typeof s==='string')
       || !v.responseCoordinates || !Number.isFinite(v.responseCoordinates.lat) || !Number.isFinite(v.responseCoordinates.lon)
       || Math.abs(v.responseCoordinates.lat-cell.lat)>tolerance || Math.abs(v.responseCoordinates.lon-cell.lon)>tolerance) throw new Error('Invalid published observations');
     const reasons=[...v.missing,...v.rejected];
+    if(key==='AOD') {
+      if(!v.sourceCoverage || Object.keys(v.sourceCoverage).length!==288)throw new Error('Missing hourly provenance');
+      months.forEach((m,i)=>{
+        const c=v.sourceCoverage![m];const hours=new Date(Date.UTC(Number(m.slice(0,4)),Number(m.slice(5)),0)).getUTCDate()*24;
+        if(!c || c.expected!==hours || !Number.isInteger(c.present) || !Number.isInteger(c.valid) || c.valid<0 || c.valid>c.present || c.present>hours || (v.values[i]!==null)!==(c.valid===hours))throw new Error('Incorrect hourly coverage');
+      });
+    }
     if(new Set(reasons).size!==reasons.length || reasons.some((m)=>!months.includes(m)) || months.some((m,i)=>(v.values[i]===null)!==reasons.includes(m))) throw new Error('Invalid published quality counts');
     const url=new URL(v.sourceUrl);
     if(url.protocol!=='https:' || !['power.larc.nasa.gov','appeears.earthdatacloud.nasa.gov','api.giovanni.earthdata.nasa.gov'].includes(url.hostname) || url.username || url.password) throw new Error('Invalid source provenance URL');
-    if(key==='SOIL_MOISTURE' && (url.hostname!=='api.giovanni.earthdata.nasa.gov' || url.pathname!=='/timeseries' || url.searchParams.get('data')!==GLDAS_PARAMETER || url.searchParams.get('location')!==`[${capital.lat.toFixed(4)},${capital.lon.toFixed(4)}]` || url.searchParams.get('time')!=='2001-01-01T00:00:00/2024-12-31T23:59:59' || [...url.searchParams.keys()].some((k)=>!['data','location','time'].includes(k))))throw new Error('Invalid GLDAS request provenance');
+    if(['SOIL_MOISTURE','AOD','EVAPOTRANSPIRATION'].includes(key) && (url.hostname!=='api.giovanni.earthdata.nasa.gov' || url.pathname!=='/timeseries' || url.searchParams.get('data')!==giovanniParameter(key) || url.searchParams.get('location')!==`[${capital.lat.toFixed(4)},${capital.lon.toFixed(4)}]` || url.searchParams.get('time')!=='2001-01-01T00:00:00/2024-12-31T23:59:59' || [...url.searchParams.keys()].some((k)=>!['data','location','time'].includes(k))))throw new Error('Invalid GLDAS request provenance');
   }
   return d;
 }
@@ -108,7 +116,7 @@ export async function loadPublishedRecord(capital: Capital, variable: GlobalVari
   const selected=d.variables[variable];if(!selected)throw new Error('Published variable is missing');
   const variables: ExplorerRecord['variables']={};
   for(const key of EXPLORER_VARIABLES) {
-    const v=d.variables[key];if(!v || v.source!==selected.source)continue;
+    const v=d.variables[key];if(!v || v.source!==selected.source || v.product!==selected.product || v.productVersion!==selected.productVersion)continue;
     variables[key]={series:completeMonthlyRecord([]).map((p,i)=>({...p,value:v.values[i]})),sourceUnit:v.unit,missing:v.missing,rejected:v.rejected};
   }
   return {source:selected.source,variables,requested:d.requested,responseCoordinates:selected.responseCoordinates,retrievedAt:selected.retrievedAt,

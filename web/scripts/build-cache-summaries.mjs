@@ -14,7 +14,7 @@ try {
     const full = path.join(directory, file); await mkdir(path.dirname(full), { recursive: true });
     await writeFile(full, JSON.stringify(data, (_key, value) => { if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('Non-finite map summary'); return value; }));
   };
-  for (const variable of ['T2M','PRECTOTCORR','RH2M','ALLSKY_SFC_SW_DWN','SOIL_MOISTURE','NDVI']) {
+  for (const variable of ['T2M','PRECTOTCORR','RH2M','ALLSKY_SFC_SW_DWN','SOIL_MOISTURE','AOD','EVAPOTRANSPIRATION','NDVI']) {
     const records = Object.entries(input.capitals).filter(([,c]) => c.variables[variable]).map(([code,c]) => {
       const v=c.variables[variable];
       return [code, { ...c, source:v.source, retrievedAt:v.retrievedAt, responseCoordinates:v.responseCoordinates, requestUrl:v.sourceUrl, sources:v.sources, raw:null,
@@ -35,7 +35,7 @@ try {
       await save(file,{schemaVersion:1,releaseId:input.releaseId,variable,kind:'annual',year,records:values});
       maps[variable].annual[year]=file;
     }
-    for (const basis of variable==='PRECTOTCORR'?['monthly','annual']:['monthly']) {
+    for (const basis of ['PRECTOTCORR','EVAPOTRANSPIRATION'].includes(variable)?['monthly','annual']:['monthly']) {
       const values={};
       for (const [code,record] of records) {
         const analysis=mapAnalysis(record,variable,{start:2001,end:2024},basis);

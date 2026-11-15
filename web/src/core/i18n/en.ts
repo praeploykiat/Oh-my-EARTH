@@ -1,4 +1,12 @@
 export const en = {
+  'global.giovanni.eyebrow': 'NASA Giovanni · Model and reanalysis data',
+  'global.giovanni.source': 'NASA Giovanni · Source request ↗',
+  'global.giovanni.etTotal': 'Annual evapotranspiration total',
+  'global.giovanni.etMissing': 'This GLDAS cell has no valid evapotranspiration data for 2001–2024. Coastal and island cells may lack model land coverage. Missing values are not zeros, and no neighbouring cell has been substituted.',
+  'global.giovanni.etBasis': 'Trend and significance use complete annual evapotranspiration totals, in mm/year per decade. Monthly and anomaly views instead test monthly mean daily rates.',
+  'global.giovanni.etNote': 'GLDAS Noah 2.1 modelled evapotranspiration: monthly mean rates in mm/day, annual totals in mm/year. Lowest/highest months compare monthly totals in mm/month. Signed rates are preserved: negative values can represent net condensation. Complete months and all 12 months are required for yearly summaries. These are grid-cell estimates, not measured crop water use or drought diagnoses.',
+  'global.giovanni.aodNote': 'MERRA-2 reanalysis aerosol optical depth at 550 nm, dimensionless. Every expected hourly value must be valid before a monthly mean is published. Annual averages are weighted by calendar days. This describes the atmospheric aerosol column, not surface PM2.5 or an air-quality index. The quality panel reports the actual 0.5° × 0.625° cell centre.',
+  'global.giovanni.quality': 'Giovanni access to separately identified MERRA-2 and GLDAS datasets. Product, parameter, units, period and exact source grid cell are checked. Missing/fill values remain gaps; invalid values are excluded. AOD requires complete hourly coverage for each monthly mean. ET is converted from kg/m²/s to mm/day. These screening checks do not establish scientific accuracy. No neighbouring cells are substituted.',
   'global.gldas.eyebrow': 'NASA GLDAS · Modelled soil moisture',
   'global.gldas.modelled': 'Modelled',
   'global.gldas.missing': 'This GLDAS cell has no valid soil-moisture values for 2001–2024. Coarse model land coverage can leave coastal and island capitals without data. These gaps are not zeros, and no neighbouring cell has been substituted.',

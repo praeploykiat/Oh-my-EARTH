@@ -1,3 +1,4 @@
+import { isWaterFlux } from './data';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { View } from '../../core/analysis';
 import { START_YEAR, END_YEAR } from '../../core/data/range';
@@ -64,7 +65,7 @@ function GlobalExplorerPage({onReload}:{onReload:()=>void}) {
   return (
     <section className="global-explorer">
       <header className="global-heading">
-        <div><span className="eyebrow">{t(state.variable==='SOIL_MOISTURE'?'global.gldas.eyebrow':state.variable === 'NDVI' ? 'global.ndvi.eyebrow' : 'global.eyebrow')}</span><h1>{t('global.title')}</h1><p>{t('global.intro')}</p></div>
+        <div><span className="eyebrow">{t(state.variable==='AOD'||state.variable==='EVAPOTRANSPIRATION'?'global.giovanni.eyebrow':state.variable==='SOIL_MOISTURE'?'global.gldas.eyebrow':state.variable === 'NDVI' ? 'global.ndvi.eyebrow' : 'global.eyebrow')}</span><h1>{t('global.title')}</h1><p>{t('global.intro')}</p></div>
         <div className="global-period"><strong>{state.mode === 'trend' ? `${state.start}—${state.end}` : state.year}</strong><span>{t(mapModeLabel(state.mode, state.variable))}</span></div>
       </header>
       <p className="global-scope">{t('global.scope')}</p>
@@ -111,7 +112,7 @@ function GlobalExplorerPage({onReload}:{onReload:()=>void}) {
           <MapExplorer onReload={onReload} mode={state.mode} year={state.year} onMode={(mode) => setState((s) => ({ ...s, mode }))} recordUpdate={mapRecord} variable={state.variable} range={{ start: state.start, end: state.end }} view={state.view} selected={capital} onSelect={(country) => setState((s) => ({ ...s, country }))} />
           <div className="global-result-heading"><div><span className="eyebrow">{capital.country}</span><h2>{capital.city}</h2></div>
             {state.mode === 'trend' && <div className="global-views" role="group" aria-label={t('global.view')}>
-              {VIEWS.map((view) => <button key={view} type="button" aria-pressed={view === state.view} onClick={() => setState((s) => ({ ...s, view }))}>{t(view === 'annual' && state.variable === 'PRECTOTCORR' ? 'global.yearlyTotal' : `view.${view}`)}</button>)}
+              {VIEWS.map((view) => <button key={view} type="button" aria-pressed={view === state.view} onClick={() => setState((s) => ({ ...s, view }))}>{t(view === 'annual' && isWaterFlux(state.variable) ? 'global.yearlyTotal' : `view.${view}`)}</button>)}
             </div>}
           </div>
           <GlobalResult onReload={onReload} mode={state.mode} year={state.year} onRecord={onRecord} key={`${capital.code}:${state.variable}`} capital={capital} variable={state.variable} view={state.view} range={{ start: state.start, end: state.end }} />
@@ -139,8 +140,10 @@ function GlobalResult({ capital, variable, view, range, onRecord, mode, year, on
   if (result.status === 'error') return <div className="result-state is-error" role="alert"><strong>{t('cache.failed')}</strong><p>{t('cache.retryHelp')}</p><a href={sourceUrl(variable,capital)} target="_blank" rel="noreferrer">{t(sourceLabel(variable))}</a><button type="button" className="button-secondary" onClick={() => setAttempt((n) => n + 1)}>{t('state.retry')}</button></div>;
   const definition = variableByKey(variable)!;
   return <>
+    {variable==='EVAPOTRANSPIRATION' && result.data.variables.EVAPOTRANSPIRATION?.series.every((p)=>p.value===null) && <p className="global-scope" role="status">{t('global.giovanni.etMissing')}</p>}
     {variable==='SOIL_MOISTURE' && result.data.variables.SOIL_MOISTURE?.series.every((p)=>p.value===null) && <p className="global-scope" role="status">{t('global.gldas.missing')}</p>}
     {mode === 'trend' ? <GlobalChart record={result.data} capital={capital} variable={variable} view={view} range={range} label={definition.label[language]} monthlyUnit={definition.unit} /> : <SingleYearResult record={result.data} variable={variable} mode={mode} year={year} city={capital.city} />}
+    {(variable==='AOD'||variable==='EVAPOTRANSPIRATION') && <p className="global-scope">{t(variable==='AOD'?'global.giovanni.aodNote':'global.giovanni.etNote')}</p>}
     {variable==='SOIL_MOISTURE' && <p className="global-scope">{t('global.gldas.scope')}</p>}
     {variable === 'NDVI' && <p className="global-scope">{t('global.ndvi.scope')}</p>}
     <QualityPanel record={result.data} range={mode === 'trend' ? range : { start: year, end: year }} onRefresh={onReload} />
@@ -161,13 +164,13 @@ function GlobalChart({ record, capital, variable, view, range, label, monthlyUni
       <span>{t('global.validMonths', { count: coverage.valid, total: coverage.total })} ({(coverage.fraction * 100).toFixed(1)}%)</span>
       <span>{t('global.completeYears', { count: completeYears, total: range.end - range.start + 1 })}</span>
     </div>
-    <div className="card"><div className="card-header"><span>{label} ({unit})</span><span className="legend"><i className="legend-line" />{t(variable==='SOIL_MOISTURE'?'global.gldas.modelled':'chart.observed')}{trend && <><i className="legend-trend" />{t('chart.trend')}</>}</span></div>
+    <div className="card"><div className="card-header"><span>{label} ({unit})</span><span className="legend"><i className="legend-line" />{t(['SOIL_MOISTURE','AOD','EVAPOTRANSPIRATION'].includes(variable)?'global.gldas.modelled':'chart.observed')}{trend && <><i className="legend-trend" />{t('chart.trend')}</>}</span></div>
       <TimeSeriesChart series={shown} unit={unit} slopePerStep={slopePerStep} height={260} />
     </div>
-    <p className="global-aggregation-note">{t(variable === 'NDVI' && view !== 'anomaly' ? view === 'annual' ? 'global.ndvi.meanNote' : 'global.ndvi.monthlyNote' : view === 'annual' ? annualRain ? 'global.rainAggregation' : 'global.meanAggregation' : view === 'anomaly' ? 'global.anomalyBaseline' : 'global.monthlyValues', { start: range.start, end: range.end })}</p>
+    <p className="global-aggregation-note">{t(variable==='EVAPOTRANSPIRATION' && view!=='anomaly'?'global.giovanni.etNote':variable === 'NDVI' && view !== 'anomaly' ? view === 'annual' ? 'global.ndvi.meanNote' : 'global.ndvi.monthlyNote' : view === 'annual' ? annualRain ? 'global.rainAggregation' : 'global.meanAggregation' : view === 'anomaly' ? 'global.anomalyBaseline' : 'global.monthlyValues', { start: range.start, end: range.end })}</p>
     {trend ? <GlobalTrendSummary result={trend} unit={unit} variable={label} city={capital.city} start={range.start} end={range.end} />
       : <p className="global-insufficient" role="status">{t(inference.status === 'loading' ? 'global.trend.calculating' : inference.status === 'error' ? 'global.trend.failed' : 'global.insufficient')}</p>}
-    <p className="global-analysis-basis">{t(annualRain ? 'global.annualTrendBasis' : 'global.monthlyTrendBasis')}</p>
+    <p className="global-analysis-basis">{t(variable==='EVAPOTRANSPIRATION' && annualRain?'global.giovanni.etBasis':annualRain ? 'global.annualTrendBasis' : 'global.monthlyTrendBasis')}</p>
     <p className="global-source"><a href={record.requestUrl} target="_blank" rel="noreferrer">{t(sourceLabel(variable))}</a></p>
     <p className="global-caution">{t('global.caution')}</p>
   </article>;
@@ -176,7 +179,7 @@ function GlobalChart({ record, capital, variable, view, range, label, monthlyUni
 function QualityPanel({ record, range, onRefresh }: { record: ExplorerRecord; range: YearRange; onRefresh: () => void }) {
   const { t, language } = useI18n();
   return <details className="global-quality"><summary>{t(record.source === 'modis' ? 'global.ndvi.qualityTitle' : 'global.qualityTitle')}</summary>
-    <p>{t(record.source==='gldas'?'global.gldas.quality':record.source === 'modis' ? 'global.ndvi.quality' : 'cache.quality')}</p>
+    <p>{t(record.source==='giovanni'?'global.giovanni.quality':record.source==='gldas'?'global.gldas.quality':record.source === 'modis' ? 'global.ndvi.quality' : 'cache.quality')}</p>
     <div className="global-quality-scroll"><table><caption>{t('global.qualityPeriod', { start: range.start, end: range.end })}</caption><thead><tr>
       <th scope="col">{t('global.variable')}</th><th scope="col">{t('cache.units')}</th><th scope="col">{t('global.valid')}</th><th scope="col">{t('global.missing')}</th><th scope="col">{t('global.rejected')}</th>
     </tr></thead><tbody>{EXPLORER_VARIABLES.filter((key)=>record.variables[key]).map((key) => {

@@ -50,6 +50,21 @@ def test_gldas_saved_artifact_resumes_without_nasa(db,tmp_path,monkeypatch):
     assert db.execute("SELECT count(*) FROM earth.observations WHERE variable='SOIL_MOISTURE'").fetchone()[0]==288
 
 
+def test_giovanni_compressed_checkpoint_resumes_without_nasa(db,tmp_path,monkeypatch):
+    import gzip
+    from src import jobs,ingestion
+    from src.database import seed_locations
+    from test_giovanni import et_csv
+    seed_locations(db)
+    data={'variable':'EVAPOTRANSPIRATION','requested':{'code':'TH','lat':13.75,'lon':100.52},'retrievedAt':'2026-11-15T00:00:00Z','csv':et_csv()}
+    path=tmp_path/'ET.json.gz';path.write_bytes(gzip.compress(json.dumps(data).encode(),mtime=0))
+    jobs.enqueue(db,'giovanni',{'country':'TH','variable':'EVAPOTRANSPIRATION','generation':'fixture'})
+    job=jobs.claim(db);jobs.checkpoint(db,job,{'artifact':{'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}})
+    jobs.fail(db,job,'interrupted');db.execute("UPDATE earth.ingestion_jobs SET available_at=clock_timestamp()-interval '1 second'")
+    monkeypatch.setattr(ingestion.requests,'get',lambda *a,**k:pytest.fail('Unexpected NASA request'))
+    assert ingestion.run_one(db,'giovanni')['status']=='succeeded'
+
+
 def test_expired_lease_is_recovered_and_stale_worker_cannot_commit(db,power_doc):
     from src import jobs
     pending(db);old=jobs.claim(db)

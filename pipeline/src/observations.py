@@ -66,6 +66,10 @@ def validate_batch(doc):
     if product["source"] == "modis":
         if product["id"] != "modis:MOD13A3:061" or product["name"] != "MOD13A3" or product["version"] != "061":
             raise ValueError("Wrong MODIS product identity")
+    elif product['source']=='giovanni':
+        from .giovanni import SPECS
+        choices=[key for key,s in SPECS.items() if product['id']==f"giovanni:{s['name']}:{s['version']}:{s['parameter']}" and product['name']==s['name'] and product['version']==s['version']]
+        if len(choices)!=1 or {r['variable'] for r in doc['observations']}!={choices[0]}:raise ValueError('Wrong Giovanni source identity')
     elif product['source']=='gldas':
         if product['id']!='gldas:GLDAS_NOAH025_M:2.1' or product['name']!='GLDAS_NOAH025_M' or product['version']!='2.1':
             raise ValueError('Wrong GLDAS product identity')

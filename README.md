@@ -200,3 +200,5 @@ AI tools were used in this project as follows. Update this section as the projec
 Global Explorer now reads database-published map summaries and per-capital monthly files. Normal exploration does not call NASA. The checked-in cache covers 195 capital coordinates for four POWER variables and GLDAS soil moisture, 2001–2024; model-cell gaps remain explicit. AppEEARS/NDVI is disabled and excluded from the deployment. Workbench connectors retain their existing behavior.
 
 See [Vercel checkpoint deployment](docs/vercel-power-checkpoint.md) for the database-free deployment and [background ingestion and publication](docs/background-ingestion.md) for optional local data refreshes.
+
+The Giovanni integration also provides MERRA-2 aerosol optical depth and GLDAS evapotranspiration as cached monthly variables. See [AOD/ET source definitions, validation and refresh commands](docs/global-giovanni-aod-et.md).

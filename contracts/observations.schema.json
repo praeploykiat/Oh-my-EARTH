@@ -25,7 +25,8 @@
       "enum": [
         "power-screen-v1",
         "good-land-clear-v1",
-        "gldas-soil-screen-v1"
+        "gldas-soil-screen-v1",
+        "giovanni-monthly-screen-v1"
       ]
     },
     "retrieved_at": {
@@ -52,7 +53,8 @@
           "enum": [
             "power",
             "modis",
-            "gldas"
+            "gldas",
+            "giovanni"
           ]
         },
         "name": {
@@ -164,7 +166,9 @@
               "RH2M",
               "ALLSKY_SFC_SW_DWN",
               "NDVI",
-              "SOIL_MOISTURE"
+              "SOIL_MOISTURE",
+              "AOD",
+              "EVAPOTRANSPIRATION"
             ]
           },
           "month": {

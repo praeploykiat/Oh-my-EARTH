@@ -5,9 +5,10 @@ import sourceSettings from './sourceSettings.json';
 
 export const GLOBAL_VARIABLES = ['T2M', 'PRECTOTCORR', 'RH2M', 'ALLSKY_SFC_SW_DWN'] as const;
 export type PowerVariable = typeof GLOBAL_VARIABLES[number];
-export type GlobalVariable = PowerVariable | 'NDVI' | 'SOIL_MOISTURE';
+export type GlobalVariable = PowerVariable | 'NDVI' | 'SOIL_MOISTURE' | 'AOD' | 'EVAPOTRANSPIRATION';
 // Deferred source implementations remain testable, but are unavailable in this release.
-export const EXPLORER_VARIABLES: readonly GlobalVariable[] = ([...GLOBAL_VARIABLES,'SOIL_MOISTURE'] as const).filter((key)=>sourceSettings.enabledVariables.includes(key));
+export const EXPLORER_VARIABLES: readonly GlobalVariable[] = ([...GLOBAL_VARIABLES,'SOIL_MOISTURE','AOD','EVAPOTRANSPIRATION'] as const).filter((key)=>sourceSettings.enabledVariables.includes(key));
+export function isWaterFlux(variable: GlobalVariable) { return variable==='PRECTOTCORR' || variable==='EVAPOTRANSPIRATION'; }
 export interface YearRange { start: number; end: number }
 export const YEARS = Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => START_YEAR + i);
 export const MIN_TREND_YEARS = 10;
@@ -55,7 +56,7 @@ export function annualRecord(monthly: SeriesPoint[], variable: GlobalVariable): 
     const months = complete.slice(i * 12, (i + 1) * 12);
     if (months.some((p) => p.value === null)) return { t: String(year), value: null };
     const total = months.reduce((sum, p, m) => sum + p.value! * daysInMonth(year, m + 1), 0);
-    return { t: String(year), value: variable === 'PRECTOTCORR' ? total : total / (daysInMonth(year, 2) === 29 ? 366 : 365) };
+    return { t: String(year), value: isWaterFlux(variable) ? total : total / (daysInMonth(year, 2) === 29 ? 366 : 365) };
   });
 }
 
@@ -70,7 +71,7 @@ export function prepareGlobalAnalysis(record: SeriesPoint[], variable: GlobalVar
   const coverage = recordCoverage(monthly);
   const completeYears = annual.filter((p) => p.value !== null).length;
   const observedYears = new Set(monthly.filter((p) => p.value !== null).map((p) => p.t.slice(0, 4))).size;
-  const annualRain = variable === 'PRECTOTCORR' && view === 'annual';
+  const annualRain = isWaterFlux(variable) && view === 'annual';
   const shown = view === 'annual' ? annual : view === 'anomaly' ? toAnomaly(monthly) : monthly;
   const analysisSeries = annualRain ? annual : monthly;
   // Explicit MVP display safeguards, not a guarantee of valid statistical inference.

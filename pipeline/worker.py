@@ -14,10 +14,11 @@ from src.source_settings import ENABLED_SOURCES
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='command',required=True)
-    for name in ['enqueue-power','enqueue-ndvi','enqueue-gldas']:
+    for name in ['enqueue-power','enqueue-ndvi','enqueue-gldas','enqueue-giovanni']:
         p=sub.add_parser(name);p.add_argument('--countries',default='all');p.add_argument('--generation',default='initial')
         if name=='enqueue-ndvi':p.add_argument('--task-id')
-    p=sub.add_parser('run');p.add_argument('--source',choices=['power','modis','gldas']);p.add_argument('--max-jobs',type=int,default=1);p.add_argument('--workers',type=int,choices=[1,2],default=1);p.add_argument('--watch',action='store_true');p.add_argument('--publish',action='store_true')
+        if name=='enqueue-giovanni':p.add_argument('--variable',choices=['AOD','EVAPOTRANSPIRATION'],required=True)
+    p=sub.add_parser('run');p.add_argument('--source',choices=['power','modis','gldas','giovanni']);p.add_argument('--max-jobs',type=int,default=1);p.add_argument('--workers',type=int,choices=[1,2],default=1);p.add_argument('--watch',action='store_true');p.add_argument('--publish',action='store_true')
     p=sub.add_parser('retry');p.add_argument('--id',type=int,required=True)
     p=sub.add_parser('adopt');p.add_argument('--id',type=int,required=True);p.add_argument('--task-id',required=True)
     sub.add_parser('status')
@@ -34,6 +35,8 @@ def main():
             if args.command in ('enqueue-power','enqueue-gldas'):
                 source='gldas' if args.command=='enqueue-gldas' else 'power'
                 out=[enqueue(conn,source,{'country':c,'generation':args.generation,'period':[2001,2024]},reuse_existing=args.generation=='initial') for c in codes]
+            elif args.command=='enqueue-giovanni':
+                out=[enqueue(conn,'giovanni',{'country':c,'variable':args.variable,'generation':args.generation,'period':[2001,2024]},reuse_existing=False) for c in codes]
             else:
                 task=str(UUID(args.task_id)) if args.task_id else None
                 out=[enqueue(conn,'modis',{'countries':codes,'generation':args.generation,'period':[2001,2024],'product':'MOD13A3.061'},task)]

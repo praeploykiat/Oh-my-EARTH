@@ -82,7 +82,8 @@ def import_batch(conn, doc):
         existing = conn.execute("SELECT source,name,version,source_url,resolution FROM earth.products WHERE id=%s", (product["id"],)).fetchone()
         if existing != tuple(product[k] for k in ["source", "name", "version", "source_url", "resolution"]):
             raise ValueError("Existing product identity has different metadata")
-        for variable, rule in PROFILES[product["source"]]["variables"].items():
+        for variable in sorted({r["variable"] for r in doc["observations"]}):
+            rule=PROFILES[product["source"]]["variables"][variable]
             values = tuple(rule[k] for k in ["unit", "temporal_kind", "annual_aggregation", "minimum", "maximum"])
             conn.execute("""INSERT INTO earth.product_variables(product_id, variable, unit, temporal_kind, annual_aggregation, minimum, maximum)
                 VALUES (%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (product_id, variable) DO NOTHING""", (product["id"], variable, *values))
