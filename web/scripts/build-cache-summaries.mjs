@@ -14,7 +14,7 @@ try {
     const full = path.join(directory, file); await mkdir(path.dirname(full), { recursive: true });
     await writeFile(full, JSON.stringify(data, (_key, value) => { if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('Non-finite map summary'); return value; }));
   };
-  for (const variable of ['T2M','PRECTOTCORR','RH2M','ALLSKY_SFC_SW_DWN','NDVI']) {
+  for (const variable of ['T2M','PRECTOTCORR','RH2M','ALLSKY_SFC_SW_DWN','SOIL_MOISTURE','NDVI']) {
     const records = Object.entries(input.capitals).filter(([,c]) => c.variables[variable]).map(([code,c]) => {
       const v=c.variables[variable];
       return [code, { ...c, source:v.source, retrievedAt:v.retrievedAt, responseCoordinates:v.responseCoordinates, requestUrl:v.sourceUrl, sources:v.sources, raw:null,

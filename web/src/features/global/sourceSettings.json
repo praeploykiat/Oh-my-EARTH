@@ -1,5 +1,14 @@
 {
-  "enabledSources": ["power"],
-  "enabledVariables": ["T2M", "PRECTOTCORR", "RH2M", "ALLSKY_SFC_SW_DWN"],
+  "enabledSources": [
+    "power",
+    "gldas"
+  ],
+  "enabledVariables": [
+    "T2M",
+    "PRECTOTCORR",
+    "RH2M",
+    "ALLSKY_SFC_SW_DWN",
+    "SOIL_MOISTURE"
+  ],
   "disabledReason": "AppEEARS/NDVI is deferred pending access and multi-capital quality validation."
 }

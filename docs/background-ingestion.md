@@ -1,6 +1,6 @@
 # Background ingestion and cached exploration
 
-**Current release: POWER only.** AppEEARS/NDVI is disabled in `web/src/features/global/sourceSettings.json`; its code and historical evidence remain archived. PostgreSQL stays local. Deploy the checked-in POWER cache using [the Vercel guide](vercel-power-checkpoint.md). Normal deployment does not run these Python commands.
+**Current release: POWER and GLDAS soil moisture.** See [GLDAS preparation and validation](global-gldas-soil.md). AppEEARS/NDVI is disabled in `web/src/features/global/sourceSettings.json`; its code and historical evidence remain archived. PostgreSQL stays local. Deploy the checked-in cache using [the Vercel guide](vercel-power-checkpoint.md). Normal deployment does not run these Python commands.
 
 The browser reads a published database snapshot. NASA calls happen only in the Python worker. POWER and NDVI share the monthly observation contract, while retaining their separate products, units, provenance, and quality policies. The four POWER variables cover all 195 capital coordinates for 2001–2024. The historical NDVI pilot is an offline test fixture, and its existing NASA task ID is preserved locally. It is excluded from current publication.
 

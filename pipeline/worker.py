@@ -14,23 +14,26 @@ from src.source_settings import ENABLED_SOURCES
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='command',required=True)
-    for name in ['enqueue-power','enqueue-ndvi']:
+    for name in ['enqueue-power','enqueue-ndvi','enqueue-gldas']:
         p=sub.add_parser(name);p.add_argument('--countries',default='all');p.add_argument('--generation',default='initial')
         if name=='enqueue-ndvi':p.add_argument('--task-id')
-    p=sub.add_parser('run');p.add_argument('--source',choices=['power','modis']);p.add_argument('--max-jobs',type=int,default=1);p.add_argument('--workers',type=int,choices=[1,2],default=1);p.add_argument('--watch',action='store_true');p.add_argument('--publish',action='store_true')
+    p=sub.add_parser('run');p.add_argument('--source',choices=['power','modis','gldas']);p.add_argument('--max-jobs',type=int,default=1);p.add_argument('--workers',type=int,choices=[1,2],default=1);p.add_argument('--watch',action='store_true');p.add_argument('--publish',action='store_true')
     p=sub.add_parser('retry');p.add_argument('--id',type=int,required=True)
     p=sub.add_parser('adopt');p.add_argument('--id',type=int,required=True);p.add_argument('--task-id',required=True)
     sub.add_parser('status')
     args=parser.parse_args()
     if args.command=='enqueue-ndvi' or args.command=='adopt' or args.command=='run' and args.source=='modis':
         if 'modis' not in ENABLED_SOURCES:parser.error('AppEEARS/NDVI is disabled in web/src/features/global/sourceSettings.json; saved jobs and data are preserved.')
+    if args.command=='enqueue-gldas' or args.command=='run' and args.source=='gldas':
+        if 'gldas' not in ENABLED_SOURCES:parser.error('GLDAS is not enabled in the source policy')
     with connect() as conn:
         conn.autocommit=True; migrate(conn); seed_locations(conn)
         if args.command.startswith('enqueue'):
             codes=sorted(c['code'] for c in catalog()) if args.countries=='all' else sorted(set(args.countries.split(',')))
             if not set(codes).issubset({c['code'] for c in catalog()}): raise ValueError('Unknown capital code')
-            if args.command=='enqueue-power':
-                out=[enqueue(conn,'power',{'country':c,'generation':args.generation,'period':[2001,2024]},reuse_existing=args.generation=='initial') for c in codes]
+            if args.command in ('enqueue-power','enqueue-gldas'):
+                source='gldas' if args.command=='enqueue-gldas' else 'power'
+                out=[enqueue(conn,source,{'country':c,'generation':args.generation,'period':[2001,2024]},reuse_existing=args.generation=='initial') for c in codes]
             else:
                 task=str(UUID(args.task_id)) if args.task_id else None
                 out=[enqueue(conn,'modis',{'countries':codes,'generation':args.generation,'period':[2001,2024],'product':'MOD13A3.061'},task)]

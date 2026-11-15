@@ -21,6 +21,19 @@ def test_current_release_excludes_archived_ndvi_observations(db,power_doc):
     assert db.execute("SELECT count(*) FROM earth.observations WHERE variable='NDVI'").fetchone()[0]==288
 
 
+def test_gldas_and_power_keep_separate_units_cells_and_provenance(db,power_doc,tmp_path):
+    from src.observations import gldas_batch
+    from test_gldas import csv_text
+    path=tmp_path/'TH.json';path.write_text(json.dumps({'requested':{'code':'TH','lat':13.75,'lon':100.52},'retrievedAt':'2026-11-15T00:00:00Z','csv':csv_text()}))
+    seed_locations(db);import_batch(db,power_doc);import_batch(db,gldas_batch(path))
+    variables=capture(db)['capitals']['TH']['variables']
+    assert len(variables)==5
+    assert variables['T2M']['responseCoordinates']=={'lat':13.75,'lon':100.52}
+    assert variables['SOIL_MOISTURE']['responseCoordinates']=={'lat':13.875,'lon':100.625}
+    assert variables['SOIL_MOISTURE']['unit']=='kg/m²'
+    assert 'SoilMoi0_10cm_inst' in variables['SOIL_MOISTURE']['sourceUrl']
+
+
 def summarize(source, stage):
     data=json.loads(source.read_text(encoding='utf-8'))
     maps={}

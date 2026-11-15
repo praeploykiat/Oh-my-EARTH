@@ -33,6 +33,23 @@ def test_current_release_does_not_claim_preserved_ndvi_jobs(db):
     assert db.execute('SELECT status FROM earth.ingestion_jobs').fetchone()[0]=='pending'
 
 
+def test_gldas_saved_artifact_resumes_without_nasa(db,tmp_path,monkeypatch):
+    from src import jobs,ingestion
+    from src.database import seed_locations
+    from test_gldas import csv_text
+    seed_locations(db)
+    path=tmp_path/'TH.json'
+    path.write_text(json.dumps({'requested':{'code':'TH','lat':13.75,'lon':100.52},'retrievedAt':'2026-11-15T00:00:00Z','csv':csv_text()}))
+    jobs.enqueue(db,'gldas',{'country':'TH','generation':'fixture'})
+    job=jobs.claim(db)
+    jobs.checkpoint(db,job,{'artifact':{'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}})
+    jobs.fail(db,job,'interrupted')
+    db.execute("UPDATE earth.ingestion_jobs SET available_at=clock_timestamp()-interval '1 second'")
+    monkeypatch.setattr(ingestion.requests,'get',lambda *args,**kwargs:pytest.fail('Unexpected NASA request'))
+    assert ingestion.run_one(db,'gldas')['status']=='succeeded'
+    assert db.execute("SELECT count(*) FROM earth.observations WHERE variable='SOIL_MOISTURE'").fetchone()[0]==288
+
+
 def test_expired_lease_is_recovered_and_stale_worker_cannot_commit(db,power_doc):
     from src import jobs
     pending(db);old=jobs.claim(db)

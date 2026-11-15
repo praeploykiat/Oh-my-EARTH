@@ -36,11 +36,24 @@ describe('database-published exploration',()=>{
     const annual=yearSummary(record,'T2M',2024,'average');
     expect(map.TH.value).toBe(annual.value);
   });
-  it('disables NDVI before any network request and ships only POWER',async()=>{
+  it('disables NDVI before any network request and publishes only enabled variables',async()=>{
     await expect(loadPublishedRecord(capitalByCode('TH')!,'NDVI')).rejects.toThrow('temporarily disabled');
     await expect(loadPublishedMap('NDVI','average',2024,false)).rejects.toThrow('temporarily disabled');
     expect(urls).toHaveLength(0);
-    expect(Object.keys(manifest.available).sort()).toEqual(['ALLSKY_SFC_SW_DWN','PRECTOTCORR','RH2M','T2M']);
+    expect(Object.keys(manifest.available).sort()).toEqual(['ALLSKY_SFC_SW_DWN','PRECTOTCORR','RH2M','SOIL_MOISTURE','T2M']);
+  });
+  it('loads GLDAS from the same capital file without mixing POWER units or substituting an island cell',async()=>{
+    const power=await loadPublishedRecord(capitalByCode('TH')!,'T2M');
+    const soil=await loadPublishedRecord(capitalByCode('TH')!,'SOIL_MOISTURE');
+    expect(power.source).toBe('power');expect(soil.source).toBe('gldas');
+    expect(soil.variables.T2M).toBeUndefined();expect(power.variables.SOIL_MOISTURE).toBeUndefined();
+    expect(soil.responseCoordinates).toEqual({lat:13.875,lon:100.625});
+    expect(urls).toHaveLength(2);
+    const island=await loadPublishedRecord(capitalByCode('MV')!,'SOIL_MOISTURE');
+    expect(island.variables.SOIL_MOISTURE!.series.every((p)=>p.value===null)).toBe(true);
+    const map=await loadPublishedMap('SOIL_MOISTURE','average',2024,false);
+    expect(map.MV.value).toBeNull();
+    expect(map.TH.value).toBe(yearSummary(soil,'SOIL_MOISTURE',2024,'average').value);
   });
   it('rejects corrupted files and permits a successful retry',async()=>{
     corrupt=true;

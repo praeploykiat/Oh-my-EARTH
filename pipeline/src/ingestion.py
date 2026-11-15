@@ -95,6 +95,22 @@ def ingest_power(conn,job):
     return doc
 
 
+def ingest_gldas(conn,job):
+    from .gldas import fetch_csv
+    from .observations import gldas_batch
+    cached=job['checkpoint'].get('artifact')
+    if artifact_ok(cached):return gldas_batch(cached['path'])
+    point=next(c for c in catalog() if c['code']==job['spec']['country'])
+    pilot=ROOT/'pipeline/raw/gldas-validation'/f"{point['code']}.json"
+    if job['spec'].get('generation')=='initial' and pilot.exists():path=pilot
+    else:
+        data={'requested':point,'retrievedAt':datetime.now(timezone.utc).isoformat(),'csv':fetch_csv(point)}
+        path=RAW/'gldas'/f"{job['work_key']}-{job['lease_token']}.json";write_json(path,data)
+    doc=gldas_batch(path)
+    jobs.checkpoint(conn,job,{'artifact':{'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}})
+    return doc
+
+
 def ingest_ndvi(conn,job):
     cached=job['checkpoint'].get('artifact')
     if artifact_ok(cached): return ndvi_batch(cached['path'])
@@ -168,7 +184,9 @@ def run_one(conn,source=None,allowed_sources=None):
     job=jobs.claim(conn,source,allowed_sources=allowed_sources)
     if not job: return None
     try:
-        doc=ingest_power(conn,job) if job['source']=='power' else ingest_ndvi(conn,job)
+        if job['source']=='power':doc=ingest_power(conn,job)
+        elif job['source']=='gldas':doc=ingest_gldas(conn,job)
+        else:doc=ingest_ndvi(conn,job)
         if doc is None:
             jobs.defer(conn,job)
             return {'id':job['id'],'source':job['source'],'status':'waiting'}
@@ -177,8 +195,9 @@ def run_one(conn,source=None,allowed_sources=None):
     except jobs.LeaseLost:
         return {'id':job['id'],'status':'lease_lost'}
     except Exception as error:
-        permanent=isinstance(error,(ValueError,KeyError,TypeError)) or isinstance(error,SourceError) and error.status in (400,404)
-        message=f'Source HTTP {error.status}' if isinstance(error,SourceError) else type(error).__name__
+        from .gldas import GldasHTTPError
+        permanent=isinstance(error,(ValueError,KeyError,TypeError)) or isinstance(error,(SourceError,GldasHTTPError)) and error.status in (400,404)
+        message=f'Source HTTP {error.status}' if isinstance(error,(SourceError,GldasHTTPError)) else type(error).__name__
         try: jobs.fail(conn,job,message,permanent=permanent)
         except jobs.LeaseLost: pass
         return {'id':job['id'],'source':job['source'],'status':'failed','error':message}

@@ -15,12 +15,12 @@ def enqueue(conn, source, spec, external_task_id=None, reuse_existing=True):
     identity = hashlib.sha256(json.dumps([source, spec], sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     with conn.transaction():
         reused = False
-        if source == "power" and reuse_existing:
+        if source in ('power','gldas') and reuse_existing:
             loc = next(c for c in catalog() if c["code"] == spec["country"])
-            reused = conn.execute("""SELECT count(DISTINCT (o.variable,o.month))=1152 FROM earth.observations o
+            reused = conn.execute("""SELECT count(DISTINCT (o.variable,o.month))=%s FROM earth.observations o
               JOIN earth.ingestion_batches b ON b.id=o.batch_id JOIN earth.products p ON p.id=o.product_id
-              WHERE o.location_id=%s AND p.source='power' AND b.qa_policy='power-screen-v1'
-              AND b.normalization_version='monthly-observation-v1'""",(loc["id"],)).fetchone()[0]
+              WHERE o.location_id=%s AND p.source=%s AND b.qa_policy=%s
+              AND b.normalization_version='monthly-observation-v1'""",(1152 if source=='power' else 288,loc['id'],source,'power-screen-v1' if source=='power' else 'gldas-soil-screen-v1')).fetchone()[0]
         conn.execute("""INSERT INTO earth.ingestion_jobs(work_key,source,spec,external_task_id,status,checkpoint)
           VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT (work_key) DO NOTHING""",
           (identity,source,Jsonb(spec),external_task_id,"succeeded" if reused else "pending",Jsonb({"reused_database": True} if reused else {})))

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { globalVariableByKey as variableByKey } from './variables';
+import { globalVariableByKey as variableByKey,sourceLabel } from './variables';
 import { useI18n } from '../../core/i18n';
 import { TimeSeriesChart } from '../../shared';
 import type { GlobalVariable } from './data';
@@ -27,7 +27,7 @@ export function SingleYearResult({ record, variable, mode, year, city }: { recor
       <TimeSeriesChart series={summary.monthly} unit={monthlyUnit} height={260} timeLabel="month" highlightDates={summary.months} />
     </div>
     <p className="global-aggregation-note">{t('global.map.yearChartNote')}</p>
-    <p className="global-source"><a href={record.requestUrl} target="_blank" rel="noreferrer">{t(variable === 'NDVI' ? 'global.ndvi.source' : 'global.source')}</a></p>
+    <p className="global-source"><a href={record.requestUrl} target="_blank" rel="noreferrer">{t(sourceLabel(variable))}</a></p>
     <p className="global-caution">{t('global.caution')}</p>
   </article>;
 }

@@ -24,7 +24,8 @@
     "qa_policy": {
       "enum": [
         "power-screen-v1",
-        "good-land-clear-v1"
+        "good-land-clear-v1",
+        "gldas-soil-screen-v1"
       ]
     },
     "retrieved_at": {
@@ -50,7 +51,8 @@
         "source": {
           "enum": [
             "power",
-            "modis"
+            "modis",
+            "gldas"
           ]
         },
         "name": {
@@ -161,7 +163,8 @@
               "PRECTOTCORR",
               "RH2M",
               "ALLSKY_SFC_SW_DWN",
-              "NDVI"
+              "NDVI",
+              "SOIL_MOISTURE"
             ]
           },
           "month": {
@@ -174,7 +177,8 @@
               "mm/day",
               "%",
               "kWh/m²/day",
-              "1"
+              "1",
+              "kg/m²"
             ]
           },
           "value": {

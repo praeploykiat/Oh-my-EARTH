@@ -5,9 +5,9 @@ import sourceSettings from './sourceSettings.json';
 
 export const GLOBAL_VARIABLES = ['T2M', 'PRECTOTCORR', 'RH2M', 'ALLSKY_SFC_SW_DWN'] as const;
 export type PowerVariable = typeof GLOBAL_VARIABLES[number];
-export type GlobalVariable = PowerVariable | 'NDVI';
+export type GlobalVariable = PowerVariable | 'NDVI' | 'SOIL_MOISTURE';
 // Deferred source implementations remain testable, but are unavailable in this release.
-export const EXPLORER_VARIABLES: readonly GlobalVariable[] = GLOBAL_VARIABLES.filter((key)=>sourceSettings.enabledVariables.includes(key));
+export const EXPLORER_VARIABLES: readonly GlobalVariable[] = ([...GLOBAL_VARIABLES,'SOIL_MOISTURE'] as const).filter((key)=>sourceSettings.enabledVariables.includes(key));
 export interface YearRange { start: number; end: number }
 export const YEARS = Array.from({ length: END_YEAR - START_YEAR + 1 }, (_, i) => START_YEAR + i);
 export const MIN_TREND_YEARS = 10;

@@ -61,5 +61,22 @@
         ]
       }
     }
+  },
+  "gldas": {
+    "qa_policy": "gldas-soil-screen-v1",
+    "variables": {
+      "SOIL_MOISTURE": {
+        "unit": "kg/m²",
+        "temporal_kind": "monthly_mean",
+        "annual_aggregation": "day_weighted_mean",
+        "minimum": 0,
+        "maximum": 100,
+        "source_units": [
+          "kg m-2",
+          "kg/m^2",
+          "kg/m²"
+        ]
+      }
+    }
   }
 }

@@ -13,7 +13,7 @@ import { WorldMap } from './WorldMap';
 export function MapExplorer({ selected, onSelect, variable, range, view, recordUpdate, mode, year, onMode, onReload }: { onReload: () => void; mode: MapMode; year: number; onMode: (mode: MapMode) => void; recordUpdate?: { code: string; record: ExplorerRecord }; selected: Capital; onSelect: (code: string) => void; variable: GlobalVariable; range: YearRange; view: View }) {
   const { t, language } = useI18n();
   const [stored, setStored] = useState<Partial<Record<GlobalVariable, Record<string, ExplorerRecord>>>>({});
-  const group = variable === 'NDVI' ? 'NDVI' : 'T2M';
+  const group = variable === 'NDVI' ? 'NDVI' : variable==='SOIL_MOISTURE'?'SOIL_MOISTURE':'T2M';
   const records = stored[group] ?? {};
   const setRecords = (update: (records: Record<string, ExplorerRecord>) => Record<string, ExplorerRecord>) => setStored((all) => ({ ...all, [group]: update(all[group] ?? {}) }));
   const [available, setAvailable] = useState<string[]>([]);
@@ -97,6 +97,7 @@ export function MapExplorer({ selected, onSelect, variable, range, view, recordU
       <p>{t(mode === 'trend' ? 'global.map.trendNote' : variable === 'NDVI' ? mode === 'average' ? 'global.ndvi.meanNote' : 'global.ndvi.extremeNote' : mode === 'average' ? variable === 'PRECTOTCORR' ? 'global.map.rainNote' : 'global.map.meanNote' : variable === 'PRECTOTCORR' ? 'global.map.rainExtremeNote' : 'global.map.extremeNote')}</p>
       <p>{t('global.map.symbols')}</p>
       <p>{t('cache.loadingNote')}</p>
+      {variable==='SOIL_MOISTURE' && <p>{t('global.gldas.scope')}</p>}
     </div>
   </div>;
 }

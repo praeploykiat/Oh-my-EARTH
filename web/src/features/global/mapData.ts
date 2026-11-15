@@ -60,8 +60,8 @@ export function mapModeLabel(mode: MapMode, variable: GlobalVariable) {
     : `global.map.${mode}` as const;
 }
 export function mapScale(variable: GlobalVariable, mode: MapMode, annualRain: boolean) {
-  const average: Record<GlobalVariable, [number, number]> = { NDVI: [-0.2, 1], T2M: [-20, 35], PRECTOTCORR: [0, annualRain ? 4000 : 12], RH2M: [0, 100], ALLSKY_SFC_SW_DWN: [0, 8] };
-  const extent = { NDVI: 0.1, T2M: 1, PRECTOTCORR: annualRain ? 300 : 1, RH2M: 5, ALLSKY_SFC_SW_DWN: 0.5 }[variable];
+  const average: Record<GlobalVariable, [number, number]> = { SOIL_MOISTURE:[0,50], NDVI: [-0.2, 1], T2M: [-20, 35], PRECTOTCORR: [0, annualRain ? 4000 : 12], RH2M: [0, 100], ALLSKY_SFC_SW_DWN: [0, 8] };
+  const extent = { SOIL_MOISTURE:5, NDVI: 0.1, T2M: 1, PRECTOTCORR: annualRain ? 300 : 1, RH2M: 5, ALLSKY_SFC_SW_DWN: 0.5 }[variable];
   if (mode === 'trend') return [-extent, extent] as [number, number];
   if (variable === 'PRECTOTCORR') return [0, mode === 'average' ? 4000 : 700] as [number, number];
   return average[variable];

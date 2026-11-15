@@ -54,5 +54,6 @@
     "requiresLocalWorker": false,
     "existingWorkbenchCredentials": "preserved; retain their separate deployment configuration"
   },
-  "credentials": "Excluded from checkpoint; staged files and production build scanned before commit."
+  "credentials": "Excluded from checkpoint; staged files and production build scanned before commit.",
+  "status": "Historical POWER-only checkpoint; the current GLDAS extension is documented in gldas-soil-validation.json and global-gldas-soil.md."
 }

@@ -32,7 +32,8 @@ def capture(conn):
           SELECT DISTINCT ON(o.location_id,o.variable) o.batch_id,o.location_id,o.variable
           FROM earth.observations o JOIN earth.ingestion_batches b ON b.id=o.batch_id JOIN earth.products p ON p.id=o.product_id
           WHERE b.normalization_version=%s AND p.source=ANY(%s) AND ((p.source='power' AND b.qa_policy='power-screen-v1')
-             OR (p.source='modis' AND b.qa_policy='good-land-clear-v1'))
+             OR (p.source='modis' AND b.qa_policy='good-land-clear-v1')
+             OR (p.source='gldas' AND b.qa_policy='gldas-soil-screen-v1'))
           ORDER BY o.location_id,o.variable,b.retrieved_at DESC,b.imported_at DESC,b.id DESC)
           SELECT o.* FROM earth.observations o JOIN picks k ON k.batch_id=o.batch_id AND k.location_id=o.location_id AND k.variable=o.variable
           ORDER BY o.location_id,o.variable,o.month""",(NORMALIZATION_VERSION,list(ENABLED_SOURCES))).fetchall()
@@ -47,7 +48,7 @@ def capture(conn):
               'source':b['source'],'product':b['name'],'productVersion':b['version'],'batchId':b['id'],
               'qaPolicy':b['qa_policy'],'normalizationVersion':b['normalization_version'],
               'retrievedAt':b['retrieved_at'].isoformat(),'artifactSha256':b['artifact_sha256'],
-              'responseCoordinates':{'lon':coords[0],'lat':coords[1]},'sourceUrl':b['source_url'],
+              'responseCoordinates':{'lon':coords[0],'lat':coords[1]},'sourceUrl':b['metadata'].get('request_url',b['source_url']),
               'sources':b['metadata'].get('sources',[b['name'],b['version'],b['qa_policy']])}
         item=capital['variables'][row['variable']]
         if row['month'].strftime('%Y-%m')!=MONTHS[len(item['values'])]: raise ValueError('Invalid database calendar grid')

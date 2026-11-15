@@ -66,6 +66,9 @@ def validate_batch(doc):
     if product["source"] == "modis":
         if product["id"] != "modis:MOD13A3:061" or product["name"] != "MOD13A3" or product["version"] != "061":
             raise ValueError("Wrong MODIS product identity")
+    elif product['source']=='gldas':
+        if product['id']!='gldas:GLDAS_NOAH025_M:2.1' or product['name']!='GLDAS_NOAH025_M' or product['version']!='2.1':
+            raise ValueError('Wrong GLDAS product identity')
     elif (not re.fullmatch(r"v\d+\.\d+\.\d+", product["version"])
           or product["id"] != f"power:monthly-point:RE:{product['version']}"
           or product["name"] != "NASA POWER monthly point RE"):
@@ -158,6 +161,25 @@ def power_batch(path):
                "source_url": "https://power.larc.nasa.gov/", "resolution": "source-native monthly grid"}
     return batch(product, envelope["retrievedAt"], artifact(path), [loc], observations,
                  {"sources": raw["header"].get("sources", []), "requested": {"lat": loc["lat"], "lon": loc["lon"]}, "response_coordinates": coords[:2]})
+
+
+def gldas_batch(path):
+    from .gldas import parse_csv,request_url
+    data=json.loads(Path(path).read_text(encoding='utf-8'))
+    point=data['requested']
+    loc=next(c for c in catalog() if c['code']==point['code'])
+    if any(not finite(point[k]) or abs(point[k]-loc[k])>0.00005 for k in ('lat','lon')):
+        raise ValueError('GLDAS requested coordinates disagree with catalog')
+    parsed=parse_csv(data['csv'],loc)
+    product={'id':'gldas:GLDAS_NOAH025_M:2.1','source':'gldas','name':'GLDAS_NOAH025_M','version':'2.1',
+      'source_url':'https://ldas.gsfc.nasa.gov/gldas','resolution':'0.25 degree monthly model grid; 0–10 cm soil layer'}
+    observations=[row(loc,'SOIL_MOISTURE',p['t'],p['value'],p['quality'],p['reason'],source='gldas') for p in parsed['series']]
+    cell=parsed['responseCoordinates']
+    return batch(product,data['retrievedAt'],artifact(path),[loc],observations,
+      {'response_coordinates':[cell['lon'],cell['lat']],'requested':{'lat':loc['lat'],'lon':loc['lon']},
+       'request_url':request_url(loc),'sources':['GLDAS Noah 2.1','Giovanni point service','SoilMoi0_10cm_inst','DOI:10.5067/SXAVCZFAQLNO'],
+       'screening':'Finite/range/fill screening only; no per-observation quality flags supplied by Giovanni. No neighbour fallback.',
+       'sourceRows':parsed['sourceRows'],'depth_cm':[0,10],'source_unit':parsed['metadata']['unit']})
 
 
 def ndvi_batch(path):

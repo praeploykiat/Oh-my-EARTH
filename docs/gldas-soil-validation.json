@@ -1,0 +1,229 @@
+{
+  "checkedAt": "2026-11-15T09:35:14.208882+00:00",
+  "status": "PASS",
+  "product": "GLDAS_NOAH025_M.2.1",
+  "parameter": "SoilMoi0_10cm_inst",
+  "period": {
+    "start": 2001,
+    "end": 2024
+  },
+  "unit": "kg/m²",
+  "depthCm": [
+    0,
+    10
+  ],
+  "bangkokRepeatValuesMatch": true,
+  "checks": [
+    {
+      "code": "TH",
+      "capital": "Bangkok",
+      "requested": {
+        "lat": 13.75,
+        "lon": 100.52
+      },
+      "responseCoordinates": {
+        "lat": 13.875,
+        "lon": 100.625
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 33.2747,
+      "maximum": 41.8196,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "68e60dcec798399941ab1c4e1ef703e100bb4e31066f04211ca9b82aa60a46f9",
+      "seriesSha256": "91c68859bad801fcb1b25c7f648ecc850b61cd54269cb4b785c1bd9a514affce"
+    },
+    {
+      "code": "EG",
+      "capital": "Cairo",
+      "requested": {
+        "lat": 30.05,
+        "lon": 31.25
+      },
+      "responseCoordinates": {
+        "lat": 30.125,
+        "lon": 31.375
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 19.6789,
+      "maximum": 27.759,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "7693609ccfdae0ce37abb3bb50640003a59e1f7c25e7c61973a1e89cb5822f3d",
+      "seriesSha256": "ee3df7ff5adb5262877cc966951807a4c4c53b0f7ccfa255fd853a650f87ccb1"
+    },
+    {
+      "code": "NO",
+      "capital": "Oslo",
+      "requested": {
+        "lat": 59.92,
+        "lon": 10.75
+      },
+      "responseCoordinates": {
+        "lat": 59.875,
+        "lon": 10.875
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 18.695,
+      "maximum": 43.398,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "2fceb36efdf83e828801f6d6d64ee252bc623ef283cf99a042284299014a21e7",
+      "seriesSha256": "a7dc4d206da9fca5296acbd235fa2172c3413b71afd94e4cbf7d9f48f61525e7"
+    },
+    {
+      "code": "AU",
+      "capital": "Canberra",
+      "requested": {
+        "lat": -35.27,
+        "lon": 149.13
+      },
+      "responseCoordinates": {
+        "lat": -35.375,
+        "lon": 149.125
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 19.5301,
+      "maximum": 32.147,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "30c6d458c71765a2b77123debd97dcb5f8d03005cb033a0b37cdb8bef3f11d44",
+      "seriesSha256": "b6966cdfdd0ba1e2285027074756aa42b0c83e13d632e49b4037a965b62c1940"
+    },
+    {
+      "code": "BR",
+      "capital": "Brasília",
+      "requested": {
+        "lat": -15.79,
+        "lon": -47.88
+      },
+      "responseCoordinates": {
+        "lat": -15.875,
+        "lon": -47.875
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 21.9759,
+      "maximum": 42.4669,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "673152854bd99b7720cfc2c85fee8145895393f5b94ccdafbc856cfbd79f1be8",
+      "seriesSha256": "1400e153e940499094599b90a51d6296e0e260bda433ce9fa673b230d2f142f3"
+    },
+    {
+      "code": "CA",
+      "capital": "Ottawa",
+      "requested": {
+        "lat": 45.42,
+        "lon": -75.7
+      },
+      "responseCoordinates": {
+        "lat": 45.375,
+        "lon": -75.625
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 30.7378,
+      "maximum": 46.1413,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "26c3d985f2be7076cb069742cb00e44b3b70284e61470742e3361cb0b0fd88e7",
+      "seriesSha256": "e017b86cde12c28bb0f640e182b4746867865bc9d9a57fd1ffe8ba4a6006e51f"
+    },
+    {
+      "code": "KE",
+      "capital": "Nairobi",
+      "requested": {
+        "lat": -1.28,
+        "lon": 36.82
+      },
+      "responseCoordinates": {
+        "lat": -1.375,
+        "lon": 36.875
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 21.681,
+      "maximum": 39.4609,
+      "completeYears": 24,
+      "trendCoverageGate": true,
+      "unit": "kg/m²",
+      "artifactSha256": "f7ca7d027d6bb7039719dad804be25062e4da3100dac93f6a45c8672700a7470",
+      "seriesSha256": "b98b1f795969e66182de8da21ebd2fbdd1b747b3ab2a7a69107e3b123b3e22a5"
+    },
+    {
+      "code": "MV",
+      "capital": "Malé",
+      "requested": {
+        "lat": 4.17,
+        "lon": 73.51
+      },
+      "responseCoordinates": {
+        "lat": 4.125,
+        "lon": 73.625
+      },
+      "status": "PASS",
+      "months": 288,
+      "sourceRows": 288,
+      "valid": 0,
+      "missing": 288,
+      "rejected": 0,
+      "minimum": null,
+      "maximum": null,
+      "completeYears": 0,
+      "trendCoverageGate": false,
+      "unit": "kg/m²",
+      "artifactSha256": "d348c7d803999bd697a9405b218f00aecf1558237b4a63bba1ed48b1d58d2c47",
+      "seriesSha256": "a07a63d2f26f04ef0746c4efc205f3e6dd5bb5a89f0deb0d02208ce39bcd97df"
+    }
+  ],
+  "scope": "Access, metadata, grid, temporal completeness and conservative range validation. Not ground-truth accuracy validation; no per-observation QA flags supplied.",
+  "spatialRule": "Containing 0.25-degree model cell, never a neighbouring fallback. Maldives is an island/missing-data diagnostic, not an integration gate.",
+  "sources": [
+    "https://ldas.gsfc.nasa.gov/gldas/dataset",
+    "https://hydro1.gesdisc.eosdis.nasa.gov/data/GLDAS/GLDAS_NOAH025_M.2.1/doc/README_GLDAS2.pdf"
+  ],
+  "pythonAndExistingTypeScriptParserParity": {
+    "capitals": 8,
+    "monthsPerCapital": 288,
+    "allMonthlyValuesMatchExactly": true
+  }
+}
