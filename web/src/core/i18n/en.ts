@@ -506,8 +506,7 @@ export const en = {
   "source.crossCheck": "Cross-check",
   "methods.title": "Methods",
   "methods.heading": "How we detect a trend",
-  "methods.intro":
-    "Every number on this site comes from public NASA data and the same three-step test, run in your browser so anyone can check it.",
+  "methods.intro": "Every trend on this site is computed from public NASA data. The Thailand explorer, the World explorer and the Hotspot map use different tests, described below.",
   "methods.step1.title": "Remove the seasons",
   "methods.step1.body":
     "Monthly data rise and fall with the seasons. We subtract each calendar month’s long-term average so only the change between years is left.",
@@ -518,8 +517,7 @@ export const en = {
   "methods.step3.body":
     "Sen's slope takes the median of every pairwise slope, so a single extreme year cannot drag the result. We report it per decade.",
   "methods.limits.title": "Limits",
-  "methods.limits.body":
-    "Neighbouring months are not fully independent, which can make p-values look stronger than they are. Model data such as MERRA-2 and GLDAS describe a grid cell, not a single weather station.",
+  "methods.limits.body": "Model data such as MERRA-2 and GLDAS describe a grid cell, not a single weather station. The Thailand explorer test does not allow for months that depend on each other, which can make p-values look stronger than they are. The Hotspot map tests 632 places for each measurement, so a few clear results can appear by chance. A trend does not explain its cause.",
   "methods.data.title": "Data we use",
   "methods.data.variable": "Variable",
   "methods.data.product": "Product",
@@ -579,6 +577,21 @@ export const en = {
   "landing.src.gistda": "flood history in Thailand",
   "footer.by": "Created by",
   "landing.imageCredit": "Earth image: NASA Blue Marble",
+  "methods.thailand.title": "Thailand explorer",
+  "methods.global.title": "World explorer and Hotspot map",
+  "methods.global.step1.title": "Compare the same month across years",
+  "methods.global.step1.body": "January is compared only with January, February with February, and so on. The median of all those yearly changes is the trend, shown per decade. Rainfall uses complete yearly totals instead.",
+  "methods.global.step2.title": "Check it against resampled years",
+  "methods.global.step2.body": "Whole years of leftover variation are resampled 999 times to give an approximate 95% range for the trend and a p-value. This allows for months that depend on each other.",
+  "methods.global.step3.title": "Hold back weak results",
+  "methods.global.step3.body": "A trend needs at least 10 years and 80% valid months. Short, gappy or strongly persistent records are marked provisional. The Hotspot map shows a place only when the result is a clear rise or fall.",
+  "methods.co2": "CO₂ in the World explorer covers only 2015 to 2021, so it shows a descriptive slope with no range and no significance test.",
+  "methods.game.title": "Guess the graph",
+  "methods.game.body": "Our team chooses each question and its data, and the source is shown under the chart. Your score compares your line with the real one: 100 means they match, and it drops as the average gap grows. Continue-the-line questions also test the whole record the same way as the Thailand explorer.",
+  "methods.data.thailand": "Thailand explorer data",
+  "methods.data.global": "World explorer, Hotspot map and Home data",
+  "methods.data.coverage": "Coverage",
+  "landing.src.oco2": "carbon dioxide in the air, 2015 to 2021",
 } as const;
 
 export type MessageKey = keyof typeof en;

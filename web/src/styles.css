@@ -5416,3 +5416,15 @@ button,
     --earth-show: 120px;
   }
 }
+
+.methods-note {
+  max-width: 72ch;
+  margin: 12px 0 0;
+  color: var(--fg-soft);
+  line-height: 1.6;
+}
+
+.methods-subheading {
+  margin: 28px 0 10px;
+  font-size: 17px;
+}

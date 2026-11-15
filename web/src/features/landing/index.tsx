@@ -247,6 +247,7 @@ const SOURCES: { name: string; use: MessageKey }[] = [
   { name: 'NASA GPM IMERG', use: 'landing.src.imerg' },
   { name: 'NASA GLDAS', use: 'landing.src.gldas' },
   { name: 'NASA MERRA-2', use: 'landing.src.merra' },
+  { name: 'NASA OCO-2', use: 'landing.src.oco2' },
   { name: 'GISTDA', use: 'landing.src.gistda' },
 ];
 
