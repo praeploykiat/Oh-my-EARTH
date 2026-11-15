@@ -119,8 +119,10 @@ export function Globe({ world, dots, selectedId, focus, resetKey, zoomStep, labe
   useEffect(() => {
     const canvas = canvasRef.current!;
     const resize = () => {
-      const w = canvas.parentElement!.clientWidth;
-      const h = Math.min(w, Math.max(320, window.innerHeight * 0.7));
+      const parent = canvas.parentElement!;
+      const w = parent.clientWidth;
+      const fills = getComputedStyle(canvas).position === 'absolute';
+      const h = fills ? parent.clientHeight : Math.min(w, Math.max(320, window.innerHeight * 0.7));
       const dpr = window.devicePixelRatio || 1;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
