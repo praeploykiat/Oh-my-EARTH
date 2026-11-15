@@ -6,11 +6,13 @@ import { Game } from './features/game';
 import { GameAdmin } from './features/game/admin';
 import { Methods } from './features/methods';
 import { Workbench } from './features/workbench';
+import { GlobalExplorer } from './features/global';
 import { BrandMark, Footer, LanguageSwitcher } from './shared';
 
 const ROUTES = {
   '/': Experience,
   '/workbench': Workbench,
+  '/global': GlobalExplorer,
   '/game': Game,
   '/game/admin': GameAdmin,
   '/methods': Methods,
@@ -54,6 +56,9 @@ export function App() {
           </a>
           <a href="#/game" aria-current={route === '/game'}>
             {t('nav.game')}
+          </a>
+          <a href="#/global" aria-current={route === '/global'}>
+            {t('nav.global')}
           </a>
           <a href="#/methods" aria-current={route === '/methods'}>
             {t('nav.methods')}

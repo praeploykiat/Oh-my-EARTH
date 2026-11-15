@@ -1,0 +1,1493 @@
+{
+  "method": "seasonal-sen-cbb-v1",
+  "python": "3.14.0",
+  "numpy": "2.5.4",
+  "scipy": "1.18.1",
+  "replicatesPerBlock": 199,
+  "casesPerScenario": 20,
+  "scope": "Small deterministic simulation smoke checks. The production method uses 999 replicates per block. These scenarios cannot certify nominal 95% coverage or a universal 5% false-positive rate.",
+  "scenarios": [
+    {
+      "name": "independent-null",
+      "ar1": 0.0,
+      "trueSlopePerDecade": 0.0,
+      "period": 12,
+      "supportedDirections": 0,
+      "numericDirectionalPassesBeforeSafeguards": 0,
+      "limitedConclusions": 0,
+      "primaryIntervalsContainingTruth": 20,
+      "sensitiveConclusions": 2,
+      "cases": [
+        {
+          "seed": 100,
+          "slopePerDecade": -0.12451229166666633,
+          "pValue": 0.1,
+          "interval": [
+            -0.29694117647058793,
+            0.020951250000003085
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 101,
+          "slopePerDecade": -0.09866101731601698,
+          "pValue": 0.165,
+          "interval": [
+            -0.21065238095238112,
+            0.025180769230768344
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 102,
+          "slopePerDecade": -0.015070357142858348,
+          "pValue": 0.97,
+          "interval": [
+            -0.19216333333333502,
+            0.17741142857142883
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 103,
+          "slopePerDecade": 0.07553720647773209,
+          "pValue": 0.33,
+          "interval": [
+            -0.056422222222223754,
+            0.20869333333333154
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 104,
+          "slopePerDecade": -0.14080924999999997,
+          "pValue": 0.075,
+          "interval": [
+            -0.31763666666666523,
+            0.012809333333332043
+          ],
+          "evidence": "sensitive",
+          "warnings": []
+        },
+        {
+          "seed": 105,
+          "slopePerDecade": 0.17746218750000042,
+          "pValue": 0.08,
+          "interval": [
+            -0.015501333333332923,
+            0.31921285714285774
+          ],
+          "evidence": "sensitive",
+          "warnings": []
+        },
+        {
+          "seed": 106,
+          "slopePerDecade": 0.07267924812030108,
+          "pValue": 0.235,
+          "interval": [
+            -0.031293333333331695,
+            0.17418842105263105
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 107,
+          "slopePerDecade": 0.06124725274725017,
+          "pValue": 0.385,
+          "interval": [
+            -0.0896554545454526,
+            0.17722363636363783
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 108,
+          "slopePerDecade": 0.0024012337662359926,
+          "pValue": 1.0,
+          "interval": [
+            -0.12487999999999896,
+            0.15281375000000263
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 109,
+          "slopePerDecade": -0.11480409090909224,
+          "pValue": 0.215,
+          "interval": [
+            -0.27451428571428493,
+            0.06456000000000017
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 110,
+          "slopePerDecade": -0.10515744047618998,
+          "pValue": 0.255,
+          "interval": [
+            -0.26391799999999677,
+            0.0457350000000023
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 111,
+          "slopePerDecade": 0.04468870445344081,
+          "pValue": 0.635,
+          "interval": [
+            -0.14178133333333182,
+            0.2079681818181811
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 112,
+          "slopePerDecade": 0.0687494705882346,
+          "pValue": 0.135,
+          "interval": [
+            -0.017825000000000202,
+            0.16760099999999944
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 113,
+          "slopePerDecade": -0.12755056410256327,
+          "pValue": 0.285,
+          "interval": [
+            -0.30605500000000063,
+            0.07972833333333243
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 114,
+          "slopePerDecade": -0.032954944444443884,
+          "pValue": 0.785,
+          "interval": [
+            -0.22889368421052655,
+            0.20352100000000206
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 115,
+          "slopePerDecade": 0.021817571428571506,
+          "pValue": 0.65,
+          "interval": [
+            -0.09021444444444526,
+            0.11921666666666732
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 116,
+          "slopePerDecade": 0.14052455357142818,
+          "pValue": 0.1,
+          "interval": [
+            -0.013011999999996249,
+            0.2754309523809524
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 117,
+          "slopePerDecade": 0.08082856725146359,
+          "pValue": 0.25,
+          "interval": [
+            -0.07528384615384563,
+            0.222055000000001
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 118,
+          "slopePerDecade": -0.047181636363637314,
+          "pValue": 0.715,
+          "interval": [
+            -0.28574833333333477,
+            0.16806263157894744
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 119,
+          "slopePerDecade": -0.04285318181818583,
+          "pValue": 0.55,
+          "interval": [
+            -0.20159499999999944,
+            0.1223235714285715
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "name": "correlated-null",
+      "ar1": 0.8,
+      "trueSlopePerDecade": 0.0,
+      "period": 12,
+      "supportedDirections": 2,
+      "numericDirectionalPassesBeforeSafeguards": 2,
+      "limitedConclusions": 3,
+      "primaryIntervalsContainingTruth": 18,
+      "sensitiveConclusions": 2,
+      "cases": [
+        {
+          "seed": 100,
+          "slopePerDecade": -0.5574826666666688,
+          "pValue": 0.135,
+          "interval": [
+            -1.199902999999999,
+            0.11247399999999885
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 101,
+          "slopePerDecade": -0.4032503947368411,
+          "pValue": 0.07,
+          "interval": [
+            -0.8286799999999999,
+            0.015131666666666394
+          ],
+          "evidence": "sensitive",
+          "warnings": []
+        },
+        {
+          "seed": 102,
+          "slopePerDecade": -0.21012269841269843,
+          "pValue": 0.55,
+          "interval": [
+            -1.010063750000001,
+            0.5566966666666673
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 103,
+          "slopePerDecade": 0.24950914473684221,
+          "pValue": 0.265,
+          "interval": [
+            -0.2530592857142861,
+            0.773557333333334
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 104,
+          "slopePerDecade": -0.7546747619047621,
+          "pValue": 0.02,
+          "interval": [
+            -1.3800578571428574,
+            -0.1632339999999992
+          ],
+          "evidence": "decrease",
+          "warnings": []
+        },
+        {
+          "seed": 105,
+          "slopePerDecade": 0.6113753333333337,
+          "pValue": 0.065,
+          "interval": [
+            -0.015146666666667013,
+            1.2496670000000005
+          ],
+          "evidence": "sensitive",
+          "warnings": []
+        },
+        {
+          "seed": 106,
+          "slopePerDecade": 0.3135938755980868,
+          "pValue": 0.23,
+          "interval": [
+            -0.1938447058823535,
+            0.8912863636363643
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 107,
+          "slopePerDecade": 0.09814204545454705,
+          "pValue": 0.615,
+          "interval": [
+            -0.4021357142857137,
+            0.7108124999999976
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 108,
+          "slopePerDecade": 0.12442500000000045,
+          "pValue": 0.77,
+          "interval": [
+            -0.6342300000000005,
+            0.9780789999999993
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 109,
+          "slopePerDecade": -0.6407079700854701,
+          "pValue": 0.115,
+          "interval": [
+            -1.3566563636363618,
+            0.11377909090909066
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 110,
+          "slopePerDecade": -0.37728999999999857,
+          "pValue": 0.195,
+          "interval": [
+            -0.8483976470588234,
+            0.15379263157894746
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 111,
+          "slopePerDecade": 0.12581674242424176,
+          "pValue": 0.7,
+          "interval": [
+            -0.7980429999999998,
+            1.0591171428571424
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 112,
+          "slopePerDecade": 0.3159882352941168,
+          "pValue": 0.01,
+          "interval": [
+            0.0894957142857153,
+            0.5856024999999998
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 113,
+          "slopePerDecade": -0.1123731428571436,
+          "pValue": 0.745,
+          "interval": [
+            -0.9181778571428569,
+            0.6861066666666658
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 114,
+          "slopePerDecade": 0.23545402777777724,
+          "pValue": 0.575,
+          "interval": [
+            -0.6446538461538455,
+            1.0374905263157888
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 115,
+          "slopePerDecade": -0.2650072727272714,
+          "pValue": 0.45,
+          "interval": [
+            -0.8573430000000002,
+            0.4092337499999976
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 116,
+          "slopePerDecade": 0.6520637777777782,
+          "pValue": 0.105,
+          "interval": [
+            -0.21759352941176457,
+            1.443026249999999
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 117,
+          "slopePerDecade": 0.1822739166666667,
+          "pValue": 0.615,
+          "interval": [
+            -0.4740405263157904,
+            0.8643716666666663
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 118,
+          "slopePerDecade": -0.24625305921052576,
+          "pValue": 0.655,
+          "interval": [
+            -1.2398000000000013,
+            0.7969099999999989
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 119,
+          "slopePerDecade": 0.06601986111111144,
+          "pValue": 0.83,
+          "interval": [
+            -0.5535563636363605,
+            0.679991052631578
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "name": "persistent-null-stress",
+      "ar1": 0.95,
+      "trueSlopePerDecade": 0.0,
+      "period": 12,
+      "supportedDirections": 1,
+      "numericDirectionalPassesBeforeSafeguards": 5,
+      "limitedConclusions": 19,
+      "primaryIntervalsContainingTruth": 13,
+      "sensitiveConclusions": 0,
+      "cases": [
+        {
+          "seed": 100,
+          "slopePerDecade": -1.6228357291666673,
+          "pValue": 0.255,
+          "interval": [
+            -4.010627142857143,
+            0.9867668750000003
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 101,
+          "slopePerDecade": -1.6654296666666673,
+          "pValue": 0.005,
+          "interval": [
+            -2.694096111111111,
+            -0.5380585714285705
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 102,
+          "slopePerDecade": -1.3292512272727284,
+          "pValue": 0.295,
+          "interval": [
+            -3.9020273333333337,
+            1.5087325000000007
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 103,
+          "slopePerDecade": 0.6796271428571409,
+          "pValue": 0.315,
+          "interval": [
+            -0.6399387499999998,
+            2.188532857142858
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 104,
+          "slopePerDecade": -2.5862674242424233,
+          "pValue": 0.005,
+          "interval": [
+            -4.0788514285714275,
+            -0.9922311111111132
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 105,
+          "slopePerDecade": 1.8721514285714287,
+          "pValue": 0.05,
+          "interval": [
+            0.029978125000000855,
+            3.5295200000000015
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 106,
+          "slopePerDecade": 1.621640587044535,
+          "pValue": 0.005,
+          "interval": [
+            0.5993369565217384,
+            2.7892262499999996
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 107,
+          "slopePerDecade": 0.28751781249999886,
+          "pValue": 0.72,
+          "interval": [
+            -1.1970379999999992,
+            1.9522600000000079
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 108,
+          "slopePerDecade": 1.3384721428571416,
+          "pValue": 0.38,
+          "interval": [
+            -1.668658333333338,
+            4.196491538461538
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 109,
+          "slopePerDecade": -2.240689304029305,
+          "pValue": 0.05,
+          "interval": [
+            -4.030597500000002,
+            -0.3197899999999976
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 110,
+          "slopePerDecade": -1.4820872587719296,
+          "pValue": 0.02,
+          "interval": [
+            -2.884149999999999,
+            -0.18699999999999842
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 111,
+          "slopePerDecade": 1.1274635000000008,
+          "pValue": 0.265,
+          "interval": [
+            -0.9085842857142877,
+            3.2785490000000017
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 112,
+          "slopePerDecade": 1.34139188034188,
+          "pValue": 0.005,
+          "interval": [
+            0.6395462499999982,
+            1.9786874999999995
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 113,
+          "slopePerDecade": -0.4486590283400803,
+          "pValue": 0.7,
+          "interval": [
+            -2.5510663636363646,
+            1.637700000000001
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 114,
+          "slopePerDecade": 2.0704868749999994,
+          "pValue": 0.085,
+          "interval": [
+            -0.3068412500000006,
+            4.035901428571427
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 115,
+          "slopePerDecade": -1.1888314047619053,
+          "pValue": 0.205,
+          "interval": [
+            -3.211894000000001,
+            0.614517499999998
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 116,
+          "slopePerDecade": 1.5925147348484843,
+          "pValue": 0.125,
+          "interval": [
+            -0.40444999999999476,
+            3.6209485714285705
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 117,
+          "slopePerDecade": 0.7793026190476194,
+          "pValue": 0.435,
+          "interval": [
+            -0.9473866666666675,
+            2.5559433333333343
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 118,
+          "slopePerDecade": 0.4360669285714283,
+          "pValue": 0.825,
+          "interval": [
+            -2.9303799999999987,
+            3.6772957142857137
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        },
+        {
+          "seed": 119,
+          "slopePerDecade": 0.4212357142857138,
+          "pValue": 0.62,
+          "interval": [
+            -1.1457925000000024,
+            1.753884166666667
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "persistence"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "correlated-known-increase",
+      "ar1": 0.6,
+      "trueSlopePerDecade": 2.0,
+      "period": 12,
+      "supportedDirections": 20,
+      "numericDirectionalPassesBeforeSafeguards": 20,
+      "limitedConclusions": 0,
+      "primaryIntervalsContainingTruth": 18,
+      "sensitiveConclusions": 0,
+      "cases": [
+        {
+          "seed": 100,
+          "slopePerDecade": 1.7125212500000004,
+          "pValue": 0.005,
+          "interval": [
+            1.3961180952380947,
+            2.017216666666665
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 101,
+          "slopePerDecade": 1.775538516483517,
+          "pValue": 0.005,
+          "interval": [
+            1.56755875,
+            2.008789
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 102,
+          "slopePerDecade": 1.9421019736842111,
+          "pValue": 0.005,
+          "interval": [
+            1.5530483333333311,
+            2.368465000000004
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 103,
+          "slopePerDecade": 2.1474473939393937,
+          "pValue": 0.005,
+          "interval": [
+            1.860366874999999,
+            2.467476666666665
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 104,
+          "slopePerDecade": 1.6086284545454528,
+          "pValue": 0.005,
+          "interval": [
+            1.2801833333333335,
+            1.9769950000000014
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 105,
+          "slopePerDecade": 2.3323164374999994,
+          "pValue": 0.005,
+          "interval": [
+            1.9700199999999946,
+            2.679093333333335
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 106,
+          "slopePerDecade": 2.169084166666668,
+          "pValue": 0.005,
+          "interval": [
+            1.8588470588235306,
+            2.452000588235296
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 107,
+          "slopePerDecade": 2.096115511363636,
+          "pValue": 0.005,
+          "interval": [
+            1.7753416666666646,
+            2.4221159999999955
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 108,
+          "slopePerDecade": 2.0512736309523802,
+          "pValue": 0.005,
+          "interval": [
+            1.7045629411764718,
+            2.4484759999999994
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 109,
+          "slopePerDecade": 1.6247094444444454,
+          "pValue": 0.005,
+          "interval": [
+            1.2915299999999963,
+            2.0233875
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 110,
+          "slopePerDecade": 1.7834827976190488,
+          "pValue": 0.005,
+          "interval": [
+            1.463062307692307,
+            2.1006940000000043
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 111,
+          "slopePerDecade": 2.018469044117647,
+          "pValue": 0.005,
+          "interval": [
+            1.5733250000000005,
+            2.549656250000001
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 112,
+          "slopePerDecade": 2.148882916666666,
+          "pValue": 0.005,
+          "interval": [
+            2.0008957142857144,
+            2.2977999999999987
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 113,
+          "slopePerDecade": 1.9041695488721788,
+          "pValue": 0.005,
+          "interval": [
+            1.5245733333333313,
+            2.3178833333333295
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 114,
+          "slopePerDecade": 2.0233395738636366,
+          "pValue": 0.005,
+          "interval": [
+            1.5561923076923059,
+            2.482684444444444
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 115,
+          "slopePerDecade": 1.9248359999999989,
+          "pValue": 0.005,
+          "interval": [
+            1.5784353333333336,
+            2.262264666666666
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 116,
+          "slopePerDecade": 2.296198849206348,
+          "pValue": 0.005,
+          "interval": [
+            1.9271207142857147,
+            2.672128749999998
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 117,
+          "slopePerDecade": 2.0560681617647063,
+          "pValue": 0.005,
+          "interval": [
+            1.735900000000008,
+            2.426981818181818
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 118,
+          "slopePerDecade": 1.8514362012987,
+          "pValue": 0.005,
+          "interval": [
+            1.3782599999999925,
+            2.377147500000003
+          ],
+          "evidence": "increase",
+          "warnings": []
+        },
+        {
+          "seed": 119,
+          "slopePerDecade": 1.9966586507936501,
+          "pValue": 0.005,
+          "interval": [
+            1.6961705263157891,
+            2.285207333333335
+          ],
+          "evidence": "increase",
+          "warnings": []
+        }
+      ]
+    },
+    {
+      "name": "correlated-with-gaps",
+      "ar1": 0.6,
+      "trueSlopePerDecade": 0.0,
+      "period": 12,
+      "supportedDirections": 0,
+      "numericDirectionalPassesBeforeSafeguards": 4,
+      "limitedConclusions": 20,
+      "primaryIntervalsContainingTruth": 16,
+      "sensitiveConclusions": 0,
+      "cases": [
+        {
+          "seed": 100,
+          "slopePerDecade": -0.2714884615384605,
+          "pValue": 0.095,
+          "interval": [
+            -0.5577275000000004,
+            0.031652352941177124
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 101,
+          "slopePerDecade": -0.3083799999999993,
+          "pValue": 0.01,
+          "interval": [
+            -0.501100000000001,
+            -0.06074909090909131
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 102,
+          "slopePerDecade": -0.08751411764705855,
+          "pValue": 0.63,
+          "interval": [
+            -0.4644727272727261,
+            0.3114766666666687
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 103,
+          "slopePerDecade": 0.10207000000000477,
+          "pValue": 0.52,
+          "interval": [
+            -0.2321212500000014,
+            0.47223555555555624
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 104,
+          "slopePerDecade": -0.4032030769230761,
+          "pValue": 0.025,
+          "interval": [
+            -0.7151299999999994,
+            -0.05659000000001413
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 105,
+          "slopePerDecade": 0.33213500000000007,
+          "pValue": 0.065,
+          "interval": [
+            -0.019015555555555883,
+            0.6466400000000003
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 106,
+          "slopePerDecade": 0.16845055555555416,
+          "pValue": 0.245,
+          "interval": [
+            -0.16565428571428448,
+            0.4648158333333333
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 107,
+          "slopePerDecade": 0.043336249999998966,
+          "pValue": 0.82,
+          "interval": [
+            -0.2883320000000005,
+            0.3851509090909082
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 108,
+          "slopePerDecade": 0.0071137499999984755,
+          "pValue": 0.95,
+          "interval": [
+            -0.30740250000000024,
+            0.36400700000000086
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 109,
+          "slopePerDecade": -0.415736874999999,
+          "pValue": 0.025,
+          "interval": [
+            -0.6805995238095247,
+            -0.07555000000000216
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 110,
+          "slopePerDecade": -0.2504977777777779,
+          "pValue": 0.135,
+          "interval": [
+            -0.5704508695652175,
+            0.08763399999999777
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 111,
+          "slopePerDecade": 0.06961833333333445,
+          "pValue": 0.8,
+          "interval": [
+            -0.40601083333333376,
+            0.5778400000000006
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 112,
+          "slopePerDecade": 0.12398333333333511,
+          "pValue": 0.08,
+          "interval": [
+            -0.009812857142857161,
+            0.2851306666666673
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 113,
+          "slopePerDecade": -0.08210529411764778,
+          "pValue": 0.735,
+          "interval": [
+            -0.4964238461538473,
+            0.38793250000000334
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 114,
+          "slopePerDecade": 0.038425000000000153,
+          "pValue": 0.84,
+          "interval": [
+            -0.4131299999999971,
+            0.4886021428571422
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 115,
+          "slopePerDecade": -0.09475950000000033,
+          "pValue": 0.56,
+          "interval": [
+            -0.44749249999999885,
+            0.23539999999998784
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 116,
+          "slopePerDecade": 0.37119499999999894,
+          "pValue": 0.02,
+          "interval": [
+            0.03162400000000076,
+            0.7562407142857148
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 117,
+          "slopePerDecade": 0.05492823529411841,
+          "pValue": 0.68,
+          "interval": [
+            -0.2513444444444445,
+            0.4412400000000005
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 118,
+          "slopePerDecade": -0.14247409090908986,
+          "pValue": 0.67,
+          "interval": [
+            -0.6541594444444441,
+            0.3925574999999992
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        },
+        {
+          "seed": 119,
+          "slopePerDecade": -0.004085555555555231,
+          "pValue": 0.985,
+          "interval": [
+            -0.3207883333333328,
+            0.28520733333333226
+          ],
+          "evidence": "limited",
+          "warnings": [
+            "gaps"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "annual-correlated-null",
+      "ar1": 0.6,
+      "trueSlopePerDecade": 0.0,
+      "period": 1,
+      "supportedDirections": 2,
+      "numericDirectionalPassesBeforeSafeguards": 2,
+      "limitedConclusions": 0,
+      "primaryIntervalsContainingTruth": 17,
+      "sensitiveConclusions": 1,
+      "cases": [
+        {
+          "seed": 100,
+          "slopePerDecade": -1.0126198011363643,
+          "pValue": 0.245,
+          "interval": [
+            -2.7439909999999976,
+            0.90235666666666
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 101,
+          "slopePerDecade": -0.014240279720280056,
+          "pValue": 0.945,
+          "interval": [
+            -1.312015384615387,
+            1.3972776190476193
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 102,
+          "slopePerDecade": -0.5108195624999985,
+          "pValue": 0.195,
+          "interval": [
+            -1.1146409999999989,
+            0.11885571428571495
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 103,
+          "slopePerDecade": 0.2382883333333344,
+          "pValue": 0.595,
+          "interval": [
+            -1.055396666666666,
+            1.4099400000000037
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 104,
+          "slopePerDecade": 0.3074235384615382,
+          "pValue": 0.08,
+          "interval": [
+            -0.037643333333328144,
+            0.950564285714286
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 105,
+          "slopePerDecade": -2.090872083333335,
+          "pValue": 0.005,
+          "interval": [
+            -3.146579999999979,
+            -0.9015008333333352
+          ],
+          "evidence": "decrease",
+          "warnings": []
+        },
+        {
+          "seed": 106,
+          "slopePerDecade": -0.443955140056023,
+          "pValue": 0.165,
+          "interval": [
+            -1.1010650000000055,
+            0.28567499999999857
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 107,
+          "slopePerDecade": 0.008292761437909253,
+          "pValue": 0.98,
+          "interval": [
+            -0.8511989999999976,
+            0.8057200000000009
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 108,
+          "slopePerDecade": -0.7676604166666667,
+          "pValue": 0.33,
+          "interval": [
+            -2.3684340000000006,
+            0.9595542105263146
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 109,
+          "slopePerDecade": 0.19069833333333303,
+          "pValue": 0.695,
+          "interval": [
+            -1.2296574999999965,
+            1.2991669230769232
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 110,
+          "slopePerDecade": -0.6845044999999992,
+          "pValue": 0.005,
+          "interval": [
+            -1.447605833333331,
+            -0.11857999999999258
+          ],
+          "evidence": "decrease",
+          "warnings": []
+        },
+        {
+          "seed": 111,
+          "slopePerDecade": -0.8626622894736844,
+          "pValue": 0.13,
+          "interval": [
+            -2.0633955555555556,
+            0.1340933333333341
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 112,
+          "slopePerDecade": -0.03091782894736819,
+          "pValue": 0.965,
+          "interval": [
+            -1.0354390000000002,
+            1.1202872727272735
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 113,
+          "slopePerDecade": -0.833575588235293,
+          "pValue": 0.165,
+          "interval": [
+            -2.1677666666666675,
+            0.48753000000000046
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 114,
+          "slopePerDecade": -0.07258933333333792,
+          "pValue": 0.865,
+          "interval": [
+            -1.2189878571428585,
+            0.6737566666666661
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 115,
+          "slopePerDecade": 0.019515584415581058,
+          "pValue": 0.985,
+          "interval": [
+            -0.6831415384615405,
+            0.733951428571429
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 116,
+          "slopePerDecade": 0.21516583333333728,
+          "pValue": 0.415,
+          "interval": [
+            -0.3321264285714268,
+            0.7792190909090929
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 117,
+          "slopePerDecade": -0.37926083333333444,
+          "pValue": 0.05,
+          "interval": [
+            -0.6054147058823536,
+            -0.016692857142857065
+          ],
+          "evidence": "sensitive",
+          "warnings": []
+        },
+        {
+          "seed": 118,
+          "slopePerDecade": 0.6716060000000006,
+          "pValue": 0.075,
+          "interval": [
+            -0.009146000000001209,
+            1.3027244444444441
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        },
+        {
+          "seed": 119,
+          "slopePerDecade": -0.727882250000001,
+          "pValue": 0.11,
+          "interval": [
+            -1.651607999999996,
+            0.12800499999999992
+          ],
+          "evidence": "inconclusive",
+          "warnings": []
+        }
+      ]
+    }
+  ]
+}

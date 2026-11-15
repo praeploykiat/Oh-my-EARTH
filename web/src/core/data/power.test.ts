@@ -22,6 +22,13 @@ describe('parsePowerMonthly', () => {
   it('fails clearly when the parameter is missing', () => {
     expect(() => parsePowerMonthly(body, 'RH2M')).toThrow('RH2M');
   });
+  it('uses the response fill value and discards invalid months and nonfinite values', () => {
+    expect(parsePowerMonthly({ header: { fill_value: -9999 }, properties: { parameter: { T2M: {
+      '200101': -9999, '200102': Infinity, '200103': 0, '200100': 1, '200114': 2,
+    } } } }, 'T2M')).toEqual([
+      { t: '2001-01', value: null }, { t: '2001-02', value: null }, { t: '2001-03', value: 0 },
+    ]);
+  });
 });
 
 describe('requestUrl', () => {

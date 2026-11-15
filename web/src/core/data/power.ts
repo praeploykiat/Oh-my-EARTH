@@ -17,6 +17,7 @@ export interface PowerRequest {
 
 interface PowerResponse {
   properties: { parameter: Record<string, Record<string, number>> };
+  header?: { fill_value?: number };
 }
 
 // Parsing
@@ -26,11 +27,11 @@ export function parsePowerMonthly(body: PowerResponse, parameter: string): Serie
   if (!raw) throw new Error(`NASA POWER response has no ${parameter}`);
 
   return Object.keys(raw)
-    .filter((key) => key.slice(4) !== '13')
+    .filter((key) => /^\d{4}(0[1-9]|1[0-2])$/.test(key))
     .sort()
     .map((key) => ({
       t: `${key.slice(0, 4)}-${key.slice(4)}`,
-      value: raw[key] === MISSING ? null : raw[key],
+      value: typeof raw[key] !== 'number' || !Number.isFinite(raw[key]) || raw[key] === (body.header?.fill_value ?? MISSING) ? null : raw[key],
     }));
 }
 
@@ -51,10 +52,15 @@ export function requestUrl({ parameter, lat, lon }: PowerRequest): string {
 
 export function fetchPowerMonthly(request: PowerRequest): Promise<SeriesPoint[]> {
   return cachedSeries(cacheKey(request), async () => {
-    const response = await fetchWithTimeout(requestUrl(request), TIMEOUT_MS);
-    if (!response.ok) throw new Error(`NASA POWER returned ${response.status}`);
-    return parsePowerMonthly((await response.json()) as PowerResponse, request.parameter);
+    return parsePowerMonthly((await fetchPowerResponse(request)) as PowerResponse, request.parameter);
   });
+}
+
+// For consumers that inspect units and provenance before normalizing the response.
+export async function fetchPowerResponse(request: PowerRequest): Promise<unknown> {
+  const response = await fetchWithTimeout(requestUrl(request), TIMEOUT_MS);
+  if (!response.ok) throw new Error(`NASA POWER returned ${response.status}`);
+  return response.json() as Promise<unknown>;
 }
 
 function cacheKey(request: PowerRequest): string {

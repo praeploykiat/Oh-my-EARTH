@@ -140,7 +140,7 @@ export const VARIABLES: VariableDefinition[] = [
     layer: 'atmosphere',
     satellites: ['Terra', 'Aqua'],
     source: 'giovanni',
-    provider: { provider: 'NASA Giovanni', product: 'MERRA-2 aerosol optical depth, 550 nm (M2TMNXAER)', url: GIOVANNI_HOME },
+    provider: { provider: 'NASA Giovanni', product: 'MERRA-2 aerosol optical depth, 550 nm (M2T1NXAER hourly, averaged monthly)', url: GIOVANNI_HOME },
     unit: 'AOD',
     label: { en: 'Haze', th: 'หมอกควัน' },
     description: {
