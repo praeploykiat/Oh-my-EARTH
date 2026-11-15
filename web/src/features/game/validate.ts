@@ -42,6 +42,8 @@ export function roundProblem(v: unknown): string | null {
   if (r.hidden.values.filter((x) => x !== null).length < 2) return 'The line needs at least 2 numbers';
   if (!isLocalized(r.answer, LIMITS.text)) return 'Answer must have English and Thai fields';
   if (!isString(r.source, LIMITS.short)) return 'Source is too long';
+  if (!r.given.unit.trim()) return 'Unit of the bars is missing';
+  if (!r.hidden.unit.trim()) return 'Unit of the line is missing';
   return (
     missing('Place', r.place) ??
     missing('Name of the shown measure', r.given.label) ??

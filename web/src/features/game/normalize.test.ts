@@ -25,8 +25,14 @@ describe('importing rounds', () => {
     expect(result.rounds[0].source).toBe('');
   });
 
-  it('replaces a round with the same id and accepts a rounds wrapper', () => {
-    const first = importRounds(DEFAULT_ROUNDS, JSON.stringify({ rounds: [SAMPLE] }));
+  it('explains that a wrapped list is not accepted', () => {
+    const result = importRounds([], JSON.stringify({ questions: [SAMPLE] }));
+    expect(result.rounds).toHaveLength(0);
+    expect(result.problems[0]).toContain('list [');
+  });
+
+  it('replaces a round with the same id', () => {
+    const first = importRounds(DEFAULT_ROUNDS, JSON.stringify([SAMPLE]));
     const again = importRounds(first.rounds, JSON.stringify([SAMPLE]));
     expect(again.replaced).toBe(1);
     expect(again.rounds).toHaveLength(DEFAULT_ROUNDS.length + 1);

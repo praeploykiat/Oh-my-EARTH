@@ -53,17 +53,15 @@ export type ImportMode = 'merge' | 'replace';
 
 export function importRounds(current: GameRound[], text: string, mode: ImportMode = 'merge'): ImportResult {
   const parsed: unknown = JSON.parse(text);
-  const wrapped = parsed as { rounds?: unknown[]; questions?: unknown[] };
-  const list: unknown[] = Array.isArray(parsed)
-    ? parsed
-    : Array.isArray(wrapped?.questions)
-      ? wrapped.questions
-      : Array.isArray(wrapped?.rounds)
-        ? wrapped.rounds
-        : [parsed];
+  const list: unknown[] = Array.isArray(parsed) ? parsed : [parsed];
 
   const rounds = mode === 'replace' ? [] : [...current];
   const problems: string[] = [];
+  const wrapper = !Array.isArray(parsed) && parsed && typeof parsed === 'object' && !('place' in parsed) && Object.values(parsed).some(Array.isArray);
+  if (wrapper) {
+    problems.push('Use one question { … } or a list [ { … }, { … } ]. Remove the outer { "…": [ ] } around the list.');
+    return { rounds, added: 0, replaced: 0, problems };
+  }
   let added = 0;
   let replaced = 0;
 

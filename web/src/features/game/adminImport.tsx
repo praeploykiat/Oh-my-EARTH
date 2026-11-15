@@ -7,15 +7,15 @@ import type { GameRound } from './types';
 // Field guide and starter files
 
 const FIELDS: { name: string; required: boolean; text: string }[] = [
-  { name: 'id', required: false, text: 'Leave out for a new question. Keep it to change an existing one.' },
+  { name: 'id', required: false, text: 'Leave it out for a new question; one is made for you. To change a question that already exists, keep its id exactly as it is (copy it from the question, or Download it).' },
   { name: 'place', required: true, text: '{ "en": "…", "th": "…" }' },
   { name: 'time', required: true, text: 'Jan…Dec, or years like "2001", or months like "2020-01". 2 to 400 points.' },
   { name: 'timeLabel', required: false, text: 'Caption under the time axis, { "en", "th" }.' },
   { name: 'given.label', required: true, text: 'Name of the bars, { "en", "th" }.' },
-  { name: 'given.unit', required: false, text: 'For example "mm/day". Recommended.' },
+  { name: 'given.unit', required: true, text: 'For example "mm/day".' },
   { name: 'given.values', required: true, text: 'One number per time point. null where there is no data. At least 2 numbers.' },
   { name: 'hidden.label', required: true, text: 'Name of the line players draw, { "en", "th" }.' },
-  { name: 'hidden.unit', required: false, text: 'For example "kg/m²". Recommended.' },
+  { name: 'hidden.unit', required: true, text: 'For example "kg/m²".' },
   { name: 'hidden.values', required: true, text: 'Same as given.values.' },
   { name: 'answer', required: true, text: '{ "en", "th" }. **bold**, "- " starts a list item, \\n\\n starts a new paragraph.' },
   { name: 'source', required: false, text: 'Where the data comes from.' },
@@ -62,7 +62,7 @@ function FieldGuide() {
                 <code>{f.name}</code>
               </td>
               <td>
-                <em className={`admin-badge ${f.required ? 'is-required' : 'is-optional'}`}>{f.required ? 'Required' : 'Optional'}</em>
+                <span className={f.required ? undefined : 'is-optional'}>{f.required ? 'Required' : 'optional'}</span>
               </td>
               <td>{f.text}</td>
             </tr>

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react';
 import { deleteQuestion, fetchQuestions, questionHistory, saveQuestion, type Stored } from './api';
-import { Result, RoundView, scoreRound } from './index';
+import { Result, ResultPeek, RoundView, scoreRound } from './index';
 import { normalizeRound } from './normalize';
 import { htmlToMarkdown, markdownToHtml } from './richText';
 import type { Feedback } from './score';
-import { Badge, Checklist, download, Guide, missingItems, questionTitle, Step, useGuideOpen } from './adminParts';
+import { Checklist, download, IdNote, missingItems, Optional, questionTitle, Step, Tour, tourWanted } from './adminParts';
 import { ImportPanel } from './adminImport';
 import { withUnit } from './answer';
 import { formatTime, monthsBetween, monthsOfYear, timeKind, yearsBetween } from './time';
@@ -129,7 +129,7 @@ function TextPair({ label, value, onChange, hint, required = true, placeholder }
   return (
     <div className="admin-field">
       <span className="admin-label">
-        {label} {!required && <Badge required={false} />}
+        {label} {!required && <Optional />}
       </span>
       {hint && <small>{hint}</small>}
       <div className="admin-pair">
@@ -511,7 +511,7 @@ function Preview({ round }: { round: GameRound }) {
         }}
         onReset={reset}
       />
-      {feedback && <Result round={round} feedback={feedback} onNext={reset} nextLabel="Try again" />}
+      {feedback ? <Result round={round} feedback={feedback} onNext={reset} nextLabel="Try again" /> : <ResultPeek round={round} />}
     </div>
   );
 }
@@ -608,7 +608,8 @@ export function GameAdmin() {
   const [importing, setImporting] = useState(false);
   const [panel, setPanel] = useState<'history' | 'json' | null>(null);
   const [copied, setCopied] = useState(false);
-  const [guideOpen, toggleGuide] = useGuideOpen();
+  const [touring, setTouring] = useState(false);
+  const toured = useRef(false);
   const [offline, setOffline] = useState(false);
   const entriesRef = useRef<Entry[]>([]);
   const timers = useRef(new Map<string, number>());
@@ -752,6 +753,12 @@ export function GameAdmin() {
     return () => window.removeEventListener('beforeunload', warn);
   }, [sending]);
 
+  useEffect(() => {
+    if (!entries || toured.current) return;
+    toured.current = true;
+    if (tourWanted()) window.setTimeout(() => setTouring(true), 300);
+  }, [entries]);
+
   if (!entries) return <p className="status">Loading…</p>;
 
   const entry = entries.find((e) => e.draft.id === selected) ?? null;
@@ -822,24 +829,21 @@ export function GameAdmin() {
     <div className="admin">
       <header className="admin-top">
         <div>
-          <h1>Guess the graph: questions</h1>
-          <p>Add, change and remove the questions players get. Everything saves by itself.</p>
+          <h1>Questions for Guess the graph</h1>
+          <p>Changes save by themselves and reach players straight away.</p>
         </div>
         <div className="admin-top-actions">
           <span className={`admin-overall ${unsaved ? 'is-busy' : ''}`}>
             {offline ? 'Offline: changes will save when the connection is back' : unsaved ? `${unsaved} not saved yet` : 'All changes saved'}
           </span>
-          {!guideOpen && (
-            <button type="button" className="button button-secondary" onClick={toggleGuide}>
-              How to use
-            </button>
-          )}
-          <button type="button" className="button button-secondary" onClick={() => setImporting(!importing)}>
+          <button type="button" data-tour="tour" onClick={() => setTouring(true)}>
+            Tour
+          </button>
+          <button type="button" data-tour="import" onClick={() => setImporting(!importing)}>
             Import JSON
           </button>
           <button
             type="button"
-            className="button button-secondary"
             onClick={() => download(entries.map((e) => e.draft), `game-questions-${new Date().toISOString().slice(0, 10)}`)}
           >
             Download all
@@ -847,7 +851,7 @@ export function GameAdmin() {
         </div>
       </header>
 
-      {guideOpen && <Guide onClose={toggleGuide} />}
+      {touring && <Tour onClose={() => setTouring(false)} />}
 
       {notice && (
         <p className={`admin-status is-${notice.kind}`}>
@@ -881,9 +885,9 @@ export function GameAdmin() {
 
       <div className="admin-body">
         <aside className="admin-list">
-          <p className="admin-list-title">Questions ({entries.length})</p>
+          <p className="admin-list-title">{entries.length} questions</p>
           <ol>
-            {entries.map((e, i) => (
+            {entries.map((e) => (
               <li key={e.draft.id} className={e.draft.id === selected ? 'is-on' : ''}>
                 <button
                   type="button"
@@ -894,25 +898,12 @@ export function GameAdmin() {
                   }}
                 >
                   <strong>{questionTitle(e.draft)}</strong>
-                  <small>{e.draft.place.en || 'No place yet'}</small>
-                  <em className={`admin-state is-${e.state}`}>{STATE_LABEL[e.state]}</em>
+                  <small>
+                    <span className={`admin-dot is-${e.state}`} title={STATE_LABEL[e.state]} />
+                    {e.draft.place.en || 'No place yet'}
+                    {e.state !== 'saved' && ` · ${STATE_LABEL[e.state]}`}
+                  </small>
                 </button>
-                <div className="admin-list-tools">
-                  <button type="button" onClick={() => add({ ...structuredClone(e.draft), id: newId() }, i)}>
-                    Duplicate
-                  </button>
-                  <button
-                    type="button"
-                    className="is-danger"
-                    onClick={() => {
-                      if (confirmDelete !== e.draft.id) return setConfirmDelete(e.draft.id);
-                      setConfirmDelete(null);
-                      remove(e);
-                    }}
-                  >
-                    {confirmDelete === e.draft.id ? 'Click again to delete' : 'Delete'}
-                  </button>
-                </div>
               </li>
             ))}
           </ol>
@@ -943,20 +934,12 @@ export function GameAdmin() {
                 </section>
               )}
 
-              <section className="admin-card admin-head">
+              <section className="admin-head">
                 <div className="admin-head-row">
                   <div>
-                    <p className="admin-kicker">{entry.base ? 'Editing' : 'New question'}</p>
-                    <h2>
-                      {round.place.en ? `${round.place.en} · ` : ''}
-                      {questionTitle(round)}
-                    </h2>
+                    <h2>{questionTitle(round)}</h2>
                     <p className="admin-meta">
-                      <code>ID {round.id}</code>
-                      <button type="button" className="admin-link" onClick={() => copyId(round.id)}>
-                        {copied ? 'Copied' : 'Copy ID'}
-                      </button>
-                      <span className={`admin-state is-${entry.state}`}>{status(entry)}</span>
+                      {round.place.en || 'No place yet'} <span className={`admin-dot is-${entry.state}`} /> {status(entry)}
                     </p>
                   </div>
                   <div className="admin-head-tools">
@@ -974,14 +957,29 @@ export function GameAdmin() {
                     <button type="button" onClick={() => download(round, round.id)}>
                       Download
                     </button>
+                    <button type="button" onClick={() => add({ ...structuredClone(round), id: newId() }, entries.indexOf(entry))}>
+                      Duplicate
+                    </button>
+                    <button
+                      type="button"
+                      className="is-danger"
+                      onClick={() => {
+                        if (confirmDelete !== round.id) return setConfirmDelete(round.id);
+                        setConfirmDelete(null);
+                        remove(entry);
+                      }}
+                    >
+                      {confirmDelete === round.id ? 'Click again to delete' : 'Delete'}
+                    </button>
                   </div>
                 </div>
+                <IdNote id={round.id} copied={copied} onCopy={() => copyId(round.id)} />
                 {panel === 'json' && <JsonEditor round={round} onApply={edit} onClose={() => setPanel(null)} />}
                 {panel === 'history' && entry.base && <History id={round.id} onRestore={(q) => edit({ ...q, id: round.id })} />}
                 {entry.state === 'error' && entry.message ? (
                   <p className="admin-status is-error">
                     Could not save: {entry.message}{' '}
-                    <button type="button" className="admin-dismiss" onClick={() => save(round.id)}>
+                    <button type="button" className="admin-link" onClick={() => save(round.id)}>
                       Try again
                     </button>
                   </p>
@@ -990,11 +988,11 @@ export function GameAdmin() {
                 )}
               </section>
 
-              <Step n={1} id="step-place" title="Place" required>
+              <Step n={1} id="step-place" title="Place">
                 <TextPair label="Place name" value={round.place} placeholder={{ en: 'Chiang Mai', th: 'เชียงใหม่' }} onChange={(place) => edit({ ...round, place })} />
               </Step>
 
-              <Step n={2} id="step-time" title="Time axis" required hint="What the bottom of both charts shows. Pick a kind, set the range, then press Use this time axis.">
+              <Step n={2} id="step-time" title="Time axis" hint="What runs along the bottom of both charts. Pick a kind, set the range, then press Use this time axis.">
                 <TimeEditor round={round} onChange={edit} />
                 <TextPair
                   label="Caption under the time axis"
@@ -1005,7 +1003,7 @@ export function GameAdmin() {
                 />
               </Step>
 
-              <Step n={3} id="step-measures" title="The two measures" required hint="Players see the bars, then draw the line they think goes with them.">
+              <Step n={3} id="step-measures" title="The two measures" hint="Players see the bars, then draw the line they think goes with them.">
                 <div className="admin-series">
                   {(['given', 'hidden'] as SeriesKey[]).map((key) => (
                     <div key={key}>
@@ -1021,7 +1019,7 @@ export function GameAdmin() {
                       />
                       <label className="admin-field">
                         <span className="admin-label">
-                          Unit <Badge required={false} />
+                          Unit
                         </span>
                         <input
                           placeholder={key === 'given' ? 'mm/day' : 'kg/m²'}
@@ -1038,7 +1036,6 @@ export function GameAdmin() {
                 n={4}
                 id="step-numbers"
                 title="Numbers"
-                required
                 hint={
                   <>
                     Type numbers, or copy columns from Excel or Google Sheets, click the first box and press <b>Ctrl+V</b>. Leave a box empty when there is no data.
@@ -1053,7 +1050,6 @@ export function GameAdmin() {
                 n={5}
                 id="step-answer"
                 title="Answer"
-                required
                 hint={
                   <>
                     Shown after players submit. Select words and press <b>Bold</b> or <b>List</b>; press again to undo. Write English and Thai yourself.
@@ -1063,7 +1059,7 @@ export function GameAdmin() {
                 <AnswerEditor value={round.answer} onChange={(answer) => edit({ ...round, answer })} />
               </Step>
 
-              <Step n={6} id="step-source" title="Data source" required={false}>
+              <Step n={6} id="step-source" title="Data source" optional>
                 <input
                   aria-label="Data source"
                   placeholder="NASA POWER (MERRA-2), NASA GLDAS Noah 2.1"
@@ -1074,10 +1070,7 @@ export function GameAdmin() {
             </main>
 
             <aside className="admin-preview-pane">
-              <div className="admin-preview-head">
-                <h2>Preview</h2>
-                <p>Exactly what players see. Draw on the chart to try it.</p>
-              </div>
+              <p className="admin-preview-head">Preview. Draw on the chart to try it.</p>
               <Preview round={round} />
             </aside>
           </>

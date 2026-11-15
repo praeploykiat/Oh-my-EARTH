@@ -63,6 +63,38 @@ export function Result({ round, feedback, onNext, nextLabel }: ResultProps) {
   );
 }
 
+// What players see after submitting, without a score (admin preview)
+
+export function ResultPeek({ round }: { round: GameRound }) {
+  const { language, t } = useI18n();
+  const points = round.hidden.values.flatMap((v, i) => (v === null ? [] : [{ v, i }]));
+  if (points.length === 0) return null;
+  const high = points.reduce((a, b) => (b.v > a.v ? b : a));
+  const low = points.reduce((a, b) => (b.v < a.v ? b : a));
+  const when = (i: number) => formatTime(round.time[i], language, 'long');
+
+  return (
+    <section className="game-result is-peek">
+      <div className="game-score">
+        <strong>–</strong>
+        <span>{t('game.outOf')}</span>
+      </div>
+      <div className="game-feedback">
+        <h3>After players submit</h3>
+        <ul>
+          <li>Highest point: really {when(high.i)}</li>
+          <li>Lowest point: really {when(low.i)}</li>
+        </ul>
+        <div className="game-why">
+          <h4>{t('game.why')}</h4>
+          <Answer text={round.answer[language]} />
+        </div>
+        <p className="game-how">{t('game.how')}</p>
+      </div>
+    </section>
+  );
+}
+
 // One question, also used as the admin preview
 
 interface RoundViewProps {
