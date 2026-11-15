@@ -86,15 +86,13 @@ function GlobalExplorerPage({onReload}:{onReload:()=>void}) {
             {options.map((c) => <option key={c.code} value={c.code}>{c.country} · {c.city}</option>)}
           </select>
           <p className="global-search-count" role="status">{t('global.matches', { count: filtered.length })}</p>
-          <fieldset><legend>{t('global.variable')}</legend>
-            {EXPLORER_VARIABLES.map((key) => {
-              const definition = variableByKey(key)!;
-              return <label className={`global-variable ${key === state.variable ? 'is-active' : ''}`} key={key}>
-                <input type="radio" name="global-variable" value={key} checked={state.variable === key} onChange={() => setState((s) => ({ ...s, variable: key, view: key === 'NDVI' ? 'monthly' : s.view, ...(key==='XCO2'?{mode:'trend' as MapMode,year:2021,start:2015,end:2021}:s.variable==='XCO2'?{mode:'trend' as MapMode,start:2001,end:2024,year:2024}:{}) }))} />
-                <span>{definition.label[language]}<small>{definition.unit}</small></span>
-              </label>;
-            })}
-          </fieldset>
+          <label htmlFor="global-variable">{t('global.variable')}</label>
+          <select id="global-variable" value={state.variable} onChange={(event)=>{
+            const key=event.target.value as GlobalVariable;
+            setState(s=>({...s,variable:key,view:key==='NDVI'?'monthly':s.view,...(key==='XCO2'?{mode:'trend' as MapMode,year:2021,start:2015,end:2021}:s.variable==='XCO2'?{mode:'trend' as MapMode,start:2001,end:2024,year:2024}:{})}));
+          }}>
+            {EXPLORER_VARIABLES.map(key=>{const definition=variableByKey(key);return <option key={key} value={key}>{definition.label[language]} · {definition.unit}</option>;})}
+          </select>
           {state.mode === 'trend' ? <fieldset className="global-range"><legend>{t('global.timeRange')}</legend>
             <label htmlFor="global-start">{t('global.startYear')}</label>
             <select id="global-start" value={state.start} onChange={(event) => {

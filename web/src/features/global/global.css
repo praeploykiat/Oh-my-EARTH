@@ -114,3 +114,7 @@
 .global-year-value span { font-size: 14px; }
 
 .global-color-controls button[aria-pressed='true'] { background: #173b32; color: #a6f4d6; border-color: var(--accent); }
+
+.global-map svg { touch-action: none; cursor: grab; user-select: none; }
+.global-map svg:active { cursor: grabbing; }
+.global-map svg:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }

@@ -1,4 +1,5 @@
 export const en = {
+  'global.mapNavigation': 'Drag to pan · Scroll or pinch to zoom · Focus map: arrow keys to pan, +/− to zoom, Home to reset',
 "global.co2.descriptive": "Descriptive trend estimate",
 "global.co2.minimum": "Choose at least three complete calendar years to estimate a descriptive rate. Incomplete records remain unavailable.",
 "global.co2.rateNote": "Estimated from {years} observed years ({start}–{end}), with the rate rescaled to ten years for comparison. This is not ten years of observations or a forecast.",
@@ -161,7 +162,7 @@ export const en = {
   'global.view': 'Time-series view',
   'global.mapHint': 'Select a country or capital marker',
   'global.mapLabel': 'World map of representative capital cities. Use the country selector for keyboard selection.',
-  'global.zoomIn': 'Zoom in around selected capital',
+  'global.zoomIn': 'Zoom in',
   'global.zoomOut': 'Zoom out',
   'global.reset': 'World',
   'global.mapFailed': 'The map could not load. You can still select a country from the list.',
