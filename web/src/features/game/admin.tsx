@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react';
-import { deleteQuestion, fetchQuestions, importQuestions, questionHistory, saveQuestion, type Stored } from './api';
+import { deleteQuestion, fetchQuestions, questionHistory, saveQuestion, type Stored } from './api';
 import { Result, RoundView, scoreRound } from './index';
-import { importRounds, type ImportMode } from './normalize';
+import { normalizeRound } from './normalize';
 import { htmlToMarkdown, markdownToHtml } from './richText';
 import type { Feedback } from './score';
+import { Badge, Checklist, download, Guide, missingItems, questionTitle, Step, useGuideOpen } from './adminParts';
+import { ImportPanel } from './adminImport';
+import { withUnit } from './answer';
 import { formatTime, monthsBetween, monthsOfYear, timeKind, yearsBetween } from './time';
 import type { GameRound, Localized, RoundSeries } from './types';
 import { LIMITS, roundProblem } from './validate';
@@ -107,29 +110,37 @@ function parseNumber(text: string): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
-function download(data: unknown, name: string) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `${name}.json`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-}
-
 function when(iso: string): string {
   return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 // Small fields
 
-function TextPair({ label, value, onChange, hint }: { label: string; value: Localized; onChange: (v: Localized) => void; hint?: string }) {
+interface TextPairProps {
+  label: string;
+  value: Localized;
+  onChange: (v: Localized) => void;
+  hint?: string;
+  required?: boolean;
+  placeholder?: Localized;
+}
+
+function TextPair({ label, value, onChange, hint, required = true, placeholder }: TextPairProps) {
   return (
     <div className="admin-field">
-      <span>{label}</span>
+      <span className="admin-label">
+        {label} {!required && <Badge required={false} />}
+      </span>
       {hint && <small>{hint}</small>}
       <div className="admin-pair">
-        <input aria-label={`${label} in English`} placeholder="English" value={value.en} onChange={(e) => onChange({ ...value, en: e.target.value })} />
-        <input aria-label={`${label} in Thai`} placeholder="Thai" value={value.th} onChange={(e) => onChange({ ...value, th: e.target.value })} />
+        <label className="admin-lang-input">
+          <small>English</small>
+          <input aria-label={`${label} in English`} placeholder={placeholder?.en} value={value.en} onChange={(e) => onChange({ ...value, en: e.target.value })} />
+        </label>
+        <label className="admin-lang-input">
+          <small>Thai</small>
+          <input aria-label={`${label} in Thai`} placeholder={placeholder?.th} value={value.th} onChange={(e) => onChange({ ...value, th: e.target.value })} />
+        </label>
       </div>
     </div>
   );
@@ -212,6 +223,16 @@ function TimeEditor({ round, onChange }: { round: GameRound; onChange: (r: GameR
   if (!problem && time.length > LIMITS.points) problem = `That is ${time.length} time points. The most is ${LIMITS.points}.`;
 
   const inUse = !problem && time.join() === round.time.join();
+  const [pending, setPending] = useState<{ time: string[]; lost: number; from: string; to: string } | null>(null);
+
+  const use = () => {
+    const keep = new Set(time);
+    const gone = round.time.map((t, i) => ({ t, i })).filter(({ t }) => !keep.has(t));
+    const lost = gone.reduce((sum, { i }) => sum + (round.given.values[i] !== null ? 1 : 0) + (round.hidden.values[i] !== null ? 1 : 0), 0);
+    if (lost === 0) return onChange(remap(round, time));
+    const withData = gone.filter(({ i }) => round.given.values[i] !== null || round.hidden.values[i] !== null);
+    setPending({ time, lost, from: formatTime(withData[0].t, 'en'), to: formatTime(withData[withData.length - 1].t, 'en') });
+  };
   const options: { kind: AxisKind; label: string }[] = [
     { kind: 'month-of-year', label: '12 months of the year' },
     { kind: 'year', label: 'Year by year' },
@@ -220,7 +241,6 @@ function TimeEditor({ round, onChange }: { round: GameRound; onChange: (r: GameR
 
   return (
     <div className="admin-field">
-      <span>Time axis</span>
       <div className="admin-axis-kinds" role="radiogroup" aria-label="Kind of time axis">
         {options.map((o) => (
           <button key={o.kind} type="button" role="radio" aria-checked={kind === o.kind} className={kind === o.kind ? 'is-on' : ''} onClick={() => setKind(o.kind)}>
@@ -271,16 +291,42 @@ function TimeEditor({ round, onChange }: { round: GameRound; onChange: (r: GameR
           {inUse ? (
             <small className="admin-axis-current">This is the current time axis</small>
           ) : (
-            <button type="button" className="button" disabled={!!problem} onClick={() => onChange(remap(round, time))}>
+            <button type="button" className="button" disabled={!!problem || !!pending} onClick={use}>
               Use this time axis
             </button>
           )}
         </div>
+        {pending && (
+          <div className="admin-confirm" role="alertdialog" aria-label="Confirm time axis change">
+            <p>
+              <strong>
+                This removes {pending.lost} number{pending.lost === 1 ? '' : 's'}
+                {pending.from === pending.to ? ` (${pending.from})` : ` (${pending.from} to ${pending.to})`}.
+              </strong>{' '}
+              Numbers for time points that stay are kept. You can get them back with Earlier versions.
+            </p>
+            <div className="admin-import-actions">
+              <button type="button" onClick={() => setPending(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="button button-danger"
+                onClick={() => {
+                  onChange(remap(round, pending.time));
+                  setPending(null);
+                }}
+              >
+                Remove and switch
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      <small>
+      <small className="admin-hint">
         Now: {round.time.length} time points
-        {round.time.length > 0 && ` (${formatTime(round.time[0], 'en')} to ${formatTime(round.time[round.time.length - 1], 'en')})`}. Numbers for time points that
-        stay the same are kept when you switch.
+        {round.time.length > 0 && ` (${formatTime(round.time[0], 'en')} to ${formatTime(round.time[round.time.length - 1], 'en')})`}. Making the range bigger keeps
+        every number.
       </small>
     </div>
   );
@@ -317,15 +363,17 @@ function ValuesTable({ round, onChange }: { round: GameRound; onChange: (r: Game
 
   return (
     <div className="admin-field">
-      <span>Numbers</span>
-      <small>Paste whole columns from Excel or Google Sheets: click the first cell and press Ctrl+V. Leave a cell empty when there is no data.</small>
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
             <tr>
               <th>Time</th>
-              <th>{round.given.label.en || 'Shown first'}</th>
-              <th>{round.hidden.label.en || 'To guess'}</th>
+              <th>
+                <span className="admin-key is-bars" /> Bars: {withUnit(round.given.label.en || 'shown', round.given.unit)}
+              </th>
+              <th>
+                <span className="admin-key is-line" /> Line: {withUnit(round.hidden.label.en || 'to guess', round.hidden.unit)}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -419,8 +467,6 @@ function RichAnswer({ value, onChange, label }: { value: string; onChange: (v: s
 function AnswerEditor({ value, onChange }: { value: Localized; onChange: (v: Localized) => void }) {
   return (
     <div className="admin-field">
-      <span>Answer</span>
-      <small>Select text and press Bold or List. Press again to undo it. Enter starts a new paragraph.</small>
       <div className="admin-answer-pair">
         <div>
           <p className="admin-lang">English</p>
@@ -448,7 +494,7 @@ function Preview({ round }: { round: GameRound }) {
 
   useEffect(reset, [round.id, round.time.length]);
 
-  if (!ready) return <p className="admin-note">Fill in every required field to see the preview.</p>;
+  if (!ready) return <p className="admin-note">The preview appears once every required field is filled in.</p>;
 
   return (
     <div className="game admin-preview">
@@ -466,6 +512,47 @@ function Preview({ round }: { round: GameRound }) {
         onReset={reset}
       />
       {feedback && <Result round={round} feedback={feedback} onNext={reset} nextLabel="Try again" />}
+    </div>
+  );
+}
+
+// One question as JSON
+
+function JsonEditor({ round, onApply, onClose }: { round: GameRound; onApply: (r: GameRound) => void; onClose: () => void }) {
+  const { id, ...rest } = round;
+  const [text, setText] = useState(() => JSON.stringify(rest, null, 2));
+  const [error, setError] = useState<string | null>(null);
+
+  const apply = () => {
+    let raw: unknown;
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      return setError('This is not valid JSON. Check the brackets, quotes and commas.');
+    }
+    if (Array.isArray(raw) || !raw || typeof raw !== 'object') return setError('Paste one question { … }, not a list.');
+    const next = { ...normalizeRound(raw, id), id };
+    const o = raw as { given?: { values?: unknown[] }; hidden?: { values?: unknown[] } };
+    const short = [o.given?.values, o.hidden?.values].some((v) => !Array.isArray(v) || v.length !== next.time.length);
+    if (next.time.length < 2) return setError('"time" needs at least 2 time points.');
+    if (short) return setError(`"given.values" and "hidden.values" need ${next.time.length} values each, one per time point.`);
+    onApply(next);
+    onClose();
+  };
+
+  return (
+    <div className="admin-json">
+      <p className="admin-hint">Change anything here, then press Apply. The ID stays the same, so this question is updated. It saves like any other edit.</p>
+      <textarea rows={18} spellCheck={false} value={text} onChange={(e) => setText(e.target.value)} aria-label="Question as JSON" />
+      {error && <p className="admin-status is-error">{error}</p>}
+      <div className="admin-import-actions">
+        <button type="button" onClick={onClose}>
+          Cancel
+        </button>
+        <button type="button" className="button" onClick={apply}>
+          Apply
+        </button>
+      </div>
     </div>
   );
 }
@@ -500,106 +587,6 @@ function History({ id, onRestore }: { id: string; onRestore: (q: GameRound) => v
   );
 }
 
-// Import from a file or pasted JSON
-
-const EXAMPLE = `[
-  {
-    "id": "chiang-mai-rain-soil",
-    "place": { "en": "Chiang Mai", "th": "เชียงใหม่" },
-    "time": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    "timeLabel": { "en": "Average for each month", "th": "ค่าเฉลี่ยแต่ละเดือน" },
-    "given": { "label": { "en": "Rainfall", "th": "ปริมาณฝน" }, "unit": "mm/day", "values": [ ... ] },
-    "hidden": { "label": { "en": "Soil wetness", "th": "ความชื้นผิวดิน" }, "unit": "%", "values": [ ... ] },
-    "answer": { "en": "…", "th": "…" },
-    "source": "NASA POWER"
-  }
-]`;
-
-function ImportPanel({
-  onDone,
-  onClose,
-}: {
-  onDone: (stored: Stored[], imported: Set<string>, message: string) => void;
-  onClose: () => void;
-}) {
-  const [text, setText] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<ImportMode>('merge');
-  const [busy, setBusy] = useState(false);
-
-  const run = async (json: string) => {
-    setError(null);
-    let result;
-    try {
-      result = importRounds([], json);
-    } catch {
-      setError('This is not valid JSON. Check the brackets, quotes and commas.');
-      return;
-    }
-    if (result.rounds.length === 0) {
-      setError(result.problems.join('\n') || 'No questions found in this JSON.');
-      return;
-    }
-    setBusy(true);
-    try {
-      const stored = await importQuestions(result.rounds, mode);
-      const skipped = result.problems.length ? ` Skipped ${result.problems.length}: ${result.problems.join(' / ')}` : '';
-      const what = mode === 'replace' ? `Replaced all questions with ${result.rounds.length} from the file.` : `Added or updated ${result.rounds.length} question(s).`;
-      onDone(stored, new Set(result.rounds.map((r) => r.id)), `${what}${skipped}`);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <section className="admin-card admin-import">
-      <h2>Import JSON</h2>
-      <div className="admin-modes" role="radiogroup" aria-label="How to import">
-        <button type="button" role="radio" aria-checked={mode === 'merge'} className={mode === 'merge' ? 'is-on' : ''} onClick={() => setMode('merge')}>
-          <strong>Add or update</strong>
-          <small>One question or several. A question with the same id as an existing one replaces it. Everything else stays.</small>
-        </button>
-        <button type="button" role="radio" aria-checked={mode === 'replace'} className={mode === 'replace' ? 'is-on' : ''} onClick={() => setMode('replace')}>
-          <strong>Replace everything</strong>
-          <small>
-            Removes all saved questions and uses the ones in this file. New questions you have not finished stay in the list. Old versions stay in
-            each question’s history.
-          </small>
-        </button>
-      </div>
-      <p className="admin-note">
-        Use one question {'{ ... }'} or a list {'[ {...}, {...} ]'}. Every question needs English and Thai. Month names in time (Jan, Feb, …) are
-        converted for you. Imported questions are saved straight away.
-      </p>
-      <label className="admin-file">
-        <span>Choose a .json file</span>
-        <input
-          type="file"
-          accept=".json,application/json"
-          disabled={busy}
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            e.target.value = '';
-            if (file) await run(await file.text());
-          }}
-        />
-      </label>
-      <textarea rows={10} placeholder={`Or paste JSON here\n\n${EXAMPLE}`} value={text} onChange={(e) => setText(e.target.value)} />
-      {error && <p className="admin-status is-error admin-pre">{error}</p>}
-      <div className="admin-import-actions">
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
-        <button type="button" className="button" disabled={!text.trim() || busy} onClick={() => run(text)}>
-          {busy ? 'Importing…' : 'Import pasted JSON'}
-        </button>
-      </div>
-    </section>
-  );
-}
-
 // Status labels
 
 const STATE_LABEL: Record<EntryState, string> = {
@@ -619,7 +606,9 @@ export function GameAdmin() {
   const [notice, setNotice] = useState<{ kind: 'ok' | 'error' | 'info'; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [panel, setPanel] = useState<'history' | 'json' | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [guideOpen, toggleGuide] = useGuideOpen();
   const [offline, setOffline] = useState(false);
   const entriesRef = useRef<Entry[]>([]);
   const timers = useRef(new Map<string, number>());
@@ -811,17 +800,40 @@ export function GameAdmin() {
     patch(e.draft.id, () => ({ draft: e.remote!.question, base: e.remote!, state: 'saved' }));
   };
 
+  const missing = round ? missingItems(round) : [];
+  const saved = entries.flatMap((e) => (e.base ? [e.base] : []));
+
+  const copyId = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(id);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setNotice({ kind: 'info', text: `Could not copy. The ID is ${id}` });
+    }
+  };
+
+  const status = (e: Entry) => {
+    if (e.state === 'saved' && e.base) return `Saved ${when(e.base.updatedAt)}`;
+    return STATE_LABEL[e.state];
+  };
+
   return (
     <div className="admin">
       <header className="admin-top">
         <div>
           <h1>Guess the graph: questions</h1>
-          <p>Changes save automatically and go live in the game straight away. Players get the questions in random order.</p>
+          <p>Add, change and remove the questions players get. Everything saves by itself.</p>
         </div>
         <div className="admin-top-actions">
           <span className={`admin-overall ${unsaved ? 'is-busy' : ''}`}>
             {offline ? 'Offline: changes will save when the connection is back' : unsaved ? `${unsaved} not saved yet` : 'All changes saved'}
           </span>
+          {!guideOpen && (
+            <button type="button" className="button button-secondary" onClick={toggleGuide}>
+              How to use
+            </button>
+          )}
           <button type="button" className="button button-secondary" onClick={() => setImporting(!importing)}>
             Import JSON
           </button>
@@ -835,6 +847,8 @@ export function GameAdmin() {
         </div>
       </header>
 
+      {guideOpen && <Guide onClose={toggleGuide} />}
+
       {notice && (
         <p className={`admin-status is-${notice.kind}`}>
           {notice.text}{' '}
@@ -846,6 +860,7 @@ export function GameAdmin() {
 
       {importing && (
         <ImportPanel
+          saved={saved}
           onClose={() => setImporting(false)}
           onDone={(stored, imported, message) => {
             const current = new Map(entriesRef.current.map((e) => [e.draft.id, e]));
@@ -866,24 +881,25 @@ export function GameAdmin() {
 
       <div className="admin-body">
         <aside className="admin-list">
+          <p className="admin-list-title">Questions ({entries.length})</p>
           <ol>
             {entries.map((e, i) => (
               <li key={e.draft.id} className={e.draft.id === selected ? 'is-on' : ''}>
-                <button type="button" className="admin-list-main" onClick={() => setSelected(e.draft.id)}>
-                  <strong>
-                    {e.draft.given.label.en || e.draft.hidden.label.en
-                      ? `${e.draft.given.label.en || '?'} → ${e.draft.hidden.label.en || '?'}`
-                      : 'New question'}
-                  </strong>
+                <button
+                  type="button"
+                  className="admin-list-main"
+                  onClick={() => {
+                    setSelected(e.draft.id);
+                    setPanel(null);
+                  }}
+                >
+                  <strong>{questionTitle(e.draft)}</strong>
                   <small>{e.draft.place.en || 'No place yet'}</small>
                   <em className={`admin-state is-${e.state}`}>{STATE_LABEL[e.state]}</em>
                 </button>
                 <div className="admin-list-tools">
                   <button type="button" onClick={() => add({ ...structuredClone(e.draft), id: newId() }, i)}>
-                    Copy
-                  </button>
-                  <button type="button" onClick={() => download(e.draft, e.draft.id)}>
-                    Download
+                    Duplicate
                   </button>
                   <button
                     type="button"
@@ -906,87 +922,167 @@ export function GameAdmin() {
         </aside>
 
         {entry && round ? (
-          <main className="admin-editor" key={round.id}>
-            {entry.state === 'conflict' && (
-              <section className="admin-card admin-conflict">
-                <h2>{entry.remote ? 'Someone else changed this question' : 'Someone else deleted this question'}</h2>
-                <p>
-                  {entry.remote
-                    ? `Another person saved a different version at ${when(entry.remote.updatedAt)} while you were editing. Which one should we keep?`
-                    : 'Another person deleted it while you were editing. Keep your version, or let it go?'}
-                </p>
-                <div className="admin-import-actions">
-                  <button type="button" onClick={() => useTheirs(entry)}>
-                    {entry.remote ? 'Use theirs' : 'Let it go'}
-                  </button>
-                  <button type="button" className="button" onClick={() => keepMine(entry)}>
-                    Keep mine
-                  </button>
-                </div>
-              </section>
-            )}
+          <>
+            <main className="admin-editor" key={round.id}>
+              {entry.state === 'conflict' && (
+                <section className="admin-card admin-conflict">
+                  <h2>{entry.remote ? 'Someone else changed this question' : 'Someone else deleted this question'}</h2>
+                  <p>
+                    {entry.remote
+                      ? `Another person saved a different version at ${when(entry.remote.updatedAt)} while you were editing. Which one should we keep?`
+                      : 'Another person deleted it while you were editing. Keep your version, or let it go?'}
+                  </p>
+                  <div className="admin-import-actions">
+                    <button type="button" onClick={() => useTheirs(entry)}>
+                      {entry.remote ? 'Use theirs' : 'Let it go'}
+                    </button>
+                    <button type="button" className="button" onClick={() => keepMine(entry)}>
+                      Keep mine
+                    </button>
+                  </div>
+                </section>
+              )}
 
-            {(entry.state === 'incomplete' || entry.state === 'error') && entry.message && (
-              <p className={`admin-status ${entry.state === 'error' ? 'is-error' : 'is-info'}`}>
-                {entry.state === 'error' ? `Could not save: ${entry.message}` : `Not saved yet: ${entry.message}`}{' '}
-                {entry.state === 'error' && (
-                  <button type="button" className="admin-dismiss" onClick={() => save(round.id)}>
-                    Try again
-                  </button>
+              <section className="admin-card admin-head">
+                <div className="admin-head-row">
+                  <div>
+                    <p className="admin-kicker">{entry.base ? 'Editing' : 'New question'}</p>
+                    <h2>
+                      {round.place.en ? `${round.place.en} · ` : ''}
+                      {questionTitle(round)}
+                    </h2>
+                    <p className="admin-meta">
+                      <code>ID {round.id}</code>
+                      <button type="button" className="admin-link" onClick={() => copyId(round.id)}>
+                        {copied ? 'Copied' : 'Copy ID'}
+                      </button>
+                      <span className={`admin-state is-${entry.state}`}>{status(entry)}</span>
+                    </p>
+                  </div>
+                  <div className="admin-head-tools">
+                    <button type="button" className={panel === 'json' ? 'is-on' : ''} onClick={() => setPanel(panel === 'json' ? null : 'json')}>
+                      Edit as JSON
+                    </button>
+                    <button
+                      type="button"
+                      className={panel === 'history' ? 'is-on' : ''}
+                      disabled={!entry.base}
+                      onClick={() => setPanel(panel === 'history' ? null : 'history')}
+                    >
+                      Earlier versions
+                    </button>
+                    <button type="button" onClick={() => download(round, round.id)}>
+                      Download
+                    </button>
+                  </div>
+                </div>
+                {panel === 'json' && <JsonEditor round={round} onApply={edit} onClose={() => setPanel(null)} />}
+                {panel === 'history' && entry.base && <History id={round.id} onRestore={(q) => edit({ ...q, id: round.id })} />}
+                {entry.state === 'error' && entry.message ? (
+                  <p className="admin-status is-error">
+                    Could not save: {entry.message}{' '}
+                    <button type="button" className="admin-dismiss" onClick={() => save(round.id)}>
+                      Try again
+                    </button>
+                  </p>
+                ) : (
+                  <Checklist items={missing} live={entry.state === 'saved'} />
                 )}
-              </p>
-            )}
+              </section>
 
-            <section className="admin-card">
-              <div className="admin-card-head">
-                <h2>Question</h2>
-                <button type="button" onClick={() => setShowHistory(!showHistory)} disabled={!entry.base}>
-                  {showHistory ? 'Hide history' : 'History'}
-                </button>
-              </div>
-              {showHistory && entry.base && <History id={round.id} onRestore={(q) => edit({ ...q, id: round.id })} />}
-              <TextPair label="Place" value={round.place} onChange={(place) => edit({ ...round, place })} />
-              <TimeEditor round={round} onChange={edit} />
-              <TextPair
-                label="Caption under the time axis"
-                hint="Optional. For example: Average for each month, 2001 to 2024."
-                value={round.timeLabel}
-                onChange={(timeLabel) => edit({ ...round, timeLabel })}
-              />
-            </section>
+              <Step n={1} id="step-place" title="Place" required>
+                <TextPair label="Place name" value={round.place} placeholder={{ en: 'Chiang Mai', th: 'เชียงใหม่' }} onChange={(place) => edit({ ...round, place })} />
+              </Step>
 
-            <section className="admin-card admin-series">
-              {(['given', 'hidden'] as SeriesKey[]).map((key) => (
-                <div key={key}>
-                  <h2>{key === 'given' ? 'Shown first (bars)' : 'Players draw this (line)'}</h2>
-                  <TextPair label="Name" value={round[key].label} onChange={(label) => edit({ ...round, [key]: { ...round[key], label } })} />
-                  <label className="admin-field">
-                    <span>Unit</span>
-                    <input value={round[key].unit} onChange={(e) => edit({ ...round, [key]: { ...round[key], unit: e.target.value } })} />
-                  </label>
+              <Step n={2} id="step-time" title="Time axis" required hint="What the bottom of both charts shows. Pick a kind, set the range, then press Use this time axis.">
+                <TimeEditor round={round} onChange={edit} />
+                <TextPair
+                  label="Caption under the time axis"
+                  required={false}
+                  placeholder={{ en: 'Average for each month, 2001 to 2024', th: 'ค่าเฉลี่ยแต่ละเดือน 2001 ถึง 2024' }}
+                  value={round.timeLabel}
+                  onChange={(timeLabel) => edit({ ...round, timeLabel })}
+                />
+              </Step>
+
+              <Step n={3} id="step-measures" title="The two measures" required hint="Players see the bars, then draw the line they think goes with them.">
+                <div className="admin-series">
+                  {(['given', 'hidden'] as SeriesKey[]).map((key) => (
+                    <div key={key}>
+                      <h3>
+                        <span className={`admin-key ${key === 'given' ? 'is-bars' : 'is-line'}`} />
+                        {key === 'given' ? 'Bars: players see this' : 'Line: players draw this'}
+                      </h3>
+                      <TextPair
+                        label="Name"
+                        placeholder={key === 'given' ? { en: 'Rainfall', th: 'ปริมาณฝน' } : { en: 'Soil moisture', th: 'ความชื้นในดิน' }}
+                        value={round[key].label}
+                        onChange={(label) => edit({ ...round, [key]: { ...round[key], label } })}
+                      />
+                      <label className="admin-field">
+                        <span className="admin-label">
+                          Unit <Badge required={false} />
+                        </span>
+                        <input
+                          placeholder={key === 'given' ? 'mm/day' : 'kg/m²'}
+                          value={round[key].unit}
+                          onChange={(e) => edit({ ...round, [key]: { ...round[key], unit: e.target.value } })}
+                        />
+                      </label>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </section>
+              </Step>
 
-            <section className="admin-card">
-              <ValuesTable round={round} onChange={edit} />
-            </section>
+              <Step
+                n={4}
+                id="step-numbers"
+                title="Numbers"
+                required
+                hint={
+                  <>
+                    Type numbers, or copy columns from Excel or Google Sheets, click the first box and press <b>Ctrl+V</b>. Leave a box empty when there is no data.
+                    Each column needs at least 2 numbers.
+                  </>
+                }
+              >
+                <ValuesTable round={round} onChange={edit} />
+              </Step>
 
-            <section className="admin-card">
-              <AnswerEditor value={round.answer} onChange={(answer) => edit({ ...round, answer })} />
-              <label className="admin-field">
-                <span>Data source</span>
-                <input placeholder="For example: NASA POWER (MERRA-2), NASA GLDAS Noah 2.1" value={round.source} onChange={(e) => edit({ ...round, source: e.target.value })} />
-              </label>
-            </section>
+              <Step
+                n={5}
+                id="step-answer"
+                title="Answer"
+                required
+                hint={
+                  <>
+                    Shown after players submit. Select words and press <b>Bold</b> or <b>List</b>; press again to undo. Write English and Thai yourself.
+                  </>
+                }
+              >
+                <AnswerEditor value={round.answer} onChange={(answer) => edit({ ...round, answer })} />
+              </Step>
 
-            <section className="admin-card">
-              <h2>Preview (you can draw here)</h2>
+              <Step n={6} id="step-source" title="Data source" required={false}>
+                <input
+                  aria-label="Data source"
+                  placeholder="NASA POWER (MERRA-2), NASA GLDAS Noah 2.1"
+                  value={round.source}
+                  onChange={(e) => edit({ ...round, source: e.target.value })}
+                />
+              </Step>
+            </main>
+
+            <aside className="admin-preview-pane">
+              <div className="admin-preview-head">
+                <h2>Preview</h2>
+                <p>Exactly what players see. Draw on the chart to try it.</p>
+              </div>
               <Preview round={round} />
-            </section>
-          </main>
+            </aside>
+          </>
         ) : (
-          <p className="admin-note">No questions yet. Press “Add a question”.</p>
+          <p className="admin-note">No questions yet. Press “+ Add a question”, or use Import JSON.</p>
         )}
       </div>
     </div>

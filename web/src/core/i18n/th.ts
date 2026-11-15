@@ -127,6 +127,7 @@ export const th: Record<MessageKey, string> = {
   'game.why': 'ทำไมถึงเป็นแบบนี้',
   'game.how': 'คะแนน 100 คือเส้นทับของจริงพอดี คะแนนลดลงเมื่อระยะห่างเฉลี่ยมากขึ้น และเป็น 0 เมื่อห่างถึง 30% ของความสูงกราฟ',
   'game.next': 'ข้อถัดไป',
+  'game.skip': 'ข้ามข้อนี้',
   'game.question.n': 'ข้อที่ {n}',
   'game.stats': 'เล่นไปแล้ว {n} ข้อ · คะแนนเฉลี่ย {average}',
   'source.crossCheck': 'ตรวจสอบเทียบ',

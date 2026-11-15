@@ -38,7 +38,8 @@ export function roundProblem(v: unknown): string | null {
   if (!isLocalized(r.timeLabel, LIMITS.short)) return 'Time caption must have English and Thai fields';
   if (!isSeries(r.given, r.time.length)) return 'The shown values must match the number of time points';
   if (!isSeries(r.hidden, r.time.length)) return 'The values to guess must match the number of time points';
-  if (r.hidden.values.filter((x) => x !== null).length < 2) return 'The values to guess need at least 2 numbers';
+  if (r.given.values.filter((x) => x !== null).length < 2) return 'The bars need at least 2 numbers';
+  if (r.hidden.values.filter((x) => x !== null).length < 2) return 'The line needs at least 2 numbers';
   if (!isLocalized(r.answer, LIMITS.text)) return 'Answer must have English and Thai fields';
   if (!isString(r.source, LIMITS.short)) return 'Source is too long';
   return (
