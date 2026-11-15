@@ -32,6 +32,7 @@ export function roundProblem(v: unknown): string | null {
   const r = v as GameRound;
   if (!r || typeof r !== 'object') return 'Not a question';
   if (!isString(r.id, LIMITS.short) || !r.id) return 'Missing id';
+  if (!/^[A-Za-z0-9_-]{1,80}$/.test(r.id)) return 'The id may only use English letters, numbers, - and _ (no spaces)';
   if (!isLocalized(r.place, LIMITS.short)) return 'Place must have English and Thai';
   if (!Array.isArray(r.time) || r.time.length < 2 || r.time.length > LIMITS.points) return `Time axis needs 2 to ${LIMITS.points} points`;
   if (!r.time.every((t) => isString(t, 20))) return 'Time labels must be short';

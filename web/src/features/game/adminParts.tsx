@@ -42,6 +42,27 @@ export function questionTitle(r: GameRound): string {
   return `${given || '?'} and ${hidden || '?'}`;
 }
 
+// What differs between two versions of a question
+
+const PARTS: { name: string; pick: (r: GameRound) => unknown }[] = [
+  { name: 'Place', pick: (r) => r.place },
+  { name: 'Time axis', pick: (r) => r.time },
+  { name: 'Caption under the time axis', pick: (r) => r.timeLabel },
+  { name: 'Name of the bars', pick: (r) => r.given.label },
+  { name: 'Unit of the bars', pick: (r) => r.given.unit },
+  { name: 'Numbers for the bars', pick: (r) => r.given.values },
+  { name: 'Name of the line', pick: (r) => r.hidden.label },
+  { name: 'Unit of the line', pick: (r) => r.hidden.unit },
+  { name: 'Numbers for the line', pick: (r) => r.hidden.values },
+  { name: 'Answer', pick: (r) => r.answer },
+  { name: 'Data source', pick: (r) => r.source },
+];
+
+export function changedParts(from: GameRound | undefined, to: GameRound): string[] {
+  if (!from) return [];
+  return PARTS.filter((p) => JSON.stringify(p.pick(from)) !== JSON.stringify(p.pick(to))).map((p) => p.name);
+}
+
 // What still needs filling in
 
 export interface MissingItem {
