@@ -19,3 +19,23 @@ export interface GameRound {
   answer: Localized;
   source: string;
 }
+
+// Continue the line: players see the record up to showUntil and draw the rest
+
+export interface ExtendRound {
+  kind: 'extend';
+  id: string;
+  place: Localized;
+  time: string[];
+  timeLabel: Localized;
+  series: RoundSeries;
+  showUntil: string;
+  answer: Localized;
+  source: string;
+}
+
+export type AnyRound = GameRound | ExtendRound;
+export type RoundKind = 'pair' | 'extend';
+
+export const isExtend = (r: AnyRound): r is ExtendRound => (r as ExtendRound).kind === 'extend';
+export const kindOf = (r: AnyRound): RoundKind => (isExtend(r) ? 'extend' : 'pair');

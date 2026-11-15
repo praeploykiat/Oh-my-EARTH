@@ -7,11 +7,12 @@ import { fetchRounds } from './api';
 import { DrawChart, GivenChart } from './GameChart';
 import { fillGaps, judge, niceAxis, type Feedback } from './score';
 import { formatTime, timeKind } from './time';
-import type { GameRound } from './types';
+import { ExtendResult, ExtendRoundView, scoreExtend, type ExtendFeedback } from './extend';
+import { isExtend, type AnyRound, type GameRound } from './types';
 
 const MIN_TOUCHED_SHARE = 0.5;
 
-const emptyGuess = (round: GameRound) => Array<number | null>(round.time.length).fill(null);
+const emptyGuess = (round: AnyRound) => Array<number | null>(round.time.length).fill(null);
 
 function formatValue(value: number): string {
   return Math.abs(value) >= 10 ? value.toFixed(0) : value.toFixed(1);
@@ -208,12 +209,14 @@ function shuffle(count: number, avoidFirst: number | null): number[] {
   return order;
 }
 
-function Play({ rounds }: { rounds: GameRound[] }) {
+type Outcome = { kind: 'pair'; feedback: Feedback } | { kind: 'extend'; feedback: ExtendFeedback };
+
+function Play({ rounds }: { rounds: AnyRound[] }) {
   const { t } = useI18n();
   const [order, setOrder] = useState(() => shuffle(rounds.length, null));
   const [position, setPosition] = useState(0);
   const [guess, setGuess] = useState(() => emptyGuess(rounds[order[0]]));
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [scores, setScores] = useState<number[]>([]);
   const [skipped, setSkipped] = useState(0);
 
@@ -221,11 +224,19 @@ function Play({ rounds }: { rounds: GameRound[] }) {
   const average = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
   const submit = () => {
-    const result = scoreRound(round, guess);
-    setGuess(result.filled);
-    setFeedback(result.feedback);
-    setScores((all) => [...all, result.feedback.score]);
+    if (isExtend(round)) {
+      const result = scoreExtend(round, guess);
+      setGuess(result.filled);
+      setOutcome({ kind: 'extend', feedback: result.feedback });
+      setScores((all) => [...all, result.feedback.score]);
+    } else {
+      const result = scoreRound(round, guess);
+      setGuess(result.filled);
+      setOutcome({ kind: 'pair', feedback: result.feedback });
+      setScores((all) => [...all, result.feedback.score]);
+    }
   };
+  const feedback = outcome?.feedback ?? null;
 
   const next = () => {
     let nextOrder = order;
@@ -237,31 +248,41 @@ function Play({ rounds }: { rounds: GameRound[] }) {
     }
     setPosition(nextPosition);
     setGuess(emptyGuess(rounds[nextOrder[nextPosition]]));
-    setFeedback(null);
+    setOutcome(null);
   };
 
+  const roundKey = `${round.id}-${scores.length + (feedback ? 0 : 1)}-${skipped}`;
+  const shared = {
+    kicker: t('game.question.n', { n: scores.length + (feedback ? 0 : 1) }),
+    stats: average !== null ? t('game.stats', { n: scores.length, average }) : undefined,
+    guess,
+    onGuess: setGuess,
+    onSubmit: submit,
+    onReset: () => setGuess(emptyGuess(round)),
+    onSkip:
+      rounds.length > 1
+        ? () => {
+            setSkipped((n) => n + 1);
+            next();
+          }
+        : undefined,
+  };
+
+  if (isExtend(round)) {
+    const extendFeedback = outcome?.kind === 'extend' ? outcome.feedback : null;
+    return (
+      <>
+        <ExtendRoundView key={roundKey} {...shared} round={round} feedback={extendFeedback} />
+        {extendFeedback && <ExtendResult round={round} feedback={extendFeedback} onNext={next} />}
+      </>
+    );
+  }
+
+  const pairFeedback = outcome?.kind === 'pair' ? outcome.feedback : null;
   return (
     <>
-      <RoundView
-        key={`${round.id}-${scores.length + (feedback ? 0 : 1)}-${skipped}`}
-        round={round}
-        kicker={t('game.question.n', { n: scores.length + (feedback ? 0 : 1) })}
-        stats={average !== null ? t('game.stats', { n: scores.length, average }) : undefined}
-        guess={guess}
-        onGuess={setGuess}
-        feedback={feedback}
-        onSubmit={submit}
-        onReset={() => setGuess(emptyGuess(round))}
-        onSkip={
-          rounds.length > 1
-            ? () => {
-                setSkipped((n) => n + 1);
-                next();
-              }
-            : undefined
-        }
-      />
-      {feedback && <Result round={round} feedback={feedback} onNext={next} />}
+      <RoundView key={roundKey} {...shared} round={round} feedback={pairFeedback} />
+      {pairFeedback && <Result round={round} feedback={pairFeedback} onNext={next} />}
     </>
   );
 }

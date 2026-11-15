@@ -361,6 +361,17 @@ export const en = {
   'game.stamp.great': 'Spot on',
   'game.stamp.good': 'Close call',
   'game.stamp.off': 'Keep digging',
+  'game.extend.question': 'What happens to {measure} after {until}?',
+  'game.extend.drawTitle': 'Draw how the line goes on',
+  'game.extend.tip': 'Draw the rest',
+  'game.extend.known': 'The record so far',
+  'game.extend.direction': 'Direction: really {actual}, you drew {guess}.',
+  'game.extend.dir.up': 'rising',
+  'game.extend.dir.down': 'falling',
+  'game.extend.dir.flat': 'flat',
+  'game.extend.trend': 'Over the whole record: {value} {unit} per 10 years.',
+  'game.extend.real': 'Real trend',
+  'game.extend.unsure': 'Not sure yet',
 } as const;
 
 export type MessageKey = keyof typeof en;
