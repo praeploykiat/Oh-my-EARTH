@@ -90,3 +90,27 @@
 }
 @media (max-width: 900px) { .global-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; } .global-controls { padding: 16px; } .global-result .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .global-period { display: none; } }
 @media (max-width: 640px) { .global-layout { grid-template-columns: 1fr; } .global-controls { position: static; } .global-controls fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .global-controls legend { grid-column: 1 / -1; } .global-controls .global-variable { margin: 0; padding: 10px; } .global-result-heading { align-items: flex-start; flex-direction: column; } .global-map-toolbar { padding: 10px; } .global-explorer { padding-top: 24px; } }
+
+.global-color-controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.global-color-controls > div { display: flex; gap: 6px; }
+.global-color-controls button { padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); color: var(--fg); cursor: pointer; font: inherit; font-size: 12px; }
+.global-color-controls button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+.global-map-progress { font-size: 12px; margin: 10px 0; }
+.global-color-legend { padding: 16px; border: 1px solid var(--line-strong); border-radius: 8px; margin-top: 12px; font-size: 12px; }
+.global-color-legend strong, .global-color-legend > span { display: block; margin-bottom: 8px; }
+.global-color-ramp { height: 12px; border-radius: 3px; }
+.global-color-ticks { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--font-mono); }
+.global-color-legend p { margin: 10px 0 0; }
+.global-capital.global-colored-capital { fill-opacity: 1; }
+.global-capital.global-colored-capital:hover, .global-capital.global-colored-capital:focus { stroke: #ffdc91 !important; stroke-width: 3 !important; }
+.global-capital-halo { fill: none; stroke: #ffbc72; stroke-width: 2; vector-effect: non-scaling-stroke; }
+
+.global-color-controls > div { flex-wrap: wrap; }
+.global-year label { display: block; font-size: 12px; margin: 0 0 8px; color: var(--fg-soft); }
+.global-year-summary { border-left: 3px solid var(--accent); background: var(--surface); padding: 18px; margin-bottom: 16px; }
+.global-year-summary h3 { font-size: 17px; margin: 0 0 12px; }
+.global-year-summary p { font-size: 12px; margin: 10px 0 0; }
+.global-year-value { display: block; font: 30px var(--font-mono); color: var(--accent); }
+.global-year-value span { font-size: 14px; }
+
+.global-color-controls button[aria-pressed='true'] { background: #173b32; color: #a6f4d6; border-color: var(--accent); }
