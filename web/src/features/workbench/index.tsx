@@ -6,7 +6,6 @@ import { useI18n, type MessageKey } from '../../core/i18n';
 import { parseState, serializeState, splitHash, type WorkbenchState } from '../../core/url';
 import { InfoTip, type MapMarker } from '../../shared';
 import { PlacePicker } from './Controls';
-import { FeaturedCases } from './FeaturedCases';
 import { LayerScene } from './LayerScene';
 import { placeName } from './placeName';
 import { ResultPanel } from './ResultPanel';
@@ -41,7 +40,6 @@ export function Workbench() {
   const { language, t } = useI18n();
   const [state, setState] = useState<WorkbenchState>(readStateFromUrl);
   const [comparing, setComparing] = useState(Boolean(state.compare));
-  const [activeCase, setActiveCase] = useState<string | null>(null);
   const [target, setTarget] = useState<'place' | 'compare'>('place');
 
   useEffect(() => writeStateToUrl(state), [state]);
@@ -66,12 +64,10 @@ export function Workbench() {
 
   const update = (patch: Partial<WorkbenchState>) => {
     setState((current) => ({ ...current, ...patch }));
-    setActiveCase(null);
   };
 
   function openCase(featured: FeaturedCase) {
     setState((current) => ({ ...current, variable: featured.variable, place: featured.place }));
-    setActiveCase(featured.id);
   }
 
   const variable = state.variable ?? DEFAULT_VARIABLE;
@@ -127,7 +123,6 @@ export function Workbench() {
           <h1>{t('workbench.question')}</h1>
           <p>{t('workbench.intro')}</p>
         </div>
-        <FeaturedCases activeId={activeCase} onOpen={openCase} />
       </header>
 
       <div className="bench">

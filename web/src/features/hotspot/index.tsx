@@ -83,6 +83,21 @@ function Legend({ variable, unit }: { variable: GlobalVariable; unit: string }) 
 
 const pointId = (p: HotspotPoint) => `${p.lat},${p.lon}`;
 
+// A hand that swipes over the globe until the first touch, instead of written instructions
+
+function GestureHint({ label }: { label: string }) {
+  return (
+    <div className="hotspot-gesture" role="img" aria-label={label}>
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 11V10a2 2 0 0 0-4 0" />
+        <path d="M14 10V9a2 2 0 0 0-4 0v1" />
+        <path d="M10 9.5V4a2 2 0 0 0-4 0v10" />
+        <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-6-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+      </svg>
+    </div>
+  );
+}
+
 export function Hotspot() {
   const { t, language } = useI18n();
   const data = useAsync(loadHotspots, []);
@@ -92,7 +107,8 @@ export function Hotspot() {
   const [focus, setFocus] = useState<{ lon: number; lat: number; key: number } | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [zoomStep, setZoomStep] = useState<{ delta: number; key: number } | null>(null);
-  const [openList, setOpenList] = useState<'rising' | 'falling' | null>(null);
+  const [openLists, setOpenLists] = useState({ rising: false, falling: false });
+  const [hinting, setHinting] = useState(true);
 
   const dots = useMemo<GlobeDot[]>(() => {
     if (data.status !== 'ready') return [];
@@ -132,17 +148,18 @@ export function Hotspot() {
   const capital = selected ? nearestCapital(selected) : null;
 
   const choose = (p: HotspotPoint) => {
+    setHinting(false);
     setSelectedId(pointId(p));
     setFocus({ lon: p.lon, lat: p.lat, key: Date.now() });
   };
 
   const list = (name: 'rising' | 'falling', items: HotspotPoint[]) => (
     <div className="hotspot-list">
-      <button type="button" className={`hotspot-list-toggle hotspot-${name === 'rising' ? 'up' : 'down'}`} aria-expanded={openList === name} onClick={() => setOpenList(openList === name ? null : name)}>
+      <button type="button" className={`hotspot-list-toggle hotspot-${name === 'rising' ? 'up' : 'down'}`} aria-expanded={openLists[name]} onClick={() => setOpenLists((o) => ({ ...o, [name]: !o[name] }))}>
         {t(name === 'rising' ? 'hotspot.rising' : 'hotspot.falling')}
-        <span aria-hidden="true">{openList === name ? '−' : '+'}</span>
+        <span aria-hidden="true">{openLists[name] ? '−' : '+'}</span>
       </button>
-      {openList === name &&
+      {openLists[name] &&
         (items.length ? (
           <ol>
             {items.map((p) => (
@@ -180,7 +197,7 @@ export function Hotspot() {
         ))}
       </div>
 
-      <div className="hotspot-stage">
+      <div className="hotspot-stage" onPointerDown={() => setHinting(false)} onWheel={() => setHinting(false)}>
         <Globe
           world={world.status === 'ready' ? world.data : null}
           dots={dots}
@@ -199,7 +216,7 @@ export function Hotspot() {
           <button type="button" aria-label={t('global.zoomIn')} onClick={() => setZoomStep({ delta: 1.4, key: Date.now() })}>+</button>
           <button type="button" aria-label={t('hotspot.reset')} onClick={() => { setSelectedId(null); setResetKey((k) => k + 1); }}>⟲</button>
         </div>
-        <p className="hotspot-gesture">{t('hotspot.gesture')}</p>
+        {hinting && <GestureHint label={t('hotspot.gesture')} />}
 
         <div className={`hotspot-detail ${selected ? 'is-open' : ''}`} aria-live="polite">
           {selected && capital ? (
@@ -231,6 +248,7 @@ export function Hotspot() {
         </div>
       </div>
 
+      <aside className="hotspot-side">
       <div className="hotspot-under">
         <Legend variable={variable} unit={unit} />
         <p className="hotspot-count">{t('hotspot.clear', { clear: clear.length, total: hotspots.points.length })}</p>
@@ -240,6 +258,7 @@ export function Hotspot() {
         {list('falling', falling)}
       </div>
       <p className="hotspot-note">{t('hotspot.note')}</p>
+      </aside>
     </div>
   );
 }

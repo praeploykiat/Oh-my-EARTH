@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { useI18n } from '../../core/i18n';
 
 export interface YearPoint {
@@ -16,8 +16,21 @@ interface HeroChartProps {
   note?: { index: number; text: string } | null;
 }
 
-const W = 800;
-const H = 360;
+const WIDE = { w: 800, h: 360 };
+const NARROW = { w: 420, h: 340 };
+const NARROW_QUERY = '(max-width: 760px)';
+
+// Phones get a narrower, taller drawing so labels and lines stay readable
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia(NARROW_QUERY).matches);
+  useEffect(() => {
+    const query = window.matchMedia(NARROW_QUERY);
+    const onChange = () => setNarrow(query.matches);
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, []);
+  return narrow;
+}
 const PAD = { left: 48, right: 24, top: 24, bottom: 40 };
 
 // Fill unset years between drawn ones so the line has no holes
@@ -38,10 +51,37 @@ export function fillGuess(guess: (number | null)[], start: number): (number | nu
   return out;
 }
 
+// A hand-written prompt in the empty part, with an arrow to where drawing starts
+
+function Hint({ from, right, narrow }: { from: [number, number]; right: number; narrow: boolean }) {
+  const { t } = useI18n();
+  const top = PAD.top + (narrow ? 34 : 56);
+  const gap = narrow ? 26 : 38;
+  const start: [number, number] = [right - (narrow ? 90 : 150), top + gap + 14];
+  const end: [number, number] = [from[0] + 14, from[1] - 14];
+  const control: [number, number] = [start[0] - 40, (start[1] + end[1]) / 2 - 20];
+  const angle = Math.atan2(end[1] - control[1], end[0] - control[0]);
+  const head = (turn: number) => `${end[0] - 14 * Math.cos(angle + turn)},${end[1] - 14 * Math.sin(angle + turn)}`;
+  return (
+    <g className="hero-chart-hint" aria-hidden="true">
+      <text x={right} y={top} textAnchor="end">
+        {t('landing.drawHint')}
+      </text>
+      <text x={right} y={top + gap} textAnchor="end" className="hero-chart-hint-small">
+        {t('landing.drawHint2')}
+      </text>
+      <path d={`M${start[0]},${start[1]} Q${control[0]},${control[1]} ${end[0]},${end[1]}`} />
+      <path d={`M${head(0.5)} L${end[0]},${end[1]} L${head(-0.5)}`} />
+    </g>
+  );
+}
+
 export function HeroChart({ points, split, unit, revealed, guess, onGuess, note }: HeroChartProps) {
   const { t } = useI18n();
   const svg = useRef<SVGSVGElement>(null);
   const [drawing, setDrawing] = useState(false);
+  const narrow = useNarrow();
+  const { w: W, h: H } = narrow ? NARROW : WIDE;
 
   const { x, y, ticks } = useMemo(() => {
     const values = points.map((p) => p.value);
@@ -53,7 +93,7 @@ export function HeroChart({ points, split, unit, revealed, guess, onGuess, note 
     const list: number[] = [];
     for (let v = low; v <= high + 1e-9; v += step) list.push(Math.round(v * 10) / 10);
     return { x: xs, y: ys, ticks: list, low, high };
-  }, [points]);
+  }, [points, W, H]);
 
   const known = points.slice(0, split);
   const hidden = points.slice(split);
@@ -152,11 +192,7 @@ export function HeroChart({ points, split, unit, revealed, guess, onGuess, note 
         </g>
       )}
 
-      {!revealed && guessPts.length === 1 && (
-        <text className="hero-chart-hint" x={(x(split) + x(points.length - 1)) / 2} y={(PAD.top + H - PAD.bottom) / 2} textAnchor="middle">
-          {t('landing.drawHint')}
-        </text>
-      )}
+      {!revealed && guessPts.length === 1 && <Hint from={[x(split - 1), y(startValue)]} right={W - PAD.right - 8} narrow={narrow} />}
     </svg>
   );
 }

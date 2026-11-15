@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { toAnnual } from '../../core/analysis';
 import { fetchPowerMonthly, useAsync } from '../../core/data';
 import { useI18n, type MessageKey } from '../../core/i18n';
 import { analyzeTrend } from '../../core/stats';
 import { fillGuess, HeroChart, type YearPoint } from './HeroChart';
 
-const PLACE = { parameter: 'T2M', lat: 13.75, lon: 100.5 };
+// Phuket: a clear, tested warming trend (p < 0.001, NASA POWER T2M, 2001 to 2024)
+const PLACE = { parameter: 'T2M', lat: 7.88, lon: 98.39 };
 const SPLIT_YEAR = 2013;
 const MIN_DRAWN_SHARE = 0.6;
 
-const loadBangkok = async (): Promise<YearPoint[]> =>
+const loadPlace = async (): Promise<YearPoint[]> =>
   toAnnual(await fetchPowerMonthly(PLACE)).flatMap((p) => (p.value === null ? [] : [{ year: Number(p.t), value: p.value }]));
 
 // Hero: draw the rest of a real record
 
 function Hero() {
   const { t } = useI18n();
-  const data = useAsync(loadBangkok, []);
+  const data = useAsync(loadPlace, []);
   const points = data.status === 'ready' ? data.data : null;
   const split = points ? points.findIndex((p) => p.year >= SPLIT_YEAR) : -1;
   const [guess, setGuess] = useState<(number | null)[]>([]);
@@ -29,10 +30,11 @@ function Hero() {
     if (!points || split <= 0 || !revealed) return null;
     const trend = analyzeTrend(points.map((p) => p.value));
     const perDecade = trend.slopePerStep * 10;
+    const total = trend.slopePerStep * (points.length - 1);
     const filled = fillGuess(guess, points[split - 1].value);
     const pairs = filled.flatMap((v, i) => (v === null ? [] : [v - points[split + i].value]));
     const gap = pairs.length ? pairs.reduce((sum, d) => sum + d, 0) / pairs.length : 0;
-    return { perDecade, significant: trend.significant, gap };
+    return { perDecade, total, significant: trend.significant, gap };
   }, [points, split, revealed, guess]);
 
   const reset = () => {
@@ -48,90 +50,99 @@ function Hero() {
   const note = points && warmest >= split ? { index: warmest, text: t('landing.warmest', { year: points[warmest].year }) } : null;
 
   return (
-    <section className="landing-hero">
+    <section className="landing-hero landing-section is-in">
       <div className="landing-hero-inner">
         <div className="landing-hero-text">
           <h1>{t('landing.title')}</h1>
-          <p>{t('landing.lead')}</p>
         </div>
 
         <div className="landing-ctas">
           <a className="button" href="#/game">
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+              <path d="M3 1.8v10.4a.6.6 0 0 0 .9.5l8.4-5.2a.6.6 0 0 0 0-1L3.9 1.3a.6.6 0 0 0-.9.5z" fill="currentColor" />
+            </svg>
             {t('landing.ctaGame')}
           </a>
           <a className="button button-secondary" href="#/workbench">
             {t('landing.thailandCta')}
           </a>
-          <a className="landing-quiet" href="#/global">
-            {t('nav.global')}
-          </a>
-          <a className="landing-quiet" href="#/hotspot">
-            {t('nav.hotspot')}
-          </a>
         </div>
 
-        <div className="landing-play">
-          <p className="landing-play-ask">{t('landing.ask', { last: SPLIT_YEAR - 1 })}</p>
-          {points && split > 0 ? (
-            <>
-              <HeroChart
-                points={points}
-                split={split}
-                unit={t('landing.unit')}
-                revealed={revealed}
-                guess={guess}
-                onGuess={setGuess}
-                note={revealed ? note : null}
-              />
-              <div className="landing-play-foot">
-                <div className="landing-legend">
-                  <span className="is-known">{t('landing.legendKnown')}</span>
-                  <span className="is-guess">{t('landing.legendGuess')}</span>
-                  {revealed && <span className="is-real">{t('landing.legendReal')}</span>}
+        <div className={`landing-play ${result ? 'is-revealed' : ''}`}>
+          <div className="landing-chart-col">
+            <p className="landing-chart-title">{t('landing.ask')}</p>
+            {points && split > 0 ? (
+              <>
+                <HeroChart
+                  points={points}
+                  split={split}
+                  unit={t('landing.unit')}
+                  revealed={revealed}
+                  guess={guess}
+                  onGuess={setGuess}
+                  note={revealed ? note : null}
+                />
+                <div className="landing-play-foot">
+                  {revealed ? (
+                    <div className="landing-legend">
+                      <span className="is-known">{t('landing.legendKnown')}</span>
+                      <span className="is-guess">{t('landing.legendGuess')}</span>
+                      <span className="is-real">{t('landing.legendReal')}</span>
+                    </div>
+                  ) : (
+                    <button type="button" className="button" disabled={drawn < Math.ceil(hiddenCount * MIN_DRAWN_SHARE)} onClick={() => setRevealed(true)}>
+                      {t('landing.reveal')}
+                    </button>
+                  )}
+                  <p className="landing-source">
+                    {t('landing.chartSource')}
+                    <br />
+                    {t('landing.imageCredit')}
+                  </p>
                 </div>
-                {revealed ? (
+              </>
+            ) : (
+              <div className="landing-play-wait">
+                <p>{data.status === 'error' ? t('landing.offline') : t('landing.loading')}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="landing-result-col" aria-live="polite">
+            {result && (
+              <div className="landing-result">
+                <span className={`stamp ${result.significant ? '' : 'is-unsure'}`} aria-hidden="true">
+                  {t(result.significant ? 'landing.stampReal' : 'landing.stampUnsure')}
+                </span>
+                <p className="landing-number">
+                  {result.total >= 0 ? '+' : '−'}
+                  {Math.abs(result.total).toFixed(1)}
+                  <span>{t('landing.sinceStart', { year: points![0].year })}</span>
+                </p>
+                <p className="landing-result-main">
+                  {t(result.total >= 0 ? 'landing.warmed' : 'landing.cooled', {
+                    total: Math.abs(result.total).toFixed(1),
+                    value: Math.abs(result.perDecade).toFixed(2),
+                    year: points![0].year,
+                  })}
+                </p>
+                <p>
+                  {t(result.significant ? 'landing.real' : 'landing.notSure')}{' '}
+                  {Math.abs(result.gap) < 0.15
+                    ? t('landing.gapClose')
+                    : t(result.gap > 0 ? 'landing.gapAbove' : 'landing.gapBelow', { value: Math.abs(result.gap).toFixed(1) })}
+                </p>
+                <div className="landing-result-actions">
+                  <a className="button" href="#/game">
+                    {t('landing.tryGame')}
+                  </a>
                   <button type="button" className="landing-link" onClick={reset}>
                     {t('landing.again')}
                   </button>
-                ) : (
-                  <button type="button" className="button" disabled={drawn < Math.ceil(hiddenCount * MIN_DRAWN_SHARE)} onClick={() => setRevealed(true)}>
-                    {t('landing.reveal')}
-                  </button>
-                )}
-              </div>
-              {result && (
-                <div className="landing-result" aria-live="polite">
-                  <p className="landing-number">
-                    {result.perDecade >= 0 ? '+' : '−'}
-                    {Math.abs(result.perDecade).toFixed(2)}
-                    <span>{t('landing.perDecade')}</span>
-                  </p>
-                  <div className="landing-result-text">
-                    <p className="landing-result-main">
-                      {t(result.perDecade >= 0 ? 'landing.warmed' : 'landing.cooled', { value: Math.abs(result.perDecade).toFixed(2) })}
-                    </p>
-                    <p>
-                      {t(result.significant ? 'landing.real' : 'landing.notSure')}{' '}
-                      {Math.abs(result.gap) < 0.15
-                        ? t('landing.gapClose')
-                        : t(result.gap > 0 ? 'landing.gapAbove' : 'landing.gapBelow', { value: Math.abs(result.gap).toFixed(1) })}
-                    </p>
-                    <p className="landing-bridge">
-                      {t('landing.bridge')} <a href="#/game">{t('landing.tryGame')}</a>
-                    </p>
-                  </div>
-                  <span className={`stamp ${result.significant ? '' : 'is-unsure'}`} aria-hidden="true">
-                    {t(result.significant ? 'landing.stampReal' : 'landing.stampUnsure')}
-                  </span>
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="landing-play-wait">
-              <p>{data.status === 'error' ? t('landing.offline') : t('landing.loading')}</p>
-            </div>
-          )}
-          <p className="landing-source">{t('landing.chartSource')}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -200,11 +211,12 @@ function Art({ kind }: { kind: Way['art'] }) {
 function Ways() {
   const { t } = useI18n();
   return (
-    <section className="landing-ways" aria-labelledby="ways-title">
+    <section className="landing-ways landing-section" aria-labelledby="ways-title">
       <h2 id="ways-title">{t('landing.waysTitle')}</h2>
+      <p className="landing-ways-lead">{t('landing.waysLead')}</p>
       <ol>
         {WAYS.map((way) => (
-          <li key={way.verb} className={way.links.length === 1 ? 'is-one' : undefined}>
+          <li key={way.ask} className={way.links.length === 1 ? 'is-one' : undefined}>
             <div className="landing-way-art">
               <Art kind={way.art} />
               <span className="landing-verb">{t(way.verb)}</span>
@@ -223,55 +235,122 @@ function Ways() {
           </li>
         ))}
       </ol>
+      <Sources />
     </section>
   );
 }
 
-// How the explorers work, and where the data comes from
+// Where the data comes from, as a slow moving strip
 
-const STEPS: [MessageKey, MessageKey][] = [
-  ['landing.step1', 'landing.step1Text'],
-  ['landing.step2', 'landing.step2Text'],
-  ['landing.step3', 'landing.step3Text'],
+const SOURCES: { name: string; use: MessageKey }[] = [
+  { name: 'NASA POWER', use: 'landing.src.power' },
+  { name: 'NASA GPM IMERG', use: 'landing.src.imerg' },
+  { name: 'NASA GLDAS', use: 'landing.src.gldas' },
+  { name: 'NASA MERRA-2', use: 'landing.src.merra' },
+  { name: 'GISTDA', use: 'landing.src.gistda' },
 ];
 
-const SOURCES = ['NASA POWER', 'NASA GLDAS', 'NASA GPM IMERG', 'NASA MERRA-2', 'GISTDA'];
-
-function How() {
+function Sources() {
   const { t } = useI18n();
   return (
-    <section className="landing-how" aria-labelledby="how-title">
-      <h2 id="how-title">{t('landing.howTitle')}</h2>
-      <ol>
-        {STEPS.map(([title, text], i) => (
-          <li key={title}>
-            <span className="landing-step-n">{i + 1}</span>
-            <h3>{t(title)}</h3>
-            <p>{t(text)}</p>
-          </li>
-        ))}
-      </ol>
-      <p className="landing-how-more">
-        <a href="#/methods">{t('landing.methodsLink')}</a>
-      </p>
-      <div className="landing-sources">
-        <p>{t('landing.sourcesTitle')}</p>
-        <ul>
-          {SOURCES.map((s) => (
-            <li key={s}>{s}</li>
+    <div className="landing-sources">
+      <p>{t('landing.sourcesTitle')}</p>
+      <div className="landing-marquee">
+        <div className="landing-marquee-track">
+          {[0, 1].map((copy) => (
+            <ul key={copy} aria-hidden={copy === 1 ? true : undefined}>
+              {SOURCES.map((s) => (
+                <li key={s.name}>
+                  <strong>{s.name}</strong> {t(s.use)}
+                </li>
+              ))}
+            </ul>
           ))}
-        </ul>
+        </div>
       </div>
-    </section>
+    </div>
   );
+}
+
+// Each section fades in once it scrolls into view
+
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const sections = ref.current?.querySelectorAll('.landing-section:not(.is-in)') ?? [];
+    const seen = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          seen.unobserve(entry.target);
+        }),
+      { threshold: 0.25 },
+    );
+    sections.forEach((section) => seen.observe(section));
+    return () => seen.disconnect();
+  }, []);
+  return ref;
+}
+
+// On larger screens a small wheel move goes to the next or previous part.
+// Inside a part taller than the screen, the wheel scrolls normally.
+
+const PAGED = '(min-width: 761px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)';
+const SETTLE_MS = 180;
+const MOVE_MS = 750;
+
+function useSectionScroll(root: RefObject<HTMLDivElement>) {
+  useEffect(() => {
+    const query = window.matchMedia(PAGED);
+    let busyUntil = 0;
+    let lastWheel = 0;
+
+    const stops = () => {
+      const header = document.querySelector<HTMLElement>('.header')?.offsetHeight ?? 0;
+      const sections = [...(root.current?.querySelectorAll<HTMLElement>('.landing-section') ?? [])];
+      const tops = sections.map((s, i) => (i === 0 ? 0 : Math.round(s.getBoundingClientRect().top + window.scrollY - header)));
+      const end = document.documentElement.scrollHeight - window.innerHeight;
+      return { tops: [...tops, end], sections };
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (!query.matches || event.ctrlKey || Math.abs(event.deltaY) < 4) return;
+      const now = Date.now();
+      const busy = now < busyUntil || now - lastWheel < SETTLE_MS;
+      lastWheel = now;
+      if (busy) return event.preventDefault();
+
+      const { tops, sections } = stops();
+      const y = window.scrollY;
+      const current = tops.reduce((found, top, i) => (top <= y + 4 ? i : found), 0);
+      const section = sections[current];
+      const down = event.deltaY > 0;
+
+      if (section) {
+        const box = section.getBoundingClientRect();
+        if (down && box.bottom > window.innerHeight + 4) return;
+        if (!down && y > tops[current] + 4) return;
+      }
+      const target = down ? tops[current + 1] : tops[Math.max(0, current - 1)];
+      if (target === undefined || Math.abs(target - y) < 4) return;
+      event.preventDefault();
+      busyUntil = now + MOVE_MS;
+      window.scrollTo({ top: target, behavior: 'smooth' });
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+  }, [root]);
 }
 
 export function Landing() {
+  const ref = useReveal();
+  useSectionScroll(ref);
   return (
-    <div className="landing">
+    <div className="landing" ref={ref}>
       <Hero />
       <Ways />
-      <How />
     </div>
   );
 }

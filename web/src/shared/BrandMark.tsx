@@ -1,9 +1,11 @@
+// A lens over a rising line: looking closely at a trend
+
 export function BrandMark({ size = 28 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" className="brand-mark">
-      <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.35" />
-      <path d="M16 3a13 13 0 0 1 0 26a9 13 0 0 0 0-26z" fill="currentColor" />
-      <circle cx="16" cy="16" r="2" fill="var(--accent)" />
+      <circle cx="13.5" cy="13.5" r="9.5" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M20.5 20.5L28 28" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M7.5 17.5l3.5-3.5 2.5 2 5-5.5" fill="none" stroke="var(--accent)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
