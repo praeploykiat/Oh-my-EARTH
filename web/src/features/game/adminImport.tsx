@@ -21,38 +21,138 @@ const FIELDS: { name: string; required: boolean; text: string }[] = [
   { name: 'source', required: false, text: 'Where the data comes from.' },
 ];
 
+// Starter files: a blank template and a filled example for each kind of time axis
+
+type StarterKind = 'months' | 'years' | 'monthly';
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const YEARS = Array.from({ length: 24 }, (_, i) => String(2001 + i));
+const MONTHLY = Array.from({ length: 36 }, (_, i) => `${2020 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}`);
 
-const TEMPLATE = [
-  {
-    place: { en: '', th: '' },
-    time: MONTHS,
-    timeLabel: { en: '', th: '' },
-    given: { label: { en: '', th: '' }, unit: '', values: MONTHS.map(() => null) },
-    hidden: { label: { en: '', th: '' }, unit: '', values: MONTHS.map(() => null) },
-    answer: { en: '', th: '' },
-    source: '',
-  },
-];
+const STARTER_TIME: Record<StarterKind, { label: string; time: string[] }> = {
+  months: { label: '12 months of the year', time: MONTHS },
+  years: { label: 'Year by year (2001 to 2024)', time: YEARS },
+  monthly: { label: 'Month by month (Jan 2020 to Dec 2022)', time: MONTHLY },
+};
 
-const EXAMPLE = [
-  {
+function blankTemplate(kind: StarterKind) {
+  const time = STARTER_TIME[kind].time;
+  const empty = time.map(() => null);
+  return [
+    {
+      place: { en: '', th: '' },
+      time,
+      timeLabel: { en: '', th: '' },
+      given: { label: { en: '', th: '' }, unit: '', values: empty },
+      hidden: { label: { en: '', th: '' }, unit: '', values: empty },
+      answer: { en: '', th: '' },
+      source: '',
+    },
+  ];
+}
+
+const RAIN = [0.3, 0.4, 0.9, 2.1, 5.6, 5.2, 6.1, 7.4, 7.0, 3.9, 1.2, 0.4];
+const SOIL = [20, 18, 17, 18, 22, 26, 29, 32, 34, 33, 28, 23];
+const YEAR_RAIN = [4.2, 4.7, 4.8, 4.5, 4.0, 3.7, 3.9, 4.3, 4.8, 5.0, 4.6, 4.1, 3.9, 4.0, 4.5, 5.0, 5.1, 4.8, 4.3, 4.0, 4.2, 4.6, 5.1, 5.2];
+const AOD = [0.55, 0.7, 0.85, 0.6, 0.3, 0.2, 0.18, 0.17, 0.2, 0.25, 0.3, 0.4];
+
+const EXAMPLES: Record<StarterKind, object> = {
+  months: {
     place: { en: 'Chiang Mai', th: 'เชียงใหม่' },
     time: MONTHS,
     timeLabel: { en: 'Average for each month, 2001 to 2024', th: 'ค่าเฉลี่ยแต่ละเดือน 2001 ถึง 2024' },
-    given: { label: { en: 'Rainfall', th: 'ปริมาณฝน' }, unit: 'mm/day', values: [0.3, 0.4, 0.9, 2.1, 5.6, 5.2, 6.1, 7.4, 7.0, 3.9, 1.2, 0.4] },
-    hidden: { label: { en: 'Soil moisture', th: 'ความชื้นในดิน' }, unit: 'kg/m²', values: [20, 18, 17, 18, 22, 26, 29, 32, 34, 33, 28, 23] },
+    given: { label: { en: 'Rainfall', th: 'ปริมาณฝน' }, unit: 'mm/day', values: RAIN },
+    hidden: { label: { en: 'Soil moisture', th: 'ความชื้นในดิน' }, unit: 'kg/m²', values: SOIL },
     answer: {
       en: '**Soil follows the rain, about a month later.**\n\n- Rain peaks in August\n- Soil moisture peaks in September',
       th: '**ดินชื้นตามฝน แต่ช้ากว่าราว 1 เดือน**\n\n- ฝนมากที่สุดเดือนสิงหาคม\n- ดินชื้นที่สุดเดือนกันยายน',
     },
     source: 'NASA POWER',
   },
-];
+  years: {
+    place: { en: 'Ayutthaya', th: 'พระนครศรีอยุธยา' },
+    time: YEARS,
+    timeLabel: { en: 'Yearly average, 2001 to 2024', th: 'ค่าเฉลี่ยรายปี 2001 ถึง 2024' },
+    given: { label: { en: 'Rainfall', th: 'ปริมาณฝน' }, unit: 'mm/day', values: YEAR_RAIN },
+    hidden: {
+      label: { en: 'Runoff', th: 'น้ำไหลบ่า' },
+      unit: 'mm/day',
+      values: YEAR_RAIN.map((r) => Math.round(Math.max(0.1, (r - 3.6) * 1.1) * 100) / 100),
+    },
+    answer: {
+      en: '**Wet years bring much more runoff.**\n\nRunoff only rises once rain passes what the ground can soak up.',
+      th: '**ปีที่ฝนมาก น้ำไหลบ่าก็มากขึ้นชัดเจน**\n\nน้ำไหลบ่าจะเพิ่มก็ต่อเมื่อฝนมากเกินกว่าที่ดินจะซึมรับได้',
+    },
+    source: 'NASA GLDAS',
+  },
+  monthly: {
+    place: { en: 'Chiang Rai', th: 'เชียงราย' },
+    time: MONTHLY,
+    timeLabel: { en: 'Each month, January 2020 to December 2022', th: 'รายเดือน มกราคม 2020 ถึง ธันวาคม 2022' },
+    given: { label: { en: 'Rainfall', th: 'ปริมาณฝน' }, unit: 'mm/day', values: [...RAIN, ...RAIN, ...RAIN] },
+    hidden: { label: { en: 'Haze (aerosol)', th: 'หมอกควัน (ละอองลอย)' }, unit: 'AOD', values: [...AOD, ...AOD.map((v, i) => (i === 2 ? null : v)), ...AOD] },
+    answer: {
+      en: '**Haze is worst in the dry season and clears when the rain comes.**\n\n- Worst in March\n- Cleanest in July and August\n\nnull marks a month with no data, like March 2021 here.',
+      th: '**หมอกควันหนักสุดหน้าแล้ง และหายไปเมื่อฝนมา**\n\n- แย่ที่สุดเดือนมีนาคม\n- สะอาดที่สุดเดือนกรกฎาคมถึงสิงหาคม\n\nnull คือเดือนที่ไม่มีข้อมูล เช่น มีนาคม 2021 ในตัวอย่างนี้',
+    },
+    source: 'NASA MERRA-2',
+  },
+};
+
+function Starters() {
+  const kinds = Object.keys(STARTER_TIME) as StarterKind[];
+  return (
+    <div className="admin-starters" data-tour="starters">
+      <table>
+        <thead>
+          <tr>
+            <th>Time axis</th>
+            <th>Blank template</th>
+            <th>Filled example</th>
+          </tr>
+        </thead>
+        <tbody>
+          {kinds.map((kind) => (
+            <tr key={kind}>
+              <td>{STARTER_TIME[kind].label}</td>
+              <td>
+                <button type="button" className="admin-link" onClick={() => download(blankTemplate(kind), `template-${kind}`)}>
+                  Download
+                </button>
+              </td>
+              <td>
+                <button type="button" className="admin-link" onClick={() => download([EXAMPLES[kind]], `example-${kind}`)}>
+                  Download
+                </button>
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <td>All three in one file</td>
+            <td>
+              <button type="button" className="admin-link" onClick={() => download(kinds.flatMap(blankTemplate), 'template-all')}>
+                Download
+              </button>
+            </td>
+            <td>
+              <button type="button" className="admin-link" onClick={() => download(kinds.map((k) => EXAMPLES[k]), 'example-all')}>
+                Download
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p className="admin-hint">
+        Open the file in any text editor, fill it in and save it. To use your own years or months, change <code>"time"</code> and give{' '}
+        <code>"values"</code> one number per time point.
+      </p>
+    </div>
+  );
+}
 
 function FieldGuide() {
   return (
-    <details className="admin-details">
+    <details className="admin-details" data-tour="fields">
       <summary>Which fields are required?</summary>
       <table className="admin-fields">
         <tbody>
@@ -163,18 +263,10 @@ export function ImportPanel({ saved, onDone, onClose }: ImportPanelProps) {
         </button>
       </div>
 
-      <div className="admin-import-start">
-        <p>Start from a file:</p>
-        <button type="button" onClick={() => download(TEMPLATE, 'question-template')}>
-          Download template
-        </button>
-        <button type="button" onClick={() => download(EXAMPLE, 'question-example')}>
-          Download example
-        </button>
-      </div>
+      <Starters />
       <FieldGuide />
 
-      <div className="admin-modes" role="radiogroup" aria-label="How to import">
+      <div className="admin-modes" role="radiogroup" aria-label="How to import" data-tour="modes">
         <button type="button" role="radio" aria-checked={mode === 'merge'} className={mode === 'merge' ? 'is-on' : ''} onClick={() => setMode('merge')}>
           <strong>Add or update</strong>
           <small>Adds new questions. A question whose id already exists is changed. Nothing else is touched.</small>
@@ -185,7 +277,7 @@ export function ImportPanel({ saved, onDone, onClose }: ImportPanelProps) {
         </button>
       </div>
 
-      <label className="admin-file">
+      <label className="admin-file" data-tour="file">
         <span>Choose a .json file</span>
         <input
           type="file"
@@ -217,7 +309,7 @@ export function ImportPanel({ saved, onDone, onClose }: ImportPanelProps) {
             </button>
           </>
         ) : (
-          <button type="button" className="button" disabled={!text.trim()} onClick={() => check(text)}>
+          <button type="button" className="button" data-tour="check" disabled={!text.trim()} onClick={() => check(text)}>
             Check
           </button>
         )}

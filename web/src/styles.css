@@ -3582,3 +3582,28 @@ button,
 .admin .admin-tour-card .admin-tour-count {
   color: #5b6863;
 }
+
+.admin-starters {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-starters table {
+  width: 100%;
+  max-width: 620px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-starters th {
+  padding: 6px 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.admin-starters td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--line);
+}

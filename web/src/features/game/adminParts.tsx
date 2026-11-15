@@ -129,17 +129,53 @@ interface TourStep {
   target: string;
   title: string;
   body: string;
+  importOpen?: boolean;
 }
 
 const TOUR: TourStep[] = [
   { target: '.admin-list', title: 'Your questions', body: 'Every question players can get. Click one to open it.' },
-  { target: '.admin-add', title: 'Add a question', body: 'Starts a blank question. It saves by itself as soon as nothing is missing.' },
+  { target: '.admin-add', title: 'Add a question by hand', body: 'Starts a blank question. It saves by itself as soon as nothing is missing.' },
   { target: '.admin-todo, .admin-done', title: 'What is left to do', body: 'Lists anything still missing. Click an item to jump straight to it.' },
   { target: '#step-place', title: 'Fill in the steps', body: 'Work from top to bottom. Every field needs English and Thai unless it says optional.' },
   { target: '#step-numbers', title: 'Paste your numbers', body: 'Copy two columns from Excel or Google Sheets, click the first box, then press Ctrl+V.' },
   { target: '.admin-preview-pane', title: 'Try it like a player', body: 'The preview shows exactly what players see, including the answer. Draw on it to test.' },
+  { target: '[data-tour="import"]', title: 'Add many questions with JSON', body: 'JSON is a text file that holds questions. Import JSON opens the panel for it. The next steps walk through it.' },
+  {
+    target: '[data-tour="starters"]',
+    title: 'Start from a file',
+    body: 'Download a blank template or a filled example. There is one for each kind of time axis, and one with all three. Open it in any text editor, such as Notepad, fill it in and save.',
+    importOpen: true,
+  },
+  {
+    target: '[data-tour="fields"]',
+    title: 'What each field means',
+    body: 'Open this list to see every field, whether it is required, and what to put in it.',
+    importOpen: true,
+  },
+  {
+    target: '[data-tour="modes"]',
+    title: 'Add, or replace everything',
+    body: 'Add or update keeps every question not in the file. Replace everything removes saved questions that are not in the file. Pick before you check.',
+    importOpen: true,
+  },
+  {
+    target: '[data-tour="file"]',
+    title: 'Choose the file',
+    body: 'Pick your .json file, or paste its text into the box below.',
+    importOpen: true,
+  },
+  {
+    target: '[data-tour="check"]',
+    title: 'Check before anything is saved',
+    body: 'Shows what will be added, changed, removed or skipped, and why. Nothing is saved until you press Import.',
+    importOpen: true,
+  },
+  {
+    target: '[data-tour="json-edit"]',
+    title: 'Change one question as JSON',
+    body: 'Opens the question you are looking at as JSON. Change the text and press Apply. You do not need its ID for this.',
+  },
   { target: '.admin-id', title: 'The question’s ID', body: ID_EXPLAINED },
-  { target: '[data-tour="import"]', title: 'Many questions at once', body: 'Import a JSON file. You see what will be added, changed or skipped before anything is saved.' },
   { target: '[data-tour="tour"]', title: 'See this again', body: 'Press Tour any time to go through these steps again.' },
 ];
 
@@ -160,8 +196,8 @@ function rememberTour(show: boolean) {
   }
 }
 
-export function Tour({ onClose }: { onClose: () => void }) {
-  const [steps] = useState(() => TOUR.filter((s) => document.querySelector(s.target)));
+export function Tour({ onClose, onImport }: { onClose: () => void; onImport: (open: boolean) => void }) {
+  const [steps] = useState(() => TOUR.filter((s) => s.importOpen || document.querySelector(s.target)));
   const [index, setIndex] = useState(0);
   const [box, setBox] = useState<DOMRect | null>(null);
   const [hideNext, setHideNext] = useState(!tourWanted());
@@ -173,14 +209,21 @@ export function Tour({ onClose }: { onClose: () => void }) {
   }, [step]);
 
   useLayoutEffect(() => {
-    const el = step && document.querySelector<HTMLElement>(step.target);
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    if (rect.top < 80 || rect.bottom > window.innerHeight) {
-      el.scrollIntoView({ block: rect.height > window.innerHeight * 0.6 ? 'start' : 'center' });
-    }
-    measure();
-  }, [step, measure]);
+    if (!step) return;
+    onImport(!!step.importOpen);
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        const el = document.querySelector<HTMLElement>(step.target);
+        if (!el) return setBox(null);
+        const rect = el.getBoundingClientRect();
+        if (rect.top < 80 || rect.bottom > window.innerHeight - 260) {
+          el.scrollIntoView({ block: rect.height > window.innerHeight * 0.5 ? 'start' : 'center' });
+        }
+        measure();
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [step, measure, onImport]);
 
   useEffect(() => {
     window.addEventListener('resize', measure);
@@ -193,8 +236,9 @@ export function Tour({ onClose }: { onClose: () => void }) {
 
   const close = useCallback(() => {
     rememberTour(!hideNext);
+    if (step?.importOpen) onImport(false);
     onClose();
-  }, [hideNext, onClose]);
+  }, [hideNext, onClose, onImport, step]);
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -215,7 +259,7 @@ export function Tour({ onClose }: { onClose: () => void }) {
     width: Math.min(box.width + pad * 2, window.innerWidth - 8),
     height: Math.min(box.height + pad * 2, window.innerHeight - 8),
   };
-  const cardHeight = 230;
+  const cardHeight = 290;
   const below = !hole || hole.top + hole.height + cardHeight < window.innerHeight;
   const cardTop = !hole
     ? window.innerHeight / 2 - cardHeight / 2
