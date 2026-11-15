@@ -223,13 +223,14 @@ export const th: Record<MessageKey, string> = {
   "hotspot.none": "ไม่พบ",
   "hotspot.openThailand": "เปิดในหน้าสำรวจประเทศไทย",
   "hotspot.openWorld": "เปิด {city} ในหน้าสำรวจทั่วโลก",
-  "hotspot.gesture": "ลากเพื่อหมุนลูกโลก เลื่อนเพื่อซูม คลิกจุดเพื่อดูรายละเอียด",
+  "hotspot.gesture":
+    "ลากเพื่อหมุนลูกโลก เลื่อนเพื่อซูม คลิกจุดเพื่อดูรายละเอียด",
   "hotspot.reset": "กลับมุมเริ่มต้น",
   "hotspot.close": "ปิด",
   "hotspot.soon":
     "แผนที่นี้กำลังจะมา ระหว่างนี้ใช้สำรวจประเทศไทยทดสอบเทรนด์ของจังหวัดไหนก็ได้",
   "landing.seeCta": "เปิดแผนที่",
-  "landing.title": "ตรงที่คุณอยู่ โลกเปลี่ยนจริงไหม?",
+  "landing.title": "โลกเปลี่ยนไปจริงไหม?",
   "landing.start": "เริ่ม",
   "landing.openWorkbench": "เปิดโต๊ะนักสืบ",
   "landing.howTitle": "เครื่องมือสำรวจทำงานยังไง",
@@ -469,5 +470,5 @@ export const th: Record<MessageKey, string> = {
   "landing.src.merra": "หมอกควัน",
   "landing.src.gistda": "ประวัติน้ำท่วมในไทย",
   "footer.by": "สร้างโดย",
-  'landing.imageCredit': 'ภาพโลก: NASA Blue Marble',
+  "landing.imageCredit": "ภาพโลก: NASA Blue Marble",
 };

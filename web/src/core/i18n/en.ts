@@ -224,13 +224,14 @@ export const en = {
   "hotspot.none": "None found.",
   "hotspot.openThailand": "Open in Thailand explorer",
   "hotspot.openWorld": "Open {city} in World explorer",
-  "hotspot.gesture": "Drag to turn the globe, scroll to zoom, click a dot for details",
+  "hotspot.gesture":
+    "Drag to turn the globe, scroll to zoom, click a dot for details",
   "hotspot.reset": "Reset view",
   "hotspot.close": "Close",
   "hotspot.soon":
     "This map is on its way. Until then, the Thailand explorer can test any province for a trend.",
   "landing.seeCta": "Open the map",
-  "landing.title": "Is Earth really changing where you live?",
+  "landing.title": "Is Earth really changing?",
   "landing.start": "Start",
   "landing.openWorkbench": "Open workbench",
   "landing.howTitle": "How the explorers work",
@@ -318,17 +319,21 @@ export const en = {
   "landing.lead": "Guess first, then let the data answer.",
   "landing.ask": "Phuket air temperature",
   "landing.unit": "°C, yearly average",
-  "landing.chartLabel": "Phuket yearly air temperature from NASA POWER, with space to draw your guess",
+  "landing.chartLabel":
+    "Phuket yearly air temperature from NASA POWER, with space to draw your guess",
   "landing.drawHint": "What do you think happened next?",
   "landing.legendKnown": "NASA record",
   "landing.legendGuess": "Your guess",
   "landing.legendReal": "What really happened",
   "landing.reveal": "Show me",
   "landing.again": "Draw again",
-  "landing.warmed": "Phuket is about {total} °C warmer than in {year}. That is roughly {value} °C every 10 years.",
-  "landing.cooled": "Phuket is about {total} °C cooler than in {year}. That is roughly {value} °C every 10 years.",
+  "landing.warmed":
+    "Phuket is about {total} °C warmer than in {year}. That is roughly {value} °C every 10 years.",
+  "landing.cooled":
+    "Phuket is about {total} °C cooler than in {year}. That is roughly {value} °C every 10 years.",
   "landing.real": "The change is too steady to be luck.",
-  "landing.notSure": "The years swing up and down a lot, so this could still be luck.",
+  "landing.notSure":
+    "The years swing up and down a lot, so this could still be luck.",
   "landing.gapClose":
     "Your line stayed close to the real one. Nice detective work.",
   "landing.gapAbove": "On average your line was {value} °C above the real one.",
@@ -459,7 +464,8 @@ export const en = {
   "game.extend.dir.up": "rising",
   "game.extend.dir.down": "falling",
   "game.extend.dir.flat": "flat",
-  "game.extend.trend": "Over the whole record it changed about {value} {unit} every 10 years.",
+  "game.extend.trend":
+    "Over the whole record it changed about {value} {unit} every 10 years.",
   "game.extend.real": "Real trend",
   "game.extend.unsure": "Could be luck",
   "landing.waysLead": "Guess, locate, then prove.",
