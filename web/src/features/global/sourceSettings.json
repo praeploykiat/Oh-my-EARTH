@@ -1,0 +1,5 @@
+{
+  "enabledSources": ["power"],
+  "enabledVariables": ["T2M", "PRECTOTCORR", "RH2M", "ALLSKY_SFC_SW_DWN"],
+  "disabledReason": "AppEEARS/NDVI is deferred pending access and multi-capital quality validation."
+}

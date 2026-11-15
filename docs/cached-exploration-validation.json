@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-11-15",
+  "releaseId": "f5b80e2a9c6e2a19f2d7c30742abbe1e6eceaab42d2694eb993706a53c5e4833",
+  "period": {
+    "end": 2024,
+    "start": 2001
+  },
+  "database": {
+    "locations": 195,
+    "products": 2,
+    "batches": 196,
+    "observations": 224928,
+    "quality": {
+      "valid": 224644,
+      "missing": 1,
+      "rejected": 283
+    }
+  },
+  "jobs": {
+    "POWER": {
+      "succeeded": 195
+    },
+    "NDVI": {
+      "pending": 1,
+      "externalTaskId": "970961e5-ac1d-4652-9731-a0fc45b8dbd0",
+      "lastPoll": "waiting; existing task adopted, no resubmission"
+    }
+  },
+  "publishedCoverage": {
+    "ALLSKY_SFC_SW_DWN": 195,
+    "NDVI": 1,
+    "PRECTOTCORR": 195,
+    "RH2M": 195,
+    "T2M": 195
+  },
+  "validatedReferencedFiles": 321,
+  "sizesBytes": {
+    "manifest": 65183,
+    "bangkokMonthly": 14085,
+    "defaultTemperatureMap": 22125,
+    "entireCache": 4610608
+  },
+  "checks": {
+    "webTests": 138,
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "cacheIntegrityAndContracts": "passed for every referenced file",
+    "databasePublication": "atomic failure, retained old release, idempotence and revision checks passed",
+    "ingestion": "exclusive claims, expired lease fencing, retries, POWER artifact resume, NDVI polling, reconciliation, completed bundle resume, strict QA, redirected token stripping passed",
+    "pipelineTests": 62,
+    "privateCredentialsInBuild": "none found"
+  },
+  "browser": {
+    "defaultTrend": "195-capital prepared map loaded",
+    "annualRain2024Bangkok": "1413.710 mm/year",
+    "NDVI": "unpublished locations explicit; incomplete annual data stays missing",
+    "customTrend2010to2024": "195/195 loaded, 195 colored, zero fetch failures",
+    "workbench": "rendered; no Vite loader error",
+    "game": "rendered",
+    "consoleErrors": 0
+  },
+  "requestEvidence": "Automated reader tests reject any URL outside /explorer-cache/. Map plus two POWER-variable selections make three requests total: manifest, summary, one reusable capital file. No browser NASA fallback.",
+  "operations": {
+    "localBackgroundWorker": "started with pipeline/start-worker.ps1; idempotent duplicate-start check passed",
+    "automaticStartup": "not installed; restart worker after reboot",
+    "productionDeployment": "not performed; requires publishing and shipping immutable releases before manifest switch"
+  },
+  "limits": [
+    "NDVI full extraction still pending upstream; only strict-QA Bangkok pilot is published.",
+    "Custom-range maps require local statistical computation from cached monthly records.",
+    "Fixed historical period 2001-2024.",
+    "Giovanni upstream availability unchanged."
+  ],
+  "status": "Historical mixed-source validation; superseded by docs/power-checkpoint-validation.json for the current deployment."
+}

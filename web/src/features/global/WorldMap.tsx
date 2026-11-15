@@ -17,7 +17,7 @@ function loadWorld(): Promise<World> {
   return world;
 }
 
-export function WorldMap({ selected, onSelect, values, mode, domain, unit, errors, period }: { period: string; selected: Capital; onSelect: (code: string) => void; values: Record<string, MapValue>; mode: MapMode; domain: [number, number]; unit: string; errors: Record<string, boolean> }) {
+export function WorldMap({ selected, onSelect, values, mode, domain, unit, errors, period, unavailable = [] }: { unavailable?: string[]; period: string; selected: Capital; onSelect: (code: string) => void; values: Record<string, MapValue>; mode: MapMode; domain: [number, number]; unit: string; errors: Record<string, boolean> }) {
   const { t, language } = useI18n();
   const [zoom, setZoom] = useState(1);
   const [attempt, setAttempt] = useState(0);
@@ -64,7 +64,7 @@ export function WorldMap({ selected, onSelect, values, mode, domain, unit, error
                 const uncertain = ready && mode === 'trend' && !supported(entry);
                 const color = ready ? mapColor(value, domain, mode) : '#82938f';
                 const status = ready ? `${value.toFixed(3)} ${unit}${mode === 'trend' ? ` / ${t('global.map.decade')} · ${period} · ${t(`global.trend.${entry.evidence}`)} · ${t('global.map.interval')}: ${entry.lower?.toFixed(3)} to ${entry.upper?.toFixed(3)} ${unit} / ${t('global.map.decade')}` : ` · ${period}${entry.months?.length ? ` · ${entry.months.map((month) => new Date(`${month}-01T00:00:00Z`).toLocaleDateString(language === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })).join(', ')}` : ''}`}`
-                  : t(errors[capital.code] || entry?.failed ? 'global.map.failed' : entry ? 'global.map.insufficient' : 'global.map.pending');
+                  : unavailable.includes(capital.code) ? t('cache.unavailablePoint') : t(errors[capital.code] || entry?.failed ? 'global.map.failed' : entry ? 'global.map.insufficient' : 'global.map.pending');
                 return <circle key={capital.code} cx={x} cy={y} r={(capital.code === selected.code ? 5 : 3.5) / Math.sqrt(zoom)}
                   className="global-capital global-colored-capital" style={{ fill: uncertain || !ready ? '#152b30' : color, stroke: color, strokeWidth: uncertain ? 2 : 1, strokeDasharray: !ready ? '2 1' : undefined }}
                   role="button" tabIndex={0} aria-label={`${capital.country} · ${capital.city}: ${status}`}

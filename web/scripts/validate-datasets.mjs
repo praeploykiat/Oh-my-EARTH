@@ -20,8 +20,11 @@ for (const entry of catalog.datasets ?? []) {
   if (!validateDataset(dataset)) errors.push([entry.file, validateDataset.errors]);
 }
 
+const validateNDVI = ajv.compile(readJson(join(root, 'contracts', 'global-ndvi.schema.json')));
+if (!validateNDVI(readJson(join(root, 'pipeline', 'fixtures', 'ndvi-pilot.json')))) errors.push(['archived ndvi-pilot.json', validateNDVI.errors]);
+
 if (errors.length > 0) {
   for (const [file, details] of errors) console.error(file, JSON.stringify(details, null, 2));
   process.exit(1);
 }
-console.log(`Validated catalog and ${catalog.datasets.length} datasets`);
+console.log(`Validated catalog and ${catalog.datasets.length} datasets, plus the archived NDVI test fixture (not deployed)`);

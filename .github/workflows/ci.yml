@@ -39,5 +39,41 @@ jobs:
             pipeline/requirements.txt
             pipeline/requirements-trend.txt
       - run: pip install -r requirements.txt
-      - run: pip install -r requirements-trend.txt
+      - run: pip install -r requirements-trend.txt -r requirements-ingestion.txt
       - run: pytest
+
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.12-bookworm
+        env:
+          POSTGRES_USER: earth_test
+          POSTGRES_PASSWORD: ci-test-only
+          POSTGRES_DB: earth_test_admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U earth_test -d earth_test_admin"
+          --health-interval 3s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGDATABASE: earth_test_admin
+      PGUSER: earth_test
+      PGPASSWORD: ci-test-only
+      RUN_DATABASE_TESTS: '1'
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pipeline/requirements-db.txt
+      - run: pip install -r requirements-ingestion.txt pytest==8.3.4
+      - run: pytest tests/test_observations.py tests/test_database.py tests/test_jobs.py tests/test_publication.py -q

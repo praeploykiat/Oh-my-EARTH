@@ -1,0 +1,84 @@
+{
+  "checkedAt": "2026-11-15T05:32:00.061Z",
+  "candidate": {
+    "variable": "SOIL_MOISTURE",
+    "source": "GLDAS Noah 2.1 via NASA Giovanni",
+    "depth": "0–10 cm",
+    "expectedUnit": "kg/m²",
+    "nativeResolution": "0.25 degrees",
+    "temporalResolution": "monthly",
+    "requestedPeriod": "2001–2024",
+    "product": "GLDAS_NOAH025_M_2_1_SoilMoi0_10cm_inst",
+    "scale": 1
+  },
+  "credentialConfigured": true,
+  "scope": "Live access pilot, not validation of every capital or measurement accuracy. Existing credentials are unchanged. HTTP 500 does not prove a token is invalid.",
+  "checks": [
+    {
+      "check": "live-catalog",
+      "httpStatus": 200,
+      "elapsedMs": 1139,
+      "productListed": true
+    },
+    {
+      "check": "direct-Bangkok-2023",
+      "requestUrl": "https://api.giovanni.earthdata.nasa.gov/timeseries?data=GLDAS_NOAH025_M_2_1_SoilMoi0_10cm_inst&location=%5B13.7500%2C100.5200%5D&time=2023-01-01T00%3A00%3A00%2F2023-12-31T23%3A59%3A59",
+      "httpStatus": 500,
+      "elapsedMs": 651,
+      "errorBody": {
+        "message": null
+      },
+      "parsedMonths": 0,
+      "validMonths": 0,
+      "unitVerified": false,
+      "status": "FAIL"
+    },
+    {
+      "check": "unauthenticated-control",
+      "httpStatus": 403,
+      "elapsedMs": 788,
+      "errorBody": {
+        "message": "Bad or missing token"
+      }
+    },
+    {
+      "check": "existing-workbench-handler-2001-2024",
+      "httpStatus": 502,
+      "elapsedMs": 724,
+      "samePoint": null,
+      "parsedMonths": 0,
+      "validMonths": 0,
+      "error": "giovanni returned 500",
+      "detail": "GLDAS_NOAH025_M_2_1_SoilMoi0_10cm_inst: {\"message\":null}",
+      "status": "FAIL"
+    }
+  ],
+  "plannedCapitals": [
+    {
+      "code": "TH",
+      "iso3": "THA",
+      "country": "Thailand",
+      "city": "Bangkok",
+      "lat": 13.75,
+      "lon": 100.52
+    },
+    {
+      "code": "EG",
+      "iso3": "EGY",
+      "country": "Egypt",
+      "city": "Cairo",
+      "lat": 30.05,
+      "lon": 31.25
+    },
+    {
+      "code": "NO",
+      "iso3": "NOR",
+      "country": "Norway",
+      "city": "Oslo",
+      "lat": 59.92,
+      "lon": 10.75
+    }
+  ],
+  "status": "BLOCKED",
+  "nextGate": "A successful numeric response with the intended server credential is required before enabling this source. No alternate credential or synthetic data was substituted."
+}

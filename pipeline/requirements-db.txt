@@ -1,0 +1,4 @@
+# Optional database tooling, separate from the frontend and scientific reference stack.
+psycopg[binary]==3.3.9
+# Match the existing contract validator version; no notebook/scientific stack needed.
+jsonschema==4.23.0

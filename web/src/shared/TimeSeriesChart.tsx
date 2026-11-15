@@ -25,16 +25,16 @@ interface TimeSeriesChartProps {
 const PADDING = { top: 20, right: 20, bottom: 32, left: 52 };
 const TICK_COUNT = 4;
 
-function useElementWidth<T extends HTMLElement>() {
+function useElementWidth<T extends HTMLElement>(enabled: boolean) {
   const ref = useRef<T>(null);
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!enabled || !ref.current) return;
     const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, []);
+  }, [enabled]);
 
   return [ref, width] as const;
 }
@@ -46,10 +46,11 @@ function niceTicks(min: number, max: number, count: number): number[] {
 
 export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height = 300, timeLabel = 'year', highlightDates = [] }: TimeSeriesChartProps) {
   const { t, language } = useI18n();
-  const [containerRef, width] = useElementWidth<HTMLDivElement>();
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const values = useMemo(() => series.map((p) => p.value).filter((v): v is number => v !== null), [series]);
+
+  const [containerRef, width] = useElementWidth<HTMLDivElement>(values.length > 0);
 
   if (values.length === 0) return <p className="status">{t('chart.noData')}</p>;
 

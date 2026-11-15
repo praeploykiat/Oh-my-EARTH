@@ -1,0 +1,157 @@
+{
+  "product": "MOD13A3.061",
+  "period": {
+    "start": 2001,
+    "end": 2024
+  },
+  "qaPolicy": "good-land-clear-v1",
+  "csvSHA256": "08b3bdf3a2e9262f239d81c2d8d323b62053048d0d669af39ec9224aaadf5821",
+  "diagnosticWarning": "Alternative counts are sensitivity diagnostics, not approved QA policies or publishable observations.",
+  "locations": {
+    "sample-point": {
+      "point": {
+        "code": "TH",
+        "iso3": "THA",
+        "country": "Thailand",
+        "city": "Bangkok",
+        "lat": 13.75,
+        "lon": 100.52,
+        "id": "TH:13.7500:100.5200"
+      },
+      "flagCounts": {
+        "reliability": {
+          "1": 112,
+          "3": 162,
+          "0": 13
+        },
+        "modland": {
+          "0": 58,
+          "2": 162,
+          "1": 67
+        },
+        "landmask": {
+          "2": 166,
+          "1": 121
+        },
+        "usefulness": {
+          "1": 35,
+          "6": 31,
+          "2": 119,
+          "0": 12,
+          "3": 33,
+          "4": 24,
+          "5": 26,
+          "7": 4,
+          "9": 3
+        },
+        "aerosol": {
+          "1": 58,
+          "0": 200,
+          "3": 16,
+          "2": 13
+        },
+        "adjacent_cloud": {
+          "0": 204,
+          "1": 83
+        },
+        "mixed_cloud": {
+          "0": 259,
+          "1": 28
+        },
+        "snow": {
+          "0": 287
+        },
+        "shadow": {
+          "0": 229,
+          "1": 58
+        }
+      },
+      "overlappingFailureReasons": {
+        "reliability": 274,
+        "landmask": 166,
+        "adjacent_cloud": 83,
+        "modland": 229,
+        "shadow": 58,
+        "mixed_cloud": 28
+      },
+      "failureCombinations": {
+        "reliability+landmask": 26,
+        "reliability+adjacent_cloud": 7,
+        "reliability+modland+landmask+adjacent_cloud+shadow": 27,
+        "reliability+modland": 71,
+        "landmask": 9,
+        "reliability+modland+adjacent_cloud+shadow": 14,
+        "reliability+modland+landmask": 65,
+        "reliability+modland+mixed_cloud": 8,
+        "reliability+modland+landmask+adjacent_cloud": 17,
+        "accepted": 4,
+        "reliability+modland+landmask+adjacent_cloud+mixed_cloud+shadow": 1,
+        "reliability+modland+adjacent_cloud": 7,
+        "reliability+modland+landmask+mixed_cloud": 15,
+        "reliability+landmask+shadow": 6,
+        "reliability+modland+adjacent_cloud+mixed_cloud+shadow": 4,
+        "reliability+adjacent_cloud+shadow": 6
+      },
+      "diagnosticOnlyCounts": {
+        "summary_good_only": 13,
+        "summary_good_or_marginal_only": 125,
+        "strict_except_allow_shoreline": 13,
+        "strict_except_allow_marginal": 4
+      },
+      "valid": 4,
+      "total": 288,
+      "sourceRows": 288,
+      "missing": 1,
+      "rejected": 283,
+      "coverageFraction": 0.013888888888888888,
+      "validMonthsPerYear": {
+        "2001": 0,
+        "2002": 1,
+        "2003": 1,
+        "2004": 2,
+        "2005": 0,
+        "2006": 0,
+        "2007": 0,
+        "2008": 0,
+        "2009": 0,
+        "2010": 0,
+        "2011": 0,
+        "2012": 0,
+        "2013": 0,
+        "2014": 0,
+        "2015": 0,
+        "2016": 0,
+        "2017": 0,
+        "2018": 0,
+        "2019": 0,
+        "2020": 0,
+        "2021": 0,
+        "2022": 0,
+        "2023": 0,
+        "2024": 0
+      },
+      "validMonthsByCalendarMonth": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0,
+        "11": 2,
+        "12": 2
+      },
+      "completeYears": 0,
+      "currentTrendCoverageGate": false,
+      "retainedNDVIRange": [
+        0.2422,
+        0.2919
+      ]
+    }
+  },
+  "checkedAt": "2026-11-15T08:37:43.186677+00:00",
+  "taskId": "3cb29fbb-080a-4f88-b2ed-46c07b5ea360"
+}

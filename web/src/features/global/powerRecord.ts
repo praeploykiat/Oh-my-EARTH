@@ -1,6 +1,6 @@
 import { fetchPowerResponse, requestUrl } from '../../core/data/power';
 import { START_YEAR, END_YEAR } from '../../core/data/range';
-import { completeMonthlyRecord, GLOBAL_VARIABLES, type GlobalVariable } from './data';
+import { completeMonthlyRecord, GLOBAL_VARIABLES, type PowerVariable } from './data';
 import type { SeriesPoint } from '../../core/data';
 
 type ObjectValue = Record<string, unknown>;
@@ -12,7 +12,7 @@ export interface ValidatedVariable {
   rejected: string[];
 }
 export interface GlobalRecord {
-  variables: Record<GlobalVariable, ValidatedVariable>;
+  variables: Record<PowerVariable, ValidatedVariable>;
   requested: Coordinates;
   responseCoordinates: Coordinates;
   retrievedAt: string;
@@ -27,7 +27,7 @@ function object(value: unknown, label: string): ObjectValue {
 }
 
 // Conservative monthly terrestrial screening bounds; these are not NASA QC flags.
-const RULES: Record<GlobalVariable, { units: string[]; min: number; max: number }> = {
+const RULES: Record<PowerVariable, { units: string[]; min: number; max: number }> = {
   T2M: { units: ['c', '°c'], min: -100, max: 70 },
   PRECTOTCORR: { units: ['mm/day'], min: 0, max: 1000 },
   RH2M: { units: ['%'], min: 0, max: 100 },
@@ -54,7 +54,7 @@ export function validateGlobalResponse(body: unknown, requested: Coordinates, re
   if (Math.abs(responseCoordinates.lat - requested.lat) > 0.01 || Math.abs(responseCoordinates.lon - requested.lon) > 0.01) throw new Error('NASA response is for a different location');
   const parameters = object(object(root.properties, 'properties').parameter, 'monthly parameters');
   const metadata = object(root.parameters, 'parameter units');
-  const variables = {} as Record<GlobalVariable, ValidatedVariable>;
+  const variables = {} as Record<PowerVariable, ValidatedVariable>;
   for (const key of GLOBAL_VARIABLES) {
     const raw = object(parameters[key], key);
     const sourceUnit = object(metadata[key], `${key} metadata`).units;

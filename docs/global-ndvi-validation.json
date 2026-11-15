@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-15T06:22:26.730264+00:00",
+  "product": "MOD13A3.061",
+  "taskId": "3cb29fbb-080a-4f88-b2ed-46c07b5ea360",
+  "qaPolicy": "good-land-clear-v1",
+  "csvSHA256": "08b3bdf3a2e9262f239d81c2d8d323b62053048d0d669af39ec9224aaadf5821",
+  "status": "PASS",
+  "scaling": "AppEEARS floating NDVI values are already scaled; no second multiplication",
+  "locations": {
+    "TH": {
+      "valid": 4,
+      "total": 288,
+      "sourceRows": 288,
+      "missing": 1,
+      "rejected": 283,
+      "completeYears": 0
+    }
+  }
+}

@@ -1,0 +1,20 @@
+name: earth-trend-detective
+services:
+  db:
+    image: postgres:17.12-bookworm
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-earth_trends}
+      POSTGRES_USER: ${PGUSER:-earth_app}
+      POSTGRES_PASSWORD: ${PGPASSWORD:?Create db/.env using db/setup.ps1}
+    ports:
+      - "127.0.0.1:${PGPORT:-54329}:5432"
+    volumes:
+      - earth_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+volumes:
+  earth_postgres:

@@ -2,6 +2,7 @@ import type { View } from '../../core/analysis';
 import { END_YEAR, START_YEAR } from '../../core/data/range';
 import type { GlobalTrendResult } from '../../core/stats/globalTrend';
 import { daysInMonth, prepareGlobalAnalysis, type GlobalVariable, type YearRange } from './data';
+import { recordVariable, type ExplorerRecord } from './explorerRecord';
 import type { GlobalRecord } from './powerRecord';
 export const MAP_MODES = ['trend', 'average', 'lowest', 'highest'] as const;
 export type MapMode = typeof MAP_MODES[number];
@@ -13,8 +14,8 @@ export function parseMapSettings(params: URLSearchParams): { mode: MapMode; year
   };
 }
 export type MapValue = { value: number | null; evidence?: GlobalTrendResult['evidence']; lower?: number; upper?: number; failed?: boolean; months?: string[] };
-export function mapAnalysis(record: GlobalRecord, variable: GlobalVariable, range: YearRange, view: View) {
-  const analysis = prepareGlobalAnalysis(record.variables[variable].series, variable, range, view);
+export function mapAnalysis(record: GlobalRecord | ExplorerRecord, variable: GlobalVariable, range: YearRange, view: View) {
+  const analysis = prepareGlobalAnalysis(recordVariable(record, variable).series, variable, range, view);
   // A complete period prevents missing seasons from biasing cross-location comparisons.
   let average: number | null = null;
   if (analysis.coverage.fraction === 1) {
@@ -31,7 +32,7 @@ export function mapAnalysis(record: GlobalRecord, variable: GlobalVariable, rang
   return { ...analysis, average };
 }
 // Each non-trend map summarizes one complete calendar year. Rain rates become monthly totals.
-export function yearSummary(record: GlobalRecord, variable: GlobalVariable, year: number, mode: Exclude<MapMode, 'trend'>) {
+export function yearSummary(record: GlobalRecord | ExplorerRecord, variable: GlobalVariable, year: number, mode: Exclude<MapMode, 'trend'>) {
   const analysis = mapAnalysis(record, variable, { start: year, end: year }, 'annual');
   const monthly = analysis.monthly.map((p) => ({
     ...p,
@@ -59,8 +60,8 @@ export function mapModeLabel(mode: MapMode, variable: GlobalVariable) {
     : `global.map.${mode}` as const;
 }
 export function mapScale(variable: GlobalVariable, mode: MapMode, annualRain: boolean) {
-  const average: Record<GlobalVariable, [number, number]> = { T2M: [-20, 35], PRECTOTCORR: [0, annualRain ? 4000 : 12], RH2M: [0, 100], ALLSKY_SFC_SW_DWN: [0, 8] };
-  const extent = { T2M: 1, PRECTOTCORR: annualRain ? 300 : 1, RH2M: 5, ALLSKY_SFC_SW_DWN: 0.5 }[variable];
+  const average: Record<GlobalVariable, [number, number]> = { NDVI: [-0.2, 1], T2M: [-20, 35], PRECTOTCORR: [0, annualRain ? 4000 : 12], RH2M: [0, 100], ALLSKY_SFC_SW_DWN: [0, 8] };
+  const extent = { NDVI: 0.1, T2M: 1, PRECTOTCORR: annualRain ? 300 : 1, RH2M: 5, ALLSKY_SFC_SW_DWN: 0.5 }[variable];
   if (mode === 'trend') return [-extent, extent] as [number, number];
   if (variable === 'PRECTOTCORR') return [0, mode === 'average' ? 4000 : 700] as [number, number];
   return average[variable];
