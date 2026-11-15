@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { View } from '../../core/analysis';
 import { START_YEAR, END_YEAR } from '../../core/data/range';
 import { useAsync, variableByKey } from '../../core/data';
@@ -6,10 +6,12 @@ import { CAPITALS, capitalByCode, type Capital } from '../../core/geo/capitals';
 import { useI18n } from '../../core/i18n';
 import { splitHash } from '../../core/url';
 import { TimeSeriesChart } from '../../shared';
-import { WorldMap } from './WorldMap';
+import { MapExplorer } from './MapExplorer';
 import { GLOBAL_VARIABLES, YEARS, parseYearRange, prepareGlobalAnalysis, recordCoverage, completeMonthlyRecord, type GlobalVariable, type YearRange } from './data';
 import { fetchGlobalRecord, globalRequestUrl, type GlobalRecord } from './powerRecord';
 import { useGlobalTrend } from './useGlobalTrend';
+import { mapModeLabel, parseMapSettings, type MapMode } from './mapData';
+import { SingleYearResult } from './SingleYearResult';
 import { GlobalTrendSummary } from './GlobalTrendSummary';
 import './global.css';
 
@@ -22,12 +24,15 @@ function initialState() {
     variable: GLOBAL_VARIABLES.find((key) => key === params.get('v')) ?? 'T2M',
     view: VIEWS.find((view) => view === params.get('view')) ?? 'annual',
     ...parseYearRange(params),
+    ...parseMapSettings(params),
   };
 }
 
 export function GlobalExplorer() {
   const { t, language } = useI18n();
   const [state, setState] = useState(initialState);
+  const [mapRecord, setMapRecord] = useState<{ code: string; record: GlobalRecord }>();
+  const onRecord = useCallback((code: string, record: GlobalRecord) => setMapRecord({ code, record }), []);
   const [search, setSearch] = useState('');
   const capital = capitalByCode(state.country)!;
   const filtered = CAPITALS.filter((c) => `${c.country} ${c.city} ${c.code}`.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()));
@@ -43,7 +48,7 @@ export function GlobalExplorer() {
   }, []);
   useEffect(() => {
     if (splitHash(window.location.hash).path !== '/global') return;
-    const params = new URLSearchParams({ country: state.country, v: state.variable, view: state.view, start: String(state.start), end: String(state.end) });
+    const params = new URLSearchParams({ country: state.country, v: state.variable, view: state.view, start: String(state.start), end: String(state.end), mode: state.mode, year: String(state.year) });
     window.history.replaceState(null, '', `#/global?${params}`);
   }, [state]);
 
@@ -51,7 +56,7 @@ export function GlobalExplorer() {
     <section className="global-explorer">
       <header className="global-heading">
         <div><span className="eyebrow">{t('global.eyebrow')}</span><h1>{t('global.title')}</h1><p>{t('global.intro')}</p></div>
-        <div className="global-period"><strong>{state.start}—{state.end}</strong><span>{t('global.period')}</span></div>
+        <div className="global-period"><strong>{state.mode === 'trend' ? `${state.start}—${state.end}` : state.year}</strong><span>{t(mapModeLabel(state.mode, state.variable))}</span></div>
       </header>
       <p className="global-scope">{t('global.scope')}</p>
       <div className="global-layout">
@@ -73,7 +78,7 @@ export function GlobalExplorer() {
               </label>;
             })}
           </fieldset>
-          <fieldset className="global-range"><legend>{t('global.timeRange')}</legend>
+          {state.mode === 'trend' ? <fieldset className="global-range"><legend>{t('global.timeRange')}</legend>
             <label htmlFor="global-start">{t('global.startYear')}</label>
             <select id="global-start" value={state.start} onChange={(event) => {
               const start = Number(event.target.value);
@@ -84,18 +89,23 @@ export function GlobalExplorer() {
               const end = Number(event.target.value);
               setState((s) => ({ ...s, end, start: Math.min(end, s.start) }));
             }}>{YEARS.map((year) => <option key={year} value={year}>{year}</option>)}</select>
-          </fieldset>
+          </fieldset> : <fieldset className="global-year"><legend>{t('global.map.singleYear')}</legend>
+            <label htmlFor="global-year">{t('global.map.year')}</label>
+            <select id="global-year" value={state.year} onChange={(event) => setState((s) => ({ ...s, year: Number(event.target.value) }))}>
+              {YEARS.map((year) => <option key={year} value={year}>{year}</option>)}
+            </select>
+          </fieldset>}
           <p className="global-range-note">{t('global.rangeAvailable', { start: START_YEAR, end: END_YEAR })}</p>
           <p className="global-controls-note">{t('global.onDemand', { count: CAPITALS.length })}</p>
         </aside>
         <div className="global-content">
-          <WorldMap selected={capital} onSelect={(country) => setState((s) => ({ ...s, country }))} />
+          <MapExplorer mode={state.mode} year={state.year} onMode={(mode) => setState((s) => ({ ...s, mode }))} recordUpdate={mapRecord} variable={state.variable} range={{ start: state.start, end: state.end }} view={state.view} selected={capital} onSelect={(country) => setState((s) => ({ ...s, country }))} />
           <div className="global-result-heading"><div><span className="eyebrow">{capital.country}</span><h2>{capital.city}</h2></div>
-            <div className="global-views" role="group" aria-label={t('global.view')}>
+            {state.mode === 'trend' && <div className="global-views" role="group" aria-label={t('global.view')}>
               {VIEWS.map((view) => <button key={view} type="button" aria-pressed={view === state.view} onClick={() => setState((s) => ({ ...s, view }))}>{t(view === 'annual' && state.variable === 'PRECTOTCORR' ? 'global.yearlyTotal' : `view.${view}`)}</button>)}
-            </div>
+            </div>}
           </div>
-          <GlobalResult key={capital.code} capital={capital} variable={state.variable} view={state.view} range={{ start: state.start, end: state.end }} />
+          <GlobalResult mode={state.mode} year={state.year} onRecord={onRecord} key={capital.code} capital={capital} variable={state.variable} view={state.view} range={{ start: state.start, end: state.end }} />
         </div>
       </div>
       <details className="global-methods"><summary>{t('global.about')}</summary><p>{t('global.method')}</p><p>{t('global.annual')}</p><p>{t('global.geography')}</p>
@@ -106,16 +116,17 @@ export function GlobalExplorer() {
   );
 }
 
-function GlobalResult({ capital, variable, view, range }: { capital: Capital; variable: GlobalVariable; view: View; range: YearRange }) {
+function GlobalResult({ capital, variable, view, range, onRecord, mode, year }: { mode: MapMode; year: number; onRecord: (code: string, record: GlobalRecord) => void; capital: Capital; variable: GlobalVariable; view: View; range: YearRange }) {
   const { t, language } = useI18n();
   const [attempt, setAttempt] = useState(0);
   const result = useAsync(() => fetchGlobalRecord(capital, attempt > 0), [capital.code, attempt]);
+  useEffect(() => { if (result.status === 'ready') onRecord(capital.code, result.data); }, [result.status === 'ready' ? result.data : null, capital.code, onRecord]);
   if (result.status === 'loading') return <div className="result-state is-loading" role="status"><div className="scan" aria-hidden="true" />{t('state.fetching', { place: capital.city })}</div>;
   if (result.status === 'error') return <div className="result-state is-error" role="alert"><strong>{t('global.fetchFailed')}</strong><p>{t('global.fetchHelp')}</p><a href={globalRequestUrl(capital)} target="_blank" rel="noreferrer">{t('global.source')}</a><button type="button" className="button-secondary" onClick={() => setAttempt((n) => n + 1)}>{t('state.retry')}</button></div>;
   const definition = variableByKey(variable)!;
   return <>
-    <GlobalChart record={result.data} capital={capital} variable={variable} view={view} range={range} label={definition.label[language]} monthlyUnit={definition.unit} />
-    <QualityPanel record={result.data} range={range} onRefresh={() => setAttempt((n) => n + 1)} />
+    {mode === 'trend' ? <GlobalChart record={result.data} capital={capital} variable={variable} view={view} range={range} label={definition.label[language]} monthlyUnit={definition.unit} /> : <SingleYearResult record={result.data} variable={variable} mode={mode} year={year} city={capital.city} />}
+    <QualityPanel record={result.data} range={mode === 'trend' ? range : { start: year, end: year }} onRefresh={() => setAttempt((n) => n + 1)} />
   </>;
 }
 

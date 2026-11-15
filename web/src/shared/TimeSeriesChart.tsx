@@ -18,6 +18,8 @@ interface TimeSeriesChartProps {
   slopePerStep?: number;
   bands?: ChartBand[];
   height?: number;
+  timeLabel?: 'year' | 'month';
+  highlightDates?: string[];
 }
 
 const PADDING = { top: 20, right: 20, bottom: 32, left: 52 };
@@ -42,8 +44,8 @@ function niceTicks(min: number, max: number, count: number): number[] {
   return Array.from({ length: count }, (_, i) => min + step * i);
 }
 
-export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height = 300 }: TimeSeriesChartProps) {
-  const { t } = useI18n();
+export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height = 300, timeLabel = 'year', highlightDates = [] }: TimeSeriesChartProps) {
+  const { t, language } = useI18n();
   const [containerRef, width] = useElementWidth<HTMLDivElement>();
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -108,9 +110,9 @@ export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height
           ))}
 
           {series.map((p, i) =>
-            i % yearLabelEvery === 0 ? (
+            i % (timeLabel === 'month' ? Math.max(1, Math.ceil(series.length / Math.max(1, Math.floor(plotWidth / 42)))) : yearLabelEvery) === 0 ? (
               <text key={p.t} x={x(i)} y={height - 10} className="chart-label" textAnchor="middle">
-                {p.t.slice(0, 4)}
+                {timeLabel === 'month' ? new Date(`${p.t}-01T00:00:00Z`).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-GB', { month: 'short', timeZone: 'UTC' }) : p.t.slice(0, 4)}
               </text>
             ) : null,
           )}
@@ -122,6 +124,10 @@ export function TimeSeriesChart({ series, unit, slopePerStep, bands = [], height
           <path d={paths.area} fill="url(#chart-area)" />
           <path d={paths.line} className="chart-line" />
           {paths.isolated.map((i) => <circle key={series[i].t} cx={x(i)} cy={y(series[i].value!)} r={3.5} fill="var(--data)" />)}
+
+          {series.map((p, i) => p.value !== null && highlightDates.includes(p.t) ? <circle key={`highlight-${p.t}`} cx={x(i)} cy={y(p.value)} r={6} fill="var(--gold)" stroke="var(--bg-deep)" strokeWidth={2}>
+            <title>{p.t}: {p.value.toFixed(2)} {unit}</title>
+          </circle> : null)}
 
           {bands.map((band) => (
             <g key={band.label} className="chart-band">

@@ -5,6 +5,8 @@ import { useAsync } from '../../core/data';
 import { CAPITALS, type Capital } from '../../core/geo/capitals';
 import { useI18n } from '../../core/i18n';
 
+import { mapColor, supported, type MapMode, type MapValue } from './mapData';
+
 type World = FeatureCollection<Geometry, { iso3: string; name: string }>;
 let world: Promise<World> | undefined;
 function loadWorld(): Promise<World> {
@@ -15,8 +17,8 @@ function loadWorld(): Promise<World> {
   return world;
 }
 
-export function WorldMap({ selected, onSelect }: { selected: Capital; onSelect: (code: string) => void }) {
-  const { t } = useI18n();
+export function WorldMap({ selected, onSelect, values, mode, domain, unit, errors, period }: { period: string; selected: Capital; onSelect: (code: string) => void; values: Record<string, MapValue>; mode: MapMode; domain: [number, number]; unit: string; errors: Record<string, boolean> }) {
+  const { t, language } = useI18n();
   const [zoom, setZoom] = useState(1);
   const [attempt, setAttempt] = useState(0);
   const boundaries = useAsync(loadWorld, [attempt]);
@@ -53,13 +55,22 @@ export function WorldMap({ selected, onSelect }: { selected: Capital; onSelect: 
                   <title>{feature.properties.name}</title>
                 </path>;
               })}
-              {CAPITALS.filter((c) => c.code !== selected.code).map((capital) => {
+              <circle cx={cx} cy={cy} r={10 / Math.sqrt(zoom)} className="global-capital-halo" />
+              {[...CAPITALS.filter((c) => c.code !== selected.code), selected].map((capital) => {
                 const [x, y] = projection([capital.lon, capital.lat])!;
-                return <circle key={capital.code} cx={x} cy={y} r={3 / Math.sqrt(zoom)} className="global-capital"
-                  onClick={() => onSelect(capital.code)}><title>{capital.country} · {capital.city}</title></circle>;
+                const entry = values[capital.code];
+                const value = entry?.value;
+                const ready = typeof value === 'number';
+                const uncertain = ready && mode === 'trend' && !supported(entry);
+                const color = ready ? mapColor(value, domain, mode) : '#82938f';
+                const status = ready ? `${value.toFixed(3)} ${unit}${mode === 'trend' ? ` / ${t('global.map.decade')} · ${period} · ${t(`global.trend.${entry.evidence}`)} · ${t('global.map.interval')}: ${entry.lower?.toFixed(3)} to ${entry.upper?.toFixed(3)} ${unit} / ${t('global.map.decade')}` : ` · ${period}${entry.months?.length ? ` · ${entry.months.map((month) => new Date(`${month}-01T00:00:00Z`).toLocaleDateString(language === 'th' ? 'th-TH-u-ca-gregory' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })).join(', ')}` : ''}`}`
+                  : t(errors[capital.code] || entry?.failed ? 'global.map.failed' : entry ? 'global.map.insufficient' : 'global.map.pending');
+                return <circle key={capital.code} cx={x} cy={y} r={(capital.code === selected.code ? 5 : 3.5) / Math.sqrt(zoom)}
+                  className="global-capital global-colored-capital" style={{ fill: uncertain || !ready ? '#152b30' : color, stroke: color, strokeWidth: uncertain ? 2 : 1, strokeDasharray: !ready ? '2 1' : undefined }}
+                  role="button" tabIndex={0} aria-label={`${capital.country} · ${capital.city}: ${status}`}
+                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect(capital.code); } }}
+                  onClick={() => onSelect(capital.code)}><title>{capital.country} · {capital.city}: {status}</title></circle>;
               })}
-              <circle cx={cx} cy={cy} r={9 / Math.sqrt(zoom)} className="global-capital-halo" />
-              <circle cx={cx} cy={cy} r={4 / Math.sqrt(zoom)} className="global-capital is-selected"><title>{selected.city}</title></circle>
             </g>
           </g>
         </svg>
