@@ -1,4 +1,4 @@
-# Earth Trend Detective
+# Oh my EARTH!
 
 NASA Space Apps Challenge 2026 (Bangkok), challenge **Be An Earth System Trend Detective!**, team **Far Side of the Moon**.
 
