@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { download, questionTitle } from './adminParts';
+import { download, KIND_LABEL, questionTitle } from './adminParts';
 import { importQuestions, type Stored } from './api';
 import { importRounds, type ImportMode, type ImportResult } from './normalize';
-import type { GameRound } from './types';
+import { kindOf, type AnyRound } from './types';
 
 // Field guide and starter files
 
@@ -19,6 +19,15 @@ const FIELDS: { name: string; required: boolean; text: string }[] = [
   { name: 'hidden.values', required: true, text: 'Same as given.values.' },
   { name: 'answer', required: true, text: '{ "en", "th" }. **bold**, "- " starts a list item, \\n\\n starts a new paragraph.' },
   { name: 'source', required: false, text: 'Where the data comes from.' },
+];
+
+const EXTEND_FIELDS: { name: string; required: boolean; text: string }[] = [
+  { name: 'kind', required: true, text: 'Always "extend". This is what makes it a Continue the line question.' },
+  { name: 'id, place, time, timeLabel, answer, source', required: false, text: 'Same as above. place and answer are required.' },
+  { name: 'series.label', required: true, text: 'Name of the measure, { "en", "th" }.' },
+  { name: 'series.unit', required: true, text: 'For example "°C".' },
+  { name: 'series.values', required: true, text: 'One number per time point. null where there is no data.' },
+  { name: 'showUntil', required: true, text: 'The last time point players see, exactly as it is written in "time", for example "2016". At least 2 numbers before it and 2 after it.' },
 ];
 
 // Starter files: a blank template and a filled example for each kind of time axis
@@ -99,6 +108,39 @@ const EXAMPLES: Record<StarterKind, object> = {
   },
 };
 
+// Continue the line starters
+
+const TEMP = [27.9, 28.1, 27.8, 28.0, 28.3, 28.2, 28.0, 28.1, 28.6, 28.9, 28.2, 28.0, 28.4, 28.7, 29.0, 29.3, 28.8, 28.6, 29.1, 29.0, 28.9, 29.0, 29.2, 29.6];
+
+function blankExtendTemplate() {
+  return [
+    {
+      kind: 'extend',
+      place: { en: '', th: '' },
+      time: YEARS,
+      timeLabel: { en: '', th: '' },
+      series: { label: { en: '', th: '' }, unit: '', values: YEARS.map(() => null) },
+      showUntil: '2016',
+      answer: { en: '', th: '' },
+      source: '',
+    },
+  ];
+}
+
+const EXTEND_EXAMPLE = {
+  kind: 'extend',
+  place: { en: 'Bangkok', th: 'กรุงเทพฯ' },
+  time: YEARS,
+  timeLabel: { en: 'Yearly average, 2001 to 2024', th: 'ค่าเฉลี่ยรายปี 2001 ถึง 2024' },
+  series: { label: { en: 'Air temperature', th: 'อุณหภูมิอากาศ' }, unit: '°C', values: TEMP },
+  showUntil: '2016',
+  answer: {
+    en: '**It kept warming.**\n\n- Ups and downs from year to year\n- The long-term direction is up',
+    th: '**ยังอุ่นขึ้นต่อเนื่อง**\n\n- แต่ละปีขึ้นลงบ้าง\n- แต่ทิศทางระยะยาวคือสูงขึ้น',
+  },
+  source: 'NASA POWER',
+};
+
 function Starters() {
   const kinds = Object.keys(STARTER_TIME) as StarterKind[];
   return (
@@ -106,7 +148,7 @@ function Starters() {
       <table>
         <thead>
           <tr>
-            <th>Time axis</th>
+            <th>Starter file</th>
             <th>Blank template</th>
             <th>Filled example</th>
           </tr>
@@ -114,7 +156,10 @@ function Starters() {
         <tbody>
           {kinds.map((kind) => (
             <tr key={kind}>
-              <td>{STARTER_TIME[kind].label}</td>
+              <td>
+                {KIND_LABEL.pair}, {STARTER_TIME[kind].label.charAt(0).toLowerCase()}
+                {STARTER_TIME[kind].label.slice(1)}
+              </td>
               <td>
                 <button type="button" className="admin-link" onClick={() => download(blankTemplate(kind), `template-${kind}`)}>
                   Download
@@ -128,14 +173,27 @@ function Starters() {
             </tr>
           ))}
           <tr>
-            <td>All three in one file</td>
+            <td>{KIND_LABEL.extend}, year by year</td>
             <td>
-              <button type="button" className="admin-link" onClick={() => download(kinds.flatMap(blankTemplate), 'template-all')}>
+              <button type="button" className="admin-link" onClick={() => download(blankExtendTemplate(), 'template-continue')}>
                 Download
               </button>
             </td>
             <td>
-              <button type="button" className="admin-link" onClick={() => download(kinds.map((k) => EXAMPLES[k]), 'example-all')}>
+              <button type="button" className="admin-link" onClick={() => download([EXTEND_EXAMPLE], 'example-continue')}>
+                Download
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>All of the above in one file</td>
+            <td>
+              <button type="button" className="admin-link" onClick={() => download([...kinds.flatMap(blankTemplate), ...blankExtendTemplate()], 'template-all')}>
+                Download
+              </button>
+            </td>
+            <td>
+              <button type="button" className="admin-link" onClick={() => download([...kinds.map((k) => EXAMPLES[k]), EXTEND_EXAMPLE], 'example-all')}>
                 Download
               </button>
             </td>
@@ -169,7 +227,26 @@ function FieldGuide() {
           ))}
         </tbody>
       </table>
-      <p className="admin-hint">Every field with "en" and "th" needs both languages. One question {'{ … }'} or a list {'[ {…}, {…} ]'} both work.</p>
+      <h3 className="admin-fields-title">{KIND_LABEL.extend} questions</h3>
+      <table className="admin-fields">
+        <tbody>
+          {EXTEND_FIELDS.map((f) => (
+            <tr key={f.name}>
+              <td>
+                <code>{f.name}</code>
+              </td>
+              <td>
+                <span className={f.required ? undefined : 'is-optional'}>{f.required ? 'Required' : 'see above'}</span>
+              </td>
+              <td>{f.text}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="admin-hint">
+        Every field with "en" and "th" needs both languages. One question {'{ … }'} or a list {'[ {…}, {…} ]'} both work, and one list can mix both
+        types.
+      </p>
     </details>
   );
 }
@@ -181,8 +258,9 @@ function Summary({ result, mode, saved }: { result: ImportResult; mode: ImportMo
   const incoming = new Set(result.rounds.map((r) => r.id));
   const adds = result.rounds.filter((r) => !existing.has(r.id));
   const updates = result.rounds.filter((r) => existing.has(r.id));
-  const removes = mode === 'replace' ? saved.filter((s) => !incoming.has(s.question.id)).map((s) => s.question) : [];
-  const name = (r: GameRound) => `${r.place.en || 'No place'}: ${questionTitle(r)}`;
+  const kinds = new Set(result.rounds.map(kindOf));
+  const removes = mode === 'replace' ? saved.filter((s) => kinds.has(kindOf(s.question)) && !incoming.has(s.question.id)).map((s) => s.question) : [];
+  const name = (r: AnyRound) => `${r.place.en || 'No place'}: ${questionTitle(r)}`;
 
   const group = (title: string, kind: string, items: string[]) =>
     items.length > 0 && (
@@ -240,7 +318,8 @@ export function ImportPanel({ saved, onDone, onClose }: ImportPanelProps) {
     try {
       const stored = await importQuestions(result.rounds, mode);
       const skipped = result.problems.length ? ` Skipped ${result.problems.length}.` : '';
-      const what = mode === 'replace' ? `Replaced all questions with ${result.rounds.length} from the file.` : `Imported ${result.rounds.length} question(s).`;
+      const types = [...new Set(result.rounds.map(kindOf))].map((k) => KIND_LABEL[k]).join(' and ');
+      const what = mode === 'replace' ? `Replaced all ${types} questions with ${result.rounds.length} from the file.` : `Imported ${result.rounds.length} question(s).`;
       onDone(stored, new Set(result.rounds.map((r) => r.id)), `${what}${skipped}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -273,7 +352,7 @@ export function ImportPanel({ saved, onDone, onClose }: ImportPanelProps) {
         </button>
         <button type="button" role="radio" aria-checked={mode === 'replace'} className={mode === 'replace' ? 'is-on' : ''} onClick={() => setMode('replace')}>
           <strong>Replace everything</strong>
-          <small>Removes every saved question that is not in the file. Unfinished questions stay in the list.</small>
+          <small>Removes saved questions of the same type that are not in the file. The other type is not touched. Unfinished questions stay in the list.</small>
         </button>
       </div>
 

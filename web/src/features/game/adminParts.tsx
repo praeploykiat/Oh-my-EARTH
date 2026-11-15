@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
-import type { GameRound } from './types';
+import { isExtend, type AnyRound, type ExtendRound, type GameRound } from './types';
 
 // Files
 
@@ -35,11 +35,65 @@ export function Step({ n, id, title, optional, hint, children }: { n: number; id
   );
 }
 
-export function questionTitle(r: GameRound): string {
+export function parseNumber(text: string): number | null {
+  const cleaned = text.trim().replace(/,/g, '');
+  if (cleaned === '') return null;
+  const value = Number(cleaned);
+  return Number.isFinite(value) ? value : null;
+}
+
+export const KIND_LABEL = { pair: 'Two graphs', extend: 'Continue the line' } as const;
+
+export function questionTitle(r: AnyRound): string {
+  if (isExtend(r)) {
+    const name = r.series.label.en.trim();
+    return name ? `${name} after ${r.showUntil || '?'}` : 'New question';
+  }
   const given = r.given.label.en.trim();
   const hidden = r.hidden.label.en.trim();
   if (!given && !hidden) return 'New question';
   return `${given || '?'} and ${hidden || '?'}`;
+}
+
+// What differs between two versions of a question
+
+const PARTS: { name: string; pick: (r: GameRound) => unknown }[] = [
+  { name: 'Place', pick: (r) => r.place },
+  { name: 'Time axis', pick: (r) => r.time },
+  { name: 'Caption under the time axis', pick: (r) => r.timeLabel },
+  { name: 'Name of the bars', pick: (r) => r.given.label },
+  { name: 'Unit of the bars', pick: (r) => r.given.unit },
+  { name: 'Numbers for the bars', pick: (r) => r.given.values },
+  { name: 'Name of the line', pick: (r) => r.hidden.label },
+  { name: 'Unit of the line', pick: (r) => r.hidden.unit },
+  { name: 'Numbers for the line', pick: (r) => r.hidden.values },
+  { name: 'Answer', pick: (r) => r.answer },
+  { name: 'Data source', pick: (r) => r.source },
+];
+
+const EXTEND_PARTS: { name: string; pick: (r: ExtendRound) => unknown }[] = [
+  { name: 'Place', pick: (r) => r.place },
+  { name: 'Time axis', pick: (r) => r.time },
+  { name: 'Caption under the time axis', pick: (r) => r.timeLabel },
+  { name: 'Name', pick: (r) => r.series.label },
+  { name: 'Unit', pick: (r) => r.series.unit },
+  { name: 'Numbers', pick: (r) => r.series.values },
+  { name: 'Last point players see', pick: (r) => r.showUntil },
+  { name: 'Answer', pick: (r) => r.answer },
+  { name: 'Data source', pick: (r) => r.source },
+];
+
+export function changedParts(from: AnyRound | undefined, to: AnyRound): string[] {
+  if (!from) return [];
+  if (isExtend(from) !== isExtend(to)) return ['Type of question'];
+  if (isExtend(from) && isExtend(to)) {
+    return EXTEND_PARTS.filter((p) => JSON.stringify(p.pick(from)) !== JSON.stringify(p.pick(to))).map((p) => p.name);
+  }
+  return pairParts(from as GameRound, to as GameRound);
+}
+
+function pairParts(from: GameRound, to: GameRound): string[] {
+  return PARTS.filter((p) => JSON.stringify(p.pick(from)) !== JSON.stringify(p.pick(to))).map((p) => p.name);
 }
 
 // What still needs filling in
@@ -49,13 +103,27 @@ export interface MissingItem {
   target: string;
 }
 
-export function missingItems(r: GameRound): MissingItem[] {
+export function missingItems(r: AnyRound): MissingItem[] {
   const items: MissingItem[] = [];
   const both = (value: { en: string; th: string }, what: string, target: string) => {
     const langs = [!value.en.trim() && 'English', !value.th.trim() && 'Thai'].filter(Boolean);
     if (langs.length) items.push({ text: `${what} (${langs.join(' and ')})`, target });
   };
   const count = (values: (number | null)[]) => values.filter((v) => v !== null).length;
+
+  if (isExtend(r)) {
+    const split = r.time.indexOf(r.showUntil);
+    both(r.place, 'Place', 'step-place');
+    both(r.series.label, 'Name of the measure', 'step-measures');
+    if (!r.series.unit.trim()) items.push({ text: 'Unit', target: 'step-measures' });
+    if (split < 0) items.push({ text: 'Last point players see', target: 'step-numbers' });
+    else {
+      if (count(r.series.values.slice(0, split + 1)) < 2) items.push({ text: 'At least 2 numbers players see', target: 'step-numbers' });
+      if (count(r.series.values.slice(split + 1)) < 2) items.push({ text: 'At least 2 numbers players guess', target: 'step-numbers' });
+    }
+    both(r.answer, 'Answer', 'step-answer');
+    return items;
+  }
 
   both(r.place, 'Place', 'step-place');
   both(r.given.label, 'Name of the bars', 'step-measures');
@@ -211,18 +279,16 @@ export function Tour({ onClose, onImport }: { onClose: () => void; onImport: (op
   useLayoutEffect(() => {
     if (!step) return;
     onImport(!!step.importOpen);
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
-        const el = document.querySelector<HTMLElement>(step.target);
-        if (!el) return setBox(null);
-        const rect = el.getBoundingClientRect();
-        if (rect.top < 80 || rect.bottom > window.innerHeight - 260) {
-          el.scrollIntoView({ block: rect.height > window.innerHeight * 0.5 ? 'start' : 'center' });
-        }
-        measure();
-      });
-    });
-    return () => cancelAnimationFrame(frame);
+    const timer = window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(step.target);
+      if (!el) return setBox(null);
+      const rect = el.getBoundingClientRect();
+      if (rect.top < 80 || rect.bottom > window.innerHeight - 260) {
+        el.scrollIntoView({ block: rect.height > window.innerHeight * 0.5 ? 'start' : 'center' });
+      }
+      measure();
+    }, 40);
+    return () => window.clearTimeout(timer);
   }, [step, measure, onImport]);
 
   useEffect(() => {

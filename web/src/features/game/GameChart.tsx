@@ -144,9 +144,13 @@ interface DrawChartProps {
   onGuess: (guess: (number | null)[]) => void;
   actual: (number | null)[] | null;
   marks: { index: number; text: string }[];
+  shown?: (number | null)[];
+  from?: number;
 }
 
-export function DrawChart({ axis, times, title, label, tip, guess, onGuess, actual, marks }: DrawChartProps) {
+// shown and from turn this into continue-the-line: values before `from` are given, players draw the rest
+
+export function DrawChart({ axis, times, title, label, tip, guess, onGuess, actual, marks, shown, from: drawFrom = 0 }: DrawChartProps) {
   const ref = useRef<SVGSVGElement>(null);
   const [drawing, setDrawing] = useState(false);
   const last = useRef<number | null>(null);
@@ -159,7 +163,7 @@ export function DrawChart({ axis, times, title, label, tip, guess, onGuess, actu
     const box = ref.current!.getBoundingClientRect();
     const px = ((event.clientX - box.left) / box.width) * WIDTH;
     const py = ((event.clientY - box.top) / box.height) * HEIGHT;
-    const month = Math.min(n - 1, Math.max(0, Math.round(((px - PAD.left - 18) / (PLOT_W - 36)) * (n - 1))));
+    const month = Math.min(n - 1, Math.max(drawFrom, Math.round(((px - PAD.left - 18) / (PLOT_W - 36)) * (n - 1))));
     const share = Math.min(1, Math.max(0, (BOTTOM - py) / PLOT_H));
     const value = axis.min + share * (axis.max - axis.min);
     const next = [...guess];
@@ -175,12 +179,19 @@ export function DrawChart({ axis, times, title, label, tip, guess, onGuess, actu
     onGuess(next);
   };
 
-  const points = guess.flatMap((g, i) => (g === null ? [] : [{ i, g }]));
-  const guessPath = points.map((p, k) => `${k === 0 ? 'M' : 'L'}${x(p.i, n).toFixed(1)} ${y(p.g).toFixed(1)}`).join(' ');
-  const complete = actual && points.length === n && actual.every((v) => v !== null);
+  const points = guess.flatMap((g, i) => (g === null || i < drawFrom ? [] : [{ i, g }]));
+  const anchor = drawFrom > 0 && shown && shown[drawFrom - 1] !== null ? { i: drawFrom - 1, g: shown[drawFrom - 1]! } : null;
+  const drawn = anchor && points.length ? [anchor, ...points] : points;
+  const guessPath = drawn.map((p, k) => `${k === 0 ? 'M' : 'L'}${x(p.i, n).toFixed(1)} ${y(p.g).toFixed(1)}`).join(' ');
+  const complete = actual && points.length === n - drawFrom && points.every((p) => actual[p.i] !== null);
   const gap = complete
-    ? `${linePath(points.map((p) => p.g), y)} ${[...actual!].reverse().map((v, i) => `L${x(n - 1 - i, n).toFixed(1)} ${y(v!).toFixed(1)}`).join(' ')} Z`
+    ? `${points.map((p, k) => `${k === 0 ? 'M' : 'L'}${x(p.i, n).toFixed(1)} ${y(p.g).toFixed(1)}`).join(' ')} ${[...points]
+        .reverse()
+        .map((p) => `L${x(p.i, n).toFixed(1)} ${y(actual![p.i]!).toFixed(1)}`)
+        .join(' ')} Z`
     : null;
+  const future = drawFrom > 0 ? x(drawFrom - 1, n) : null;
+  const tipX = future === null ? PAD.left + PLOT_W / 2 : (future + WIDTH - PAD.right) / 2;
 
   return (
     <svg
@@ -202,11 +213,15 @@ export function DrawChart({ axis, times, title, label, tip, guess, onGuess, actu
       onPointerCancel={() => setDrawing(false)}
     >
       <Frame axis={axis} times={times} title={title} label={label}>
+        {future !== null && <rect x={future} y={PAD.top} width={WIDTH - PAD.right - future} height={PLOT_H} className="sketch-future" />}
+        {shown && <path d={linePath(shown.map((v, i) => (i < drawFrom ? v : null)), y)} className="sketch-known" />}
+        {shown &&
+          shown.map((v, i) => (i < drawFrom && v !== null ? <circle key={i} cx={x(i, n)} cy={y(v)} r={3.5} className="sketch-known-dot" /> : null))}
         {gap && <path d={gap} className="sketch-gap" />}
         {actual && <path d={linePath(actual, y)} className="sketch-actual" pathLength={1} />}
         {guessPath && <path d={guessPath} className="sketch-guess" />}
         {!started && !locked && (
-          <text x={PAD.left + PLOT_W / 2} y={PAD.top + PLOT_H / 2} textAnchor="middle" className="sketch-tip">
+          <text x={tipX} y={PAD.top + PLOT_H / 2} textAnchor="middle" className="sketch-tip">
             {tip}
           </text>
         )}
