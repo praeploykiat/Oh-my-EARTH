@@ -29,7 +29,8 @@ interface ResultProps {
 export function Result({ round, feedback, onNext, nextLabel }: ResultProps) {
   const { language, t } = useI18n();
   const when = (i: number) => formatTime(round.time[i], language, 'long');
-  const headline = feedback.score >= 80 ? t('game.great') : feedback.score >= 50 ? t('game.good') : t('game.tryAgain');
+  const level = feedback.score >= 80 ? 'great' : feedback.score >= 50 ? 'good' : 'off';
+  const headline = t(level === 'great' ? 'game.great' : level === 'good' ? 'game.good' : 'game.tryAgain');
 
   return (
     <section className="game-result" aria-live="polite">
@@ -59,6 +60,9 @@ export function Result({ round, feedback, onNext, nextLabel }: ResultProps) {
       <button type="button" className="button game-next" onClick={onNext}>
         {nextLabel ?? t('game.next')}
       </button>
+      <span className={`stamp game-stamp is-${level}`} aria-hidden="true">
+        {t(`game.stamp.${level}`)}
+      </span>
     </section>
   );
 }
@@ -100,6 +104,7 @@ export function ResultPeek({ round }: { round: GameRound }) {
 interface RoundViewProps {
   round: GameRound;
   kicker: string;
+  stats?: string;
   guess: (number | null)[];
   onGuess: (guess: (number | null)[]) => void;
   feedback: Feedback | null;
@@ -108,7 +113,7 @@ interface RoundViewProps {
   onSkip?: () => void;
 }
 
-export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, onReset, onSkip }: RoundViewProps) {
+export function RoundView({ round, kicker, stats, guess, onGuess, feedback, onSubmit, onReset, onSkip }: RoundViewProps) {
   const { language, t } = useI18n();
   const times = useMemo(() => round.time.map((x) => formatTime(x, language)), [round.time, language]);
   const givenAxis = useMemo(() => niceAxis(round.given.values), [round.given.values]);
@@ -120,9 +125,12 @@ export function RoundView({ round, kicker, guess, onGuess, feedback, onSubmit, o
   return (
     <>
       <header className="game-head">
-        <p className="game-kicker">
-          {kicker} · {round.place[language]}
-        </p>
+        <div className="game-meta">
+          <p className="game-kicker">
+            {kicker} · {round.place[language]}
+          </p>
+          {stats && <p className="game-stats">{stats}</p>}
+        </div>
         <h1>{t('game.question', { given, hidden })}</h1>
       </header>
 
@@ -234,11 +242,11 @@ function Play({ rounds }: { rounds: GameRound[] }) {
 
   return (
     <>
-      {average !== null && <p className="game-stats">{t('game.stats', { n: scores.length, average })}</p>}
       <RoundView
         key={`${round.id}-${scores.length + (feedback ? 0 : 1)}-${skipped}`}
         round={round}
         kicker={t('game.question.n', { n: scores.length + (feedback ? 0 : 1) })}
+        stats={average !== null ? t('game.stats', { n: scores.length, average }) : undefined}
         guess={guess}
         onGuess={setGuess}
         feedback={feedback}

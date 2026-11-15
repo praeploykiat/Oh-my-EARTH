@@ -11,7 +11,8 @@
     "test": "vitest run",
     "validate:data": "node scripts/validate-datasets.mjs",
     "validate:global:live": "node scripts/validate-global-live.mjs",
-    "validate:trend": "node scripts/validate-global-trend.mjs"
+    "validate:trend": "node scripts/validate-global-trend.mjs",
+    "build:hotspots": "node scripts/build-hotspots.mjs"
   },
   "dependencies": {
     "@upstash/redis": "1.40.0",

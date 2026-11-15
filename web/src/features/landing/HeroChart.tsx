@@ -13,6 +13,7 @@ interface HeroChartProps {
   revealed: boolean;
   guess: (number | null)[];
   onGuess: (guess: (number | null)[]) => void;
+  note?: { index: number; text: string } | null;
 }
 
 const W = 800;
@@ -37,7 +38,7 @@ export function fillGuess(guess: (number | null)[], start: number): (number | nu
   return out;
 }
 
-export function HeroChart({ points, split, unit, revealed, guess, onGuess }: HeroChartProps) {
+export function HeroChart({ points, split, unit, revealed, guess, onGuess, note }: HeroChartProps) {
   const { t } = useI18n();
   const svg = useRef<SVGSVGElement>(null);
   const [drawing, setDrawing] = useState(false);
@@ -140,6 +141,15 @@ export function HeroChart({ points, split, unit, revealed, guess, onGuess }: Her
           pathLength={1}
           d={path([[x(split - 1), y(startValue)], ...hidden.map((p, i): [number, number] => [x(split + i), y(p.value)])])}
         />
+      )}
+
+      {note && (
+        <g className="hero-chart-note">
+          <circle cx={x(note.index)} cy={y(points[note.index].value)} r={9} />
+          <text x={x(note.index) - 14} y={y(points[note.index].value) - 16} textAnchor="end">
+            {note.text}
+          </text>
+        </g>
       )}
 
       {!revealed && guessPts.length === 1 && (
