@@ -4754,3 +4754,133 @@ button,
     top: 0;
   }
 }
+
+/* Two kinds of question */
+
+.admin-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.admin .admin-filter button {
+  min-height: 0;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.admin-filter small {
+  color: var(--muted);
+}
+
+.admin-kind {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-kind.is-pair {
+  background: rgba(214, 222, 219, 0.1);
+  color: var(--fg-soft);
+}
+
+.admin-kind.is-extend {
+  background: rgba(255, 154, 61, 0.14);
+  color: var(--gold);
+}
+
+.admin-add-choice {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+}
+
+.admin-add-choice p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin .admin-add-choice button:not(.admin-link) {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-height: 0;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.admin-add-choice small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.admin-split select {
+  max-width: 240px;
+}
+
+.admin-table tr.is-guess td {
+  background: rgba(255, 154, 61, 0.06);
+}
+
+.admin-split-cell {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-table tr.is-guess .admin-split-cell {
+  color: var(--gold);
+}
+
+.admin-fields-title {
+  margin: 16px 0 6px;
+  font-size: 14px;
+}
+
+.sketch-future {
+  fill: rgba(255, 154, 61, 0.06);
+}
+
+.sketch-known {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sketch-known-dot {
+  fill: var(--fg);
+}
+
+.game-legend .is-known::before {
+  background: var(--fg);
+}
+
+.game-feedback em.is-real {
+  color: var(--accent);
+}
+
+.game-feedback em.is-unsure {
+  color: var(--gold);
+}
+
+.admin-preview .game-result {
+  grid-template-columns: 1fr;
+  padding-top: 36px;
+}
+
+.admin-preview .game-score {
+  justify-items: start;
+}
+
+.admin-preview .game-next {
+  grid-column: 1;
+}

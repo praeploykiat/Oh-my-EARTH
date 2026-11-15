@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react';
-import { deleteQuestion, fetchQuestions, questionHistory, saveQuestion, type Stored } from './api';
+import { deleteQuestion, fetchAllQuestions, questionHistory, saveQuestion, type Stored } from './api';
 import { Result, ResultPeek, RoundView, scoreRound } from './index';
-import { normalizeRound } from './normalize';
+import { normalizeExtend, normalizeRound, valuesMismatch } from './normalize';
 import { htmlToMarkdown, markdownToHtml } from './richText';
 import type { Feedback } from './score';
-import { changedParts, Checklist, download, IdNote, missingItems, Optional, questionTitle, Step, Tour, tourWanted } from './adminParts';
+import { changedParts, Checklist, download, IdNote, KIND_LABEL, missingItems, Optional, parseNumber, questionTitle, Step, Tour, tourWanted } from './adminParts';
+import { blankExtend, ExtendPreview, ExtendValues, SplitPicker } from './adminExtend';
 import { ImportPanel } from './adminImport';
 import { withUnit } from './answer';
 import { formatTime, monthsBetween, monthsOfYear, timeKind, yearsBetween } from './time';
-import type { GameRound, Localized, RoundSeries } from './types';
-import { LIMITS, roundProblem } from './validate';
+import { isExtend, kindOf, type AnyRound, type GameRound, type Localized, type RoundKind, type RoundSeries } from './types';
+import { anyProblem, LIMITS, roundProblem } from './validate';
 
 const SAVE_DELAY_MS = 900;
 const REFRESH_MS = 8000;
@@ -18,14 +19,14 @@ type SeriesKey = 'given' | 'hidden';
 type EntryState = 'saved' | 'waiting' | 'saving' | 'incomplete' | 'conflict' | 'error';
 
 interface Entry {
-  draft: GameRound;
+  draft: AnyRound;
   base: Stored | null;
   state: EntryState;
   message?: string;
   remote?: Stored | null;
 }
 
-const same = (a: GameRound, b: GameRound | undefined) => !!b && JSON.stringify(a) === JSON.stringify(b);
+const same = (a: AnyRound, b: AnyRound | undefined) => !!b && JSON.stringify(a) === JSON.stringify(b);
 const isDirty = (e: Entry) => !e.base || !same(e.draft, e.base.question);
 const newId = () => `q-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -34,7 +35,7 @@ const newId = () => `q-${Date.now().toString(36)}${Math.random().toString(36).sl
 const DRAFTS_KEY = 'game-admin-drafts';
 
 interface SavedDraft {
-  draft: GameRound;
+  draft: AnyRound;
   base: Stored | null;
 }
 
@@ -57,8 +58,8 @@ function writeDrafts(entries: Entry[]) {
   }
 }
 
-function draftEntry(draft: GameRound, base: Stored | null): Entry {
-  const problem = roundProblem(draft);
+function draftEntry(draft: AnyRound, base: Stored | null): Entry {
+  const problem = anyProblem(draft);
   return { draft, base, state: problem ? 'incomplete' : 'waiting', message: problem ?? undefined };
 }
 
@@ -95,20 +96,19 @@ function blankQuestion(): GameRound {
   };
 }
 
-function remap(round: GameRound, time: string[]): GameRound {
+function remap(round: AnyRound, time: string[]): AnyRound {
   const pick = (series: RoundSeries): RoundSeries => {
     const old = new Map(round.time.map((t, i) => [t, series.values[i]]));
     return { ...series, values: time.map((t) => old.get(t) ?? null) };
   };
+  if (isExtend(round)) {
+    const showUntil = time.includes(round.showUntil) ? round.showUntil : (time[Math.max(1, Math.round(time.length * 0.66) - 1)] ?? '');
+    return { ...round, time, series: pick(round.series), showUntil };
+  }
   return { ...round, time, given: pick(round.given), hidden: pick(round.hidden) };
 }
 
-function parseNumber(text: string): number | null {
-  const cleaned = text.trim().replace(/,/g, '');
-  if (cleaned === '') return null;
-  const value = Number(cleaned);
-  return Number.isFinite(value) ? value : null;
-}
+const valueLists = (round: AnyRound) => (isExtend(round) ? [round.series.values] : [round.given.values, round.hidden.values]);
 
 function when(iso: string): string {
   return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -192,7 +192,7 @@ function MonthPicker({ label, value, onChange }: { label: string; value: YearMon
   );
 }
 
-function TimeEditor({ round, onChange }: { round: GameRound; onChange: (r: GameRound) => void }) {
+function TimeEditor({ round, onChange }: { round: AnyRound; onChange: (r: AnyRound) => void }) {
   const current = timeKind(round.time);
   const [kind, setKind] = useState<AxisKind>(current === 'other' ? 'month-of-year' : current);
   const [years, setYears] = useState(() =>
@@ -234,9 +234,10 @@ function TimeEditor({ round, onChange }: { round: GameRound; onChange: (r: GameR
   const use = () => {
     const keep = new Set(time);
     const gone = round.time.map((t, i) => ({ t, i })).filter(({ t }) => !keep.has(t));
-    const lost = gone.reduce((sum, { i }) => sum + (round.given.values[i] !== null ? 1 : 0) + (round.hidden.values[i] !== null ? 1 : 0), 0);
+    const lists = valueLists(round);
+    const lost = gone.reduce((sum, { i }) => sum + lists.filter((values) => values[i] !== null).length, 0);
     if (lost === 0) return onChange(remap(round, time));
-    const withData = gone.filter(({ i }) => round.given.values[i] !== null || round.hidden.values[i] !== null);
+    const withData = gone.filter(({ i }) => lists.some((values) => values[i] !== null));
     setPending({ time, lost, from: formatTime(withData[0].t, 'en'), to: formatTime(withData[withData.length - 1].t, 'en') });
   };
   const options: { kind: AxisKind; label: string }[] = [
@@ -489,7 +490,11 @@ function AnswerEditor({ value, onChange }: { value: Localized; onChange: (change
 
 // Preview
 
-function Preview({ round }: { round: GameRound }) {
+function Preview({ round }: { round: AnyRound }) {
+  return isExtend(round) ? <ExtendPreview round={round} /> : <PairPreview round={round} />;
+}
+
+function PairPreview({ round }: { round: GameRound }) {
   const [guess, setGuess] = useState<(number | null)[]>(() => round.time.map(() => null));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const ready = roundProblem(round) === null;
@@ -524,7 +529,7 @@ function Preview({ round }: { round: GameRound }) {
 
 // One question as JSON
 
-function JsonEditor({ round, onApply, onClose }: { round: GameRound; onApply: (r: GameRound) => void; onClose: () => void }) {
+function JsonEditor({ round, onApply, onClose }: { round: AnyRound; onApply: (r: AnyRound) => void; onClose: () => void }) {
   const { id, ...rest } = round;
   const [text, setText] = useState(() => JSON.stringify(rest, null, 2));
   const [error, setError] = useState<string | null>(null);
@@ -537,11 +542,10 @@ function JsonEditor({ round, onApply, onClose }: { round: GameRound; onApply: (r
       return setError('This is not valid JSON. Check the brackets, quotes and commas.');
     }
     if (Array.isArray(raw) || !raw || typeof raw !== 'object') return setError('Paste one question { … }, not a list.');
-    const next = { ...normalizeRound(raw, id), id };
-    const o = raw as { given?: { values?: unknown[] }; hidden?: { values?: unknown[] } };
-    const short = [o.given?.values, o.hidden?.values].some((v) => !Array.isArray(v) || v.length !== next.time.length);
+    const next = isExtend(round) ? { ...normalizeExtend(raw, id), id } : { ...normalizeRound(raw, id), id };
     if (next.time.length < 2) return setError('"time" needs at least 2 time points.');
-    if (short) return setError(`"given.values" and "hidden.values" need ${next.time.length} values each, one per time point.`);
+    const short = valuesMismatch(raw, next);
+    if (short) return setError(`${short.charAt(0).toUpperCase()}${short.slice(1)}.`);
     onApply(next);
     onClose();
   };
@@ -565,13 +569,15 @@ function JsonEditor({ round, onApply, onClose }: { round: GameRound; onApply: (r
 
 // History of one question
 
-function History({ id, current, onRestore }: { id: string; current: Stored; onRestore: (q: GameRound) => void }) {
+function History({ round, current, onRestore }: { round: AnyRound; current: Stored; onRestore: (q: AnyRound) => void }) {
   const [versions, setVersions] = useState<Stored[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    questionHistory(id).then(setVersions, (e: Error) => setError(e.message));
-  }, [id]);
+    questionHistory(round).then(setVersions, (e: Error) => setError(e.message));
+    // Only reload when a different question is opened
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [round.id]);
 
   if (error) return <p className="admin-status is-error">{error}</p>;
   if (!versions) return <p className="admin-note">Loading…</p>;
@@ -615,6 +621,8 @@ export function GameAdmin() {
   const [panel, setPanel] = useState<'history' | 'json' | null>(null);
   const [copied, setCopied] = useState(false);
   const [touring, setTouring] = useState(false);
+  const [filter, setFilter] = useState<RoundKind | 'all'>('all');
+  const [choosing, setChoosing] = useState(false);
   const toured = useRef(false);
   const [offline, setOffline] = useState(false);
   const entriesRef = useRef<Entry[]>([]);
@@ -644,7 +652,7 @@ export function GameAdmin() {
     async (id: string, force = false) => {
       const entry = entriesRef.current.find((e) => e.draft.id === id);
       if (!entry || entry.state === 'saving') return;
-      const problem = roundProblem(entry.draft);
+      const problem = anyProblem(entry.draft);
       if (problem) return patch(id, (e) => ({ ...e, state: 'incomplete', message: problem }));
       if (!force && !isDirty(entry)) return patch(id, (e) => ({ ...e, state: 'saved', message: undefined }));
 
@@ -678,8 +686,8 @@ export function GameAdmin() {
     [save],
   );
 
-  const edit = (next: GameRound) => {
-    const problem = roundProblem(next);
+  const edit = (next: AnyRound) => {
+    const problem = anyProblem(next);
     patch(next.id, (e) =>
       e.state === 'conflict' ? { ...e, draft: next } : { ...e, draft: next, state: problem ? 'incomplete' : 'waiting', message: problem ?? undefined },
     );
@@ -692,7 +700,7 @@ export function GameAdmin() {
   const refresh = useCallback(async () => {
     let remote: Stored[];
     try {
-      remote = await fetchQuestions();
+      remote = await fetchAllQuestions();
       setOffline(false);
     } catch {
       setOffline(true);
@@ -720,7 +728,7 @@ export function GameAdmin() {
 
   useEffect(() => {
     const drafts = readDrafts();
-    fetchQuestions()
+    fetchAllQuestions()
       .then((remote) => {
         const { entries: restoredEntries, restored } = restoreDrafts(remote, drafts);
         commit(restoredEntries);
@@ -770,7 +778,7 @@ export function GameAdmin() {
   const entry = entries.find((e) => e.draft.id === selected) ?? null;
   const round = entry?.draft ?? null;
 
-  const add = (question: GameRound, after?: number) => {
+  const add = (question: AnyRound, after?: number) => {
     const next = [...entriesRef.current];
     next.splice(after === undefined ? next.length : after + 1, 0, { draft: question, base: null, state: 'incomplete' });
     commit(next);
@@ -784,7 +792,7 @@ export function GameAdmin() {
       patch(e.draft.id, () => null);
     } else {
       try {
-        const result = await deleteQuestion(e.draft.id, e.base.version);
+        const result = await deleteQuestion(e.draft, e.base.version);
         if (result.kind === 'conflict') {
           patch(e.draft.id, (x) => ({ ...x, state: 'conflict', remote: result.current }));
           setNotice({ kind: 'info', text: 'Someone else changed this question just now, so it was not deleted. Check it and try again.' });
@@ -815,10 +823,13 @@ export function GameAdmin() {
 
   const missing = round ? missingItems(round) : [];
 
-  const update = (change: (r: GameRound) => GameRound) => {
+  const update = (change: (r: AnyRound) => AnyRound) => {
     const latest = entriesRef.current.find((e) => e.draft.id === selected)?.draft;
     if (latest) edit(change(latest));
   };
+  const updatePair = (change: (r: GameRound) => GameRound) => update((r) => (isExtend(r) ? r : change(r)));
+  const visible = entries.filter((e) => filter === 'all' || kindOf(e.draft) === filter);
+  const counts = { pair: entries.filter((e) => !isExtend(e.draft)).length, extend: entries.filter((e) => isExtend(e.draft)).length };
   const saved = entries.flatMap((e) => (e.base ? [e.base] : []));
 
   const copyId = async (id: string) => {
@@ -897,8 +908,15 @@ export function GameAdmin() {
       <div className="admin-body">
         <aside className="admin-list">
           <p className="admin-list-title">{entries.length} questions</p>
+          <div className="admin-filter" role="radiogroup" aria-label="Show questions of type">
+            {(['all', 'pair', 'extend'] as const).map((k) => (
+              <button key={k} type="button" role="radio" aria-checked={filter === k} className={filter === k ? 'is-on' : ''} onClick={() => setFilter(k)}>
+                {k === 'all' ? 'All' : KIND_LABEL[k]} <small>{k === 'all' ? entries.length : counts[k]}</small>
+              </button>
+            ))}
+          </div>
           <ol>
-            {entries.map((e) => (
+            {visible.map((e) => (
               <li key={e.draft.id} className={e.draft.id === selected ? 'is-on' : ''}>
                 <button
                   type="button"
@@ -910,6 +928,7 @@ export function GameAdmin() {
                 >
                   <strong>{questionTitle(e.draft)}</strong>
                   <small>
+                    <span className={`admin-kind is-${kindOf(e.draft)}`}>{KIND_LABEL[kindOf(e.draft)]}</span>
                     <span className={`admin-dot is-${e.state}`} title={STATE_LABEL[e.state]} />
                     {e.draft.place.en || 'No place yet'}
                     {e.state !== 'saved' && ` · ${STATE_LABEL[e.state]}`}
@@ -918,9 +937,38 @@ export function GameAdmin() {
               </li>
             ))}
           </ol>
-          <button type="button" className="button admin-add" onClick={() => add(blankQuestion())}>
-            + Add a question
-          </button>
+          {choosing ? (
+            <div className="admin-add-choice" role="group" aria-label="Type of the new question">
+              <p>What kind of question?</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setChoosing(false);
+                  add(blankQuestion());
+                }}
+              >
+                <strong>{KIND_LABEL.pair}</strong>
+                <small>Players see one measure as bars and draw how a second one goes with it.</small>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setChoosing(false);
+                  add(blankExtend(newId()));
+                }}
+              >
+                <strong>{KIND_LABEL.extend}</strong>
+                <small>Players see one measure up to a point in time and draw what comes next.</small>
+              </button>
+              <button type="button" className="admin-link" onClick={() => setChoosing(false)}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="button admin-add" onClick={() => setChoosing(true)}>
+              + Add a question
+            </button>
+          )}
         </aside>
 
         {entry && round ? (
@@ -961,7 +1009,7 @@ export function GameAdmin() {
                   <div>
                     <h2>{questionTitle(round)}</h2>
                     <p className="admin-meta">
-                      {round.place.en || 'No place yet'} <span className={`admin-dot is-${entry.state}`} /> {status(entry)}
+                      <span className={`admin-kind is-${kindOf(round)}`}>{KIND_LABEL[kindOf(round)]}</span> {round.place.en || 'No place yet'} <span className={`admin-dot is-${entry.state}`} /> {status(entry)}
                     </p>
                   </div>
                   <div className="admin-head-tools">
@@ -997,7 +1045,7 @@ export function GameAdmin() {
                 </div>
                 <IdNote id={round.id} copied={copied} onCopy={() => copyId(round.id)} />
                 {panel === 'json' && <JsonEditor round={round} onApply={edit} onClose={() => setPanel(null)} />}
-                {panel === 'history' && entry.base && <History id={round.id} current={entry.base} onRestore={(q) => edit({ ...q, id: round.id })} />}
+                {panel === 'history' && entry.base && <History round={round} current={entry.base} onRestore={(q) => edit({ ...q, id: round.id })} />}
                 {entry.state === 'error' && entry.message ? (
                   <p className="admin-status is-error">
                     Could not save: {entry.message}{' '}
@@ -1014,7 +1062,12 @@ export function GameAdmin() {
                 <TextPair label="Place name" value={round.place} placeholder={{ en: 'Chiang Mai', th: 'เชียงใหม่' }} onChange={(f) => update((r) => ({ ...r, place: f(r.place) }))} />
               </Step>
 
-              <Step n={2} id="step-time" title="Time axis" hint="What runs along the bottom of both charts. Pick a kind, set the range, then press Use this time axis.">
+              <Step
+                n={2}
+                id="step-time"
+                title="Time axis"
+                hint={`What runs along the bottom of ${isExtend(round) ? 'the chart' : 'both charts'}. Pick a kind, set the range, then press Use this time axis.`}
+              >
                 <TimeEditor round={round} onChange={edit} />
                 <TextPair
                   label="Caption under the time axis"
@@ -1025,51 +1078,92 @@ export function GameAdmin() {
                 />
               </Step>
 
-              <Step n={3} id="step-measures" title="The two measures" hint="Players see the bars, then draw the line they think goes with them.">
-                <div className="admin-series">
-                  {(['given', 'hidden'] as SeriesKey[]).map((key) => (
-                    <div key={key}>
-                      <h3>
-                        <span className={`admin-key ${key === 'given' ? 'is-bars' : 'is-line'}`} />
-                        {key === 'given' ? 'Bars: players see this' : 'Line: players draw this'}
-                      </h3>
-                      <TextPair
-                        label="Name"
-                        placeholder={key === 'given' ? { en: 'Rainfall', th: 'ปริมาณฝน' } : { en: 'Soil moisture', th: 'ความชื้นในดิน' }}
-                        value={round[key].label}
-                        onChange={(f) => update((r) => ({ ...r, [key]: { ...r[key], label: f(r[key].label) } }))}
+              {isExtend(round) ? (
+                <>
+                  <Step n={3} id="step-measures" title="The measure" hint="One line. Players see the first part and draw the rest.">
+                    <TextPair
+                      label="Name"
+                      placeholder={{ en: 'Air temperature', th: 'อุณหภูมิอากาศ' }}
+                      value={round.series.label}
+                      onChange={(f) => update((r) => (isExtend(r) ? { ...r, series: { ...r.series, label: f(r.series.label) } } : r))}
+                    />
+                    <label className="admin-field">
+                      <span className="admin-label">Unit</span>
+                      <input
+                        placeholder="°C"
+                        value={round.series.unit}
+                        onChange={(e) => {
+                          const unit = e.target.value;
+                          update((r) => (isExtend(r) ? { ...r, series: { ...r.series, unit } } : r));
+                        }}
                       />
-                      <label className="admin-field">
-                        <span className="admin-label">
-                          Unit
-                        </span>
-                        <input
-                          placeholder={key === 'given' ? 'mm/day' : 'kg/m²'}
-                          value={round[key].unit}
-                          onChange={(e) => {
-                            const unit = e.target.value;
-                            update((r) => ({ ...r, [key]: { ...r[key], unit } }));
-                          }}
-                        />
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </Step>
+                    </label>
+                  </Step>
 
-              <Step
-                n={4}
-                id="step-numbers"
-                title="Numbers"
-                hint={
-                  <>
-                    Type numbers, or copy columns from Excel or Google Sheets, click the first box and press <b>Ctrl+V</b>. Leave a box empty when there is no data.
-                    Each column needs at least 2 numbers.
-                  </>
-                }
-              >
-                <ValuesTable round={round} onChange={edit} />
-              </Step>
+                  <Step
+                    n={4}
+                    id="step-numbers"
+                    title="Numbers and where players start drawing"
+                    hint={
+                      <>
+                        Type numbers, or copy a column from Excel or Google Sheets, click the first box and press <b>Ctrl+V</b>. Rows marked draw are hidden
+                        until players submit. Each part needs at least 2 numbers.
+                      </>
+                    }
+                  >
+                    <SplitPicker round={round} onChange={edit} />
+                    <ExtendValues round={round} onChange={edit} />
+                  </Step>
+                </>
+              ) : (
+                <>
+                <Step n={3} id="step-measures" title="The two measures" hint="Players see the bars, then draw the line they think goes with them.">
+                  <div className="admin-series">
+                    {(['given', 'hidden'] as SeriesKey[]).map((key) => (
+                      <div key={key}>
+                        <h3>
+                          <span className={`admin-key ${key === 'given' ? 'is-bars' : 'is-line'}`} />
+                          {key === 'given' ? 'Bars: players see this' : 'Line: players draw this'}
+                        </h3>
+                        <TextPair
+                          label="Name"
+                          placeholder={key === 'given' ? { en: 'Rainfall', th: 'ปริมาณฝน' } : { en: 'Soil moisture', th: 'ความชื้นในดิน' }}
+                          value={round[key].label}
+                          onChange={(f) => updatePair((r) => ({ ...r, [key]: { ...r[key], label: f(r[key].label) } }))}
+                        />
+                        <label className="admin-field">
+                          <span className="admin-label">
+                            Unit
+                          </span>
+                          <input
+                            placeholder={key === 'given' ? 'mm/day' : 'kg/m²'}
+                            value={round[key].unit}
+                            onChange={(e) => {
+                              const unit = e.target.value;
+                              updatePair((r) => ({ ...r, [key]: { ...r[key], unit } }));
+                            }}
+                          />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </Step>
+
+                <Step
+                  n={4}
+                  id="step-numbers"
+                  title="Numbers"
+                  hint={
+                    <>
+                      Type numbers, or copy columns from Excel or Google Sheets, click the first box and press <b>Ctrl+V</b>. Leave a box empty when there is no data.
+                      Each column needs at least 2 numbers.
+                    </>
+                  }
+                >
+                  <ValuesTable round={round} onChange={edit} />
+                </Step>
+                </>
+              )}
 
               <Step
                 n={5}

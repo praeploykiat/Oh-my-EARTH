@@ -1,18 +1,39 @@
 import { Redis } from '@upstash/redis';
-import { roundProblem } from '../src/features/game/validate.js';
-import type { GameRound } from '../src/features/game/types.js';
+import { extendProblem, roundProblem } from '../src/features/game/validate.js';
+import type { AnyRound } from '../src/features/game/types.js';
 
 export const maxDuration = 30;
 
-const QUESTIONS = 'game:questions';
-const VERSIONS = 'game:versions';
-const HISTORY = 'game:history:';
 const HISTORY_KEEP = 30;
 const MAX_BODY = 2_000_000;
 const ID = /^[A-Za-z0-9_-]{1,80}$/;
 
+// Each kind of question has its own keys. Requests without ?kind= use the original game:* keys.
+
+interface Store {
+  questions: string;
+  versions: string;
+  history: string;
+  problem: (question: unknown) => string | null;
+}
+
+const STORES: Record<'pair' | 'extend', Store> = {
+  pair: { questions: 'game:questions', versions: 'game:versions', history: 'game:history:', problem: roundProblem },
+  extend: { questions: 'extend:questions', versions: 'extend:versions', history: 'extend:history:', problem: extendProblem },
+};
+
+type Kind = keyof typeof STORES;
+
+function kindOf(request: Request): Kind | null {
+  const kind = new URL(request.url).searchParams.get('kind');
+  if (kind === null || kind === '' || kind === 'pair') return 'pair';
+  return kind === 'extend' ? 'extend' : null;
+}
+
+const otherStore = (kind: Kind) => STORES[kind === 'pair' ? 'extend' : 'pair'];
+
 export interface Stored {
-  question: GameRound;
+  question: AnyRound;
   version: string;
   createdAt: string;
   updatedAt: string;
@@ -63,6 +84,8 @@ function json(body: unknown, status = 200): Response {
 }
 
 const parse = (raw: string | null | undefined): Stored | null => (raw ? (JSON.parse(raw) as Stored) : null);
+const UNKNOWN_KIND = () => json({ error: 'Unknown kind of question' }, 400);
+const USED_ELSEWHERE = 'This id is already used by a question of the other type. Give this question its own id.';
 
 async function readBody<T>(request: Request): Promise<T | null> {
   const text = await request.text();
@@ -74,16 +97,16 @@ async function readBody<T>(request: Request): Promise<T | null> {
   }
 }
 
-async function save(redis: Redis, question: GameRound, base: string, createdAt?: string) {
+async function save(redis: Redis, store: Store, question: AnyRound, base: string, createdAt?: string) {
   const now = new Date().toISOString();
-  const previous = parse(await redis.hget<string>(QUESTIONS, question.id));
+  const previous = parse(await redis.hget<string>(store.questions, question.id));
   const stored: Stored = {
     question,
     version: crypto.randomUUID(),
     createdAt: previous?.createdAt ?? createdAt ?? now,
     updatedAt: now,
   };
-  const [outcome, other] = (await redis.eval(SAVE, [QUESTIONS, VERSIONS, `${HISTORY}${question.id}`], [
+  const [outcome, other] = (await redis.eval(SAVE, [store.questions, store.versions, `${store.history}${question.id}`], [
     question.id,
     base,
     stored.version,
@@ -93,15 +116,18 @@ async function save(redis: Redis, question: GameRound, base: string, createdAt?:
 }
 
 export async function GET(request: Request): Promise<Response> {
+  const kind = kindOf(request);
+  if (!kind) return UNKNOWN_KIND();
+  const store = STORES[kind];
   try {
     const redis = client();
     const id = new URL(request.url).searchParams.get('history');
     if (id !== null) {
       if (!ID.test(id)) return json({ error: 'Unknown question' }, 400);
-      const items = await redis.lrange<string>(`${HISTORY}${id}`, 0, HISTORY_KEEP - 1);
+      const items = await redis.lrange<string>(`${store.history}${id}`, 0, HISTORY_KEEP - 1);
       return json({ versions: items.map((item) => parse(item)).filter(Boolean) });
     }
-    const raw = (await redis.hgetall(QUESTIONS)) as unknown;
+    const raw = (await redis.hgetall(store.questions)) as unknown;
     const values = Array.isArray(raw) ? raw.filter((_, i) => i % 2 === 1) : Object.values((raw ?? {}) as Record<string, unknown>);
     const questions = values
       .map((value) => (typeof value === 'string' ? parse(value) : (value as Stored)))
@@ -114,16 +140,20 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function PUT(request: Request): Promise<Response> {
-  const body = await readBody<{ question?: GameRound; baseVersion?: string | null; force?: boolean }>(request);
+  const kind = kindOf(request);
+  if (!kind) return UNKNOWN_KIND();
+  const store = STORES[kind];
+  const body = await readBody<{ question?: AnyRound; baseVersion?: string | null; force?: boolean }>(request);
   if (!body?.question) return json({ error: 'Missing question' }, 400);
   if (!ID.test(body.question.id ?? '')) return json({ error: 'Question id may only use letters, numbers, - and _' }, 400);
-  const problem = roundProblem(body.question);
+  const problem = store.problem(body.question);
   if (problem) return json({ error: problem }, 400);
 
   try {
     const redis = client();
+    if (await redis.hexists(otherStore(kind).questions, body.question.id)) return json({ error: USED_ELSEWHERE }, 400);
     const base = body.force ? '*' : (body.baseVersion ?? '');
-    const result = await save(redis, body.question, base);
+    const result = await save(redis, store, body.question, base);
     if (result.outcome !== 'ok') return json({ conflict: result.outcome, current: result.current }, 409);
     return json({ stored: result.stored });
   } catch (error) {
@@ -132,6 +162,9 @@ export async function PUT(request: Request): Promise<Response> {
 }
 
 export async function DELETE(request: Request): Promise<Response> {
+  const kind = kindOf(request);
+  if (!kind) return UNKNOWN_KIND();
+  const store = STORES[kind];
   const params = new URL(request.url).searchParams;
   const id = params.get('id') ?? '';
   if (!ID.test(id)) return json({ error: 'Unknown question' }, 400);
@@ -139,7 +172,7 @@ export async function DELETE(request: Request): Promise<Response> {
 
   try {
     const redis = client();
-    const [outcome, other] = (await redis.eval(REMOVE, [QUESTIONS, VERSIONS, `${HISTORY}${id}`], [id, base])) as [string, string];
+    const [outcome, other] = (await redis.eval(REMOVE, [store.questions, store.versions, `${store.history}${id}`], [id, base])) as [string, string];
     if (outcome !== 'ok') return json({ conflict: outcome, current: parse(other) }, 409);
     return json({ ok: true });
   } catch (error) {
@@ -147,31 +180,39 @@ export async function DELETE(request: Request): Promise<Response> {
   }
 }
 
-// Bulk import: merge adds or updates, replace also removes questions not in the file
+// Bulk import: merge adds or updates, replace also removes questions of this kind that are not in the file
 
 export async function POST(request: Request): Promise<Response> {
-  const body = await readBody<{ mode?: 'merge' | 'replace'; questions?: GameRound[] }>(request);
+  const kind = kindOf(request);
+  if (!kind) return UNKNOWN_KIND();
+  const store = STORES[kind];
+  const body = await readBody<{ mode?: 'merge' | 'replace'; questions?: AnyRound[] }>(request);
   if (!body || !Array.isArray(body.questions)) return json({ error: 'Missing questions' }, 400);
   if (body.questions.length > 200) return json({ error: 'At most 200 questions' }, 400);
   for (const [i, question] of body.questions.entries()) {
-    const problem = ID.test(question?.id ?? '') ? roundProblem(question) : 'Question id may only use letters, numbers, - and _';
+    const problem = ID.test(question?.id ?? '') ? store.problem(question) : 'Question id may only use letters, numbers, - and _';
     if (problem) return json({ error: `Question ${i + 1}: ${problem}` }, 400);
   }
 
   try {
     const redis = client();
+    for (const [i, question] of body.questions.entries()) {
+      if (await redis.hexists(otherStore(kind).questions, question.id)) return json({ error: `Question ${i + 1}: ${USED_ELSEWHERE}` }, 400);
+    }
     if (body.mode === 'replace') {
       const keep = new Set(body.questions.map((q) => q.id));
-      const existing = await redis.hkeys(QUESTIONS);
+      const existing = await redis.hkeys(store.questions);
       for (const id of existing.filter((id) => !keep.has(id))) {
-        await redis.eval(REMOVE, [QUESTIONS, VERSIONS, `${HISTORY}${id}`], [id, '*']);
+        await redis.eval(REMOVE, [store.questions, store.versions, `${store.history}${id}`], [id, '*']);
       }
     }
     const start = Date.now();
     for (const [i, question] of body.questions.entries()) {
-      await save(redis, question, '*', new Date(start + i).toISOString());
+      await save(redis, store, question, '*', new Date(start + i).toISOString());
     }
-    return GET(new Request(new URL('/api/questions', request.url)));
+    const list = new URL('/api/questions', request.url);
+    if (kind === 'extend') list.searchParams.set('kind', 'extend');
+    return GET(new Request(list));
   } catch (error) {
     return json({ error: 'Could not import questions', detail: String(error) }, 502);
   }

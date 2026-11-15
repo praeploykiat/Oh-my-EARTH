@@ -1,5 +1,5 @@
-import type { GameRound, Localized, RoundSeries } from './types';
-import { roundProblem } from './validate';
+import { isExtend, type AnyRound, type ExtendRound, type GameRound, type Localized, type RoundSeries } from './types';
+import { anyProblem } from './validate';
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -42,8 +42,36 @@ export function normalizeRound(raw: unknown, fallbackId: string): GameRound {
   };
 }
 
+export function normalizeExtend(raw: unknown, fallbackId: string): ExtendRound {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const time = Array.isArray(o.time) ? o.time.map(normalizeTime) : [];
+  return {
+    kind: 'extend',
+    id: typeof o.id === 'string' && o.id.trim() ? o.id.trim() : fallbackId,
+    place: localized(o.place),
+    time,
+    timeLabel: localized(o.timeLabel),
+    series: series(o.series, time.length),
+    showUntil: normalizeTime(o.showUntil),
+    answer: localized(o.answer),
+    source: String(o.source ?? ''),
+  };
+}
+
+export function normalizeAny(raw: unknown, fallbackId: string): AnyRound {
+  return (raw as { kind?: unknown })?.kind === 'extend' ? normalizeExtend(raw, fallbackId) : normalizeRound(raw, fallbackId);
+}
+
+// Each list of values must have one number per time point
+export function valuesMismatch(raw: unknown, round: AnyRound): string | null {
+  const o = (raw ?? {}) as { given?: { values?: unknown[] }; hidden?: { values?: unknown[] }; series?: { values?: unknown[] } };
+  const fits = (v: unknown[] | undefined) => Array.isArray(v) && v.length === round.time.length;
+  if (isExtend(round)) return fits(o.series?.values) ? null : `series.values needs ${round.time.length} values, one per time point`;
+  return fits(o.given?.values) && fits(o.hidden?.values) ? null : `given and hidden need ${round.time.length} values each, one per time point`;
+}
+
 export interface ImportResult {
-  rounds: GameRound[];
+  rounds: AnyRound[];
   added: number;
   replaced: number;
   problems: string[];
@@ -51,7 +79,7 @@ export interface ImportResult {
 
 export type ImportMode = 'merge' | 'replace';
 
-export function importRounds(current: GameRound[], text: string, mode: ImportMode = 'merge'): ImportResult {
+export function importRounds(current: AnyRound[], text: string, mode: ImportMode = 'merge'): ImportResult {
   const parsed: unknown = JSON.parse(text);
   const list: unknown[] = Array.isArray(parsed) ? parsed : [parsed];
 
@@ -72,10 +100,8 @@ export function importRounds(current: GameRound[], text: string, mode: ImportMod
       problems.push(`Question ${i + 1}: this is not a question { … }`);
       return;
     }
-    const round = normalizeRound(raw, `q-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}${i}`);
-    const o = (raw ?? {}) as { given?: { values?: unknown[] }; hidden?: { values?: unknown[] } };
-    const mismatch = [o.given?.values, o.hidden?.values].some((v) => !Array.isArray(v) || v.length !== round.time.length);
-    const problem = mismatch ? `given and hidden need ${round.time.length} values each, one per time point` : roundProblem(round);
+    const round = normalizeAny(raw, `q-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}${i}`);
+    const problem = valuesMismatch(raw, round) ?? anyProblem(round);
     if (problem) {
       const named = typeof (raw as { id?: unknown })?.id === 'string' ? ` (id ${round.id})` : '';
       const place = round.place.en ? ` ${round.place.en}` : '';

@@ -1,4 +1,4 @@
-import type { GameRound, Localized, RoundSeries } from './types';
+import type { ExtendRound, GameRound, Localized, RoundSeries } from './types';
 
 export const LIMITS = { rounds: 200, points: 400, text: 4000, short: 200 };
 
@@ -64,4 +64,34 @@ export function roundsProblem(v: unknown): string | null {
     ids.add((round as GameRound).id);
   }
   return null;
+}
+
+// Continue the line
+
+export const MIN_SIDE = 2;
+
+export function extendProblem(v: unknown): string | null {
+  const r = v as ExtendRound;
+  if (!r || typeof r !== 'object') return 'Not a question';
+  if (r.kind !== 'extend') return 'Not a continue-the-line question';
+  if (!isString(r.id, LIMITS.short) || !r.id) return 'Missing id';
+  if (!/^[A-Za-z0-9_-]{1,80}$/.test(r.id)) return 'The id may only use English letters, numbers, - and _ (no spaces)';
+  if (!isLocalized(r.place, LIMITS.short)) return 'Place must have English and Thai';
+  if (!Array.isArray(r.time) || r.time.length < MIN_SIDE * 2 || r.time.length > LIMITS.points) return `Time axis needs ${MIN_SIDE * 2} to ${LIMITS.points} points`;
+  if (!r.time.every((t) => isString(t, 20))) return 'Time labels must be short';
+  if (!isLocalized(r.timeLabel, LIMITS.short)) return 'Time caption must have English and Thai fields';
+  if (!isSeries(r.series, r.time.length)) return 'The values must match the number of time points';
+  if (!isLocalized(r.answer, LIMITS.text)) return 'Answer must have English and Thai fields';
+  if (!isString(r.source, LIMITS.short)) return 'Source is too long';
+  if (!r.series.unit.trim()) return 'Unit is missing';
+  const split = r.time.indexOf(r.showUntil);
+  if (split < 0) return 'Choose the last time point players see';
+  const count = (values: (number | null)[]) => values.filter((x) => x !== null).length;
+  if (count(r.series.values.slice(0, split + 1)) < MIN_SIDE) return `Players need to see at least ${MIN_SIDE} numbers`;
+  if (count(r.series.values.slice(split + 1)) < MIN_SIDE) return `Players need at least ${MIN_SIDE} numbers to guess after the last one they see`;
+  return missing('Place', r.place) ?? missing('Name of the measure', r.series.label) ?? missing('Answer', r.answer);
+}
+
+export function anyProblem(v: unknown): string | null {
+  return (v as ExtendRound)?.kind === 'extend' ? extendProblem(v) : roundProblem(v);
 }
