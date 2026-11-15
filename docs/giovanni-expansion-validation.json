@@ -1,0 +1,420 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "variable": "AOD",
+      "code": "TH",
+      "capital": "Bangkok",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.12741681827956983,
+      "maximum": 0.7260586061827964,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        100.625,
+        14.0
+      ],
+      "artifactSha256": "f6eef10db74c133e6d8a37b56414fa95738c663d0bd0676554798a624caacc28",
+      "retrievedAt": "2026-11-15T10:16:17.082845+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "EG",
+      "capital": "Cairo",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.13432972352150538,
+      "maximum": 0.48874314583333356,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        31.25,
+        30.0
+      ],
+      "artifactSha256": "ed438d355532392ce2ec6cd3eb449676a73a9d778b8606271eb718dc3e49185e",
+      "retrievedAt": "2026-11-15T10:16:12.414798+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "NO",
+      "capital": "Oslo",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.05324121895161285,
+      "maximum": 0.23171719750000008,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        10.625,
+        60.0
+      ],
+      "artifactSha256": "651c337c12201fc6763570871cc32c794d5e92544141f1a4e027b24521b3beb3",
+      "retrievedAt": "2026-11-15T10:16:21.402184+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "AU",
+      "capital": "Canberra",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.03292305333333335,
+      "maximum": 0.9243494465053752,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        149.375,
+        -35.5
+      ],
+      "artifactSha256": "63f04e49659a4fb360d972a0cfe290ee41f57491857240502f6b8b558f51c373",
+      "retrievedAt": "2026-11-15T10:16:25.709791+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "BR",
+      "capital": "Bras\u00edlia",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.0337008826388889,
+      "maximum": 0.3594455823611112,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        -48.125,
+        -16.0
+      ],
+      "artifactSha256": "4c15fce3f50a606bd0f8c819b97f7a1d79bae9d7673fa410ab2a185f7951040e",
+      "retrievedAt": "2026-11-15T10:16:29.939660+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "CA",
+      "capital": "Ottawa",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.08796946402777776,
+      "maximum": 0.7055185576388895,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        -75.625,
+        45.5
+      ],
+      "artifactSha256": "d222ccad3c431c7669e6f4a99c01f06f95be047ad0f9894d34130e5068cf140f",
+      "retrievedAt": "2026-11-15T10:16:34.981992+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "KE",
+      "capital": "Nairobi",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.03299484805555553,
+      "maximum": 0.2836454188988095,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        36.875,
+        -1.5
+      ],
+      "artifactSha256": "f543fbc0cf2a79854bf5811db840453dce3963f820aa3c38a39e99c9a57dd1e7",
+      "retrievedAt": "2026-11-15T10:16:38.674346+00:00"
+    },
+    {
+      "variable": "AOD",
+      "code": "MV",
+      "capital": "Mal\u00e9",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.06592471361111109,
+      "maximum": 0.30510648185483885,
+      "unit": "1",
+      "sourceRows": 210384,
+      "responseCoordinates": [
+        73.75,
+        4.0
+      ],
+      "artifactSha256": "8f3b6a1fc98fd3974c194bb383d6ff81c62a305846afe8f51273b5ede4190132",
+      "retrievedAt": "2026-11-15T10:16:43.389240+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "TH",
+      "capital": "Bangkok",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.18470937599999998,
+      "maximum": 2.3921136,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        100.625,
+        13.875
+      ],
+      "artifactSha256": "5fde18d8b83e0814545ac546ae05c336af9b50798db513fd43628bcf4f8d0abe",
+      "retrievedAt": "2026-11-15T10:16:41.540523+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "EG",
+      "capital": "Cairo",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": -0.00160469856,
+      "maximum": 0.5350155839999999,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        31.375,
+        30.125
+      ],
+      "artifactSha256": "efe84613485f1941ff4768a6bc9f62fa8fdb4a9c43ad12d2169ecec6ce4799a5",
+      "retrievedAt": "2026-11-15T10:16:44.923586+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "NO",
+      "capital": "Oslo",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": -0.162209088,
+      "maximum": 4.24866816,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        10.875,
+        59.875
+      ],
+      "artifactSha256": "95da137a8b5264e52bd1727704e2ccb07e3e67f88480912aeee5179a39dbba6c",
+      "retrievedAt": "2026-11-15T10:16:46.155322+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "AU",
+      "capital": "Canberra",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.263536416,
+      "maximum": 2.1866803200000002,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        149.125,
+        -35.375
+      ],
+      "artifactSha256": "d84b1cc20598fc4b34aee85e9a39c3e0145d510bf6843c7a8930194801b9e9ef",
+      "retrievedAt": "2026-11-15T10:16:47.863594+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "BR",
+      "capital": "Bras\u00edlia",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.181912608,
+      "maximum": 3.6008063999999997,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        -47.875,
+        -15.875
+      ],
+      "artifactSha256": "51b238efc3f5694889e6192d64f2d28de89ddb61c4ac6ebd5a1ec158a99c98b6",
+      "retrievedAt": "2026-11-15T10:16:49.144934+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "CA",
+      "capital": "Ottawa",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.08998300799999999,
+      "maximum": 3.80106432,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        -75.625,
+        45.375
+      ],
+      "artifactSha256": "63d962c89ec20a7a2fd98bcf6c7367c4b19267bb4f1082d661852e8d5f76b77f",
+      "retrievedAt": "2026-11-15T10:16:50.782039+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "KE",
+      "capital": "Nairobi",
+      "valid": 288,
+      "missing": 0,
+      "rejected": 0,
+      "minimum": 0.07469496,
+      "maximum": 3.49965792,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        36.875,
+        -1.375
+      ],
+      "artifactSha256": "4d5297b00c613e18e5d3d74bedff07b6b67839ffd2cb3d89eb88747a4afb8d96",
+      "retrievedAt": "2026-11-15T10:16:52.102381+00:00"
+    },
+    {
+      "variable": "EVAPOTRANSPIRATION",
+      "code": "MV",
+      "capital": "Mal\u00e9",
+      "valid": 0,
+      "missing": 288,
+      "rejected": 0,
+      "minimum": null,
+      "maximum": null,
+      "unit": "mm/day",
+      "sourceRows": 288,
+      "responseCoordinates": [
+        73.625,
+        4.125
+      ],
+      "artifactSha256": "c09ce83130d27e105239821a5b32aff696b76325e9fd672c76532c8302724a54",
+      "retrievedAt": "2026-11-15T10:16:53.343527+00:00"
+    }
+  ],
+  "AODRule": "All calendar hours must be valid for a monthly mean; positive 1e15 fill, absent and invalid hours produce a monthly gap.",
+  "scope": "Access, metadata, grid and numerical screening, not ground-truth accuracy. ET signed fluxes are retained. Maldives is an ET land-mask diagnostic.",
+  "independentNumPyValidation": {
+    "allPassed": true,
+    "checks": [
+      {
+        "variable": "AOD",
+        "code": "TH",
+        "passed": true,
+        "maxAbsoluteDifference": 9.992007221626409e-16
+      },
+      {
+        "variable": "AOD",
+        "code": "EG",
+        "passed": true,
+        "maxAbsoluteDifference": 5.551115123125783e-16
+      },
+      {
+        "variable": "AOD",
+        "code": "NO",
+        "passed": true,
+        "maxAbsoluteDifference": 2.7755575615628914e-16
+      },
+      {
+        "variable": "AOD",
+        "code": "AU",
+        "passed": true,
+        "maxAbsoluteDifference": 1.1102230246251565e-15
+      },
+      {
+        "variable": "AOD",
+        "code": "BR",
+        "passed": true,
+        "maxAbsoluteDifference": 4.163336342344337e-16
+      },
+      {
+        "variable": "AOD",
+        "code": "CA",
+        "passed": true,
+        "maxAbsoluteDifference": 5.551115123125783e-16
+      },
+      {
+        "variable": "AOD",
+        "code": "KE",
+        "passed": true,
+        "maxAbsoluteDifference": 2.7755575615628914e-16
+      },
+      {
+        "variable": "AOD",
+        "code": "MV",
+        "passed": true,
+        "maxAbsoluteDifference": 4.163336342344337e-16
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "TH",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "EG",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "NO",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "AU",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "BR",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "CA",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "KE",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      },
+      {
+        "variable": "EVAPOTRANSPIRATION",
+        "code": "MV",
+        "passed": true,
+        "maxAbsoluteDifference": 0
+      }
+    ],
+    "method": "Independent NumPy monthly means after source sentinel masking, exact calendar-hour count checks, and ET scaling by 86400."
+  },
+  "checkedAt": "2026-11-15T10:28:39.774072+00:00",
+  "period": [
+    2001,
+    2024
+  ],
+  "globalIngestion": {
+    "jobsSucceeded": 390,
+    "AOD": {
+      "capitals": 195,
+      "completeMonthlyRecords": 195,
+      "validMonths": 56160,
+      "missingMonths": 0
+    },
+    "EVAPOTRANSPIRATION": {
+      "capitals": 195,
+      "completeMonthlyRecords": 148,
+      "allMissingCapitalRecords": 47,
+      "validMonths": 42624,
+      "missingMonths": 13536
+    },
+    "rejectedMonths": 0,
+    "maximumConcurrentRequests": 2
+  }
+}

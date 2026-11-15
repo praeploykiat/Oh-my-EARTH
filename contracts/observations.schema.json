@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Monthly observation batch v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "normalization_version",
+    "qa_policy",
+    "retrieved_at",
+    "product",
+    "artifact",
+    "locations",
+    "observations",
+    "metadata"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "normalization_version": {
+      "const": "monthly-observation-v1"
+    },
+    "qa_policy": {
+      "enum": [
+        "power-screen-v1",
+        "good-land-clear-v1",
+        "gldas-soil-screen-v1",
+        "giovanni-monthly-screen-v1"
+      ]
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "name",
+        "version",
+        "source_url",
+        "resolution"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "enum": [
+            "power",
+            "modis",
+            "gldas",
+            "giovanni"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_url": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "resolution": {
+          "type": "string"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256",
+        "path"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "locations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "code",
+          "iso3",
+          "country",
+          "city",
+          "lat",
+          "lon"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 5
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "iso3": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "country": {
+            "type": "string",
+            "minLength": 1
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lon": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "location_id",
+          "variable",
+          "month",
+          "unit",
+          "value",
+          "quality",
+          "reason"
+        ],
+        "properties": {
+          "location_id": {
+            "type": "string"
+          },
+          "variable": {
+            "enum": [
+              "T2M",
+              "PRECTOTCORR",
+              "RH2M",
+              "ALLSKY_SFC_SW_DWN",
+              "NDVI",
+              "SOIL_MOISTURE",
+              "AOD",
+              "EVAPOTRANSPIRATION"
+            ]
+          },
+          "month": {
+            "type": "string",
+            "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])$"
+          },
+          "unit": {
+            "enum": [
+              "°C",
+              "mm/day",
+              "%",
+              "kWh/m²/day",
+              "1",
+              "kg/m²"
+            ]
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "quality": {
+            "enum": [
+              "valid",
+              "missing",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "quality": {
+                  "const": "valid"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "reason": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}

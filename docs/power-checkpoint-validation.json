@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-11-15T09:07:04.120390+00:00",
+  "scope": "POWER-only Vercel checkpoint; local database retained, no cloud deployment performed",
+  "releaseId": "1997b7c3adc8cda7958c539061757b45372ebd8ef68fb8bb23edf6f6dd773b81",
+  "period": {
+    "end": 2024,
+    "start": 2001
+  },
+  "coverage": {
+    "ALLSKY_SFC_SW_DWN": 195,
+    "PRECTOTCORR": 195,
+    "RH2M": 195,
+    "T2M": 195
+  },
+  "cache": {
+    "jsonFiles": 298,
+    "referencedFilesValidated": 296,
+    "bytes": 4593936,
+    "publicReleases": 1,
+    "containsNDVI": false
+  },
+  "disabled": {
+    "sources": [
+      "AppEEARS/NDVI"
+    ],
+    "browser": "NDVI selection absent; legacy NDVI URL falls back to T2M",
+    "worker": "stopped; disabled CLI rejected before database connection; default claims exclude modis",
+    "publisher": "NDVI observations excluded, preserved in local DB",
+    "fixture": "pipeline/fixtures/ndvi-pilot.json; excluded from public deployment"
+  },
+  "checks": {
+    "pipelineTests": 69,
+    "webTests": 138,
+    "typecheck": "passed",
+    "datasetAndCacheValidation": "passed",
+    "productionBuild": "passed with DATABASE_URL=postgresql://invalid.invalid/unavailable and PGHOST=invalid.invalid",
+    "browserProductionPreview": {
+      "legacyNDVILink": "fell back to temperature",
+      "variableOptions": 4,
+      "defaultTrendMap": "195 capitals colored",
+      "annualRainCanberra2024": "580.83 mm/year",
+      "game": "heading rendered",
+      "workbench": "heading rendered; live API availability not asserted by static preview",
+      "globalConsoleErrors": 0
+    },
+    "workbenchAPIMiddleware": "10 tests passed in full web suite"
+  },
+  "deployment": {
+    "rootDirectory": "web",
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "requiresPostgreSQL": false,
+    "requiresAppEEARSToken": false,
+    "requiresLocalWorker": false,
+    "existingWorkbenchCredentials": "preserved; retain their separate deployment configuration"
+  },
+  "credentials": "Excluded from checkpoint; staged files and production build scanned before commit.",
+  "status": "Historical POWER-only checkpoint; the current GLDAS extension is documented in gldas-soil-validation.json and global-gldas-soil.md."
+}

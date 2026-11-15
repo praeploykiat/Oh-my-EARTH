@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-11-15T07:18:54.300088+00:00",
+  "scope": "Local PostgreSQL foundation; five validated POWER capitals and one NDVI capital, not global observational coverage. No new NASA retrievals or frontend data rewrites.",
+  "target": {
+    "host": "127.0.0.1",
+    "port": 54329,
+    "database": "earth_trends",
+    "postgresql": "17.12 (Debian 17.12-1.pgdg12+1)"
+  },
+  "database": {
+    "locations": 195,
+    "products": 2,
+    "batches": 6,
+    "observations": 6048,
+    "quality": {
+      "missing": 1,
+      "rejected": 283,
+      "valid": 5764
+    },
+    "migrations": [
+      "001_observations.sql"
+    ]
+  },
+  "sources": [
+    {
+      "source": "modis",
+      "observations": 288,
+      "capitals": 1,
+      "valid": 4
+    },
+    {
+      "source": "power",
+      "observations": 5760,
+      "capitals": 5,
+      "valid": 5760
+    }
+  ],
+  "repeatMigrationApplied": [],
+  "repeatImportInserted": 0,
+  "unchangedOnRepeat": true,
+  "ndviSnapshotUnchanged": true,
+  "databasePasswordAbsentFromBrowserBundle": true,
+  "verification": {
+    "pythonTests": 49,
+    "webTests": 133,
+    "typecheckAndProductionBuild": "PASS",
+    "datasetValidation": "PASS",
+    "browserRoutes": [
+      "global POWER",
+      "global NDVI",
+      "workbench",
+      "experience",
+      "methods",
+      "game",
+      "game/admin"
+    ]
+  }
+}

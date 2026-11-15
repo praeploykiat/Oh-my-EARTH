@@ -1,0 +1,18 @@
+{
+  "enabledSources": [
+    "power",
+    "gldas",
+    "giovanni"
+  ],
+  "enabledVariables": [
+    "T2M",
+    "PRECTOTCORR",
+    "RH2M",
+    "ALLSKY_SFC_SW_DWN",
+    "SOIL_MOISTURE",
+    "AOD",
+    "EVAPOTRANSPIRATION",
+    "XCO2"
+  ],
+  "disabledReason": "AppEEARS/NDVI is deferred pending access and multi-capital quality validation."
+}

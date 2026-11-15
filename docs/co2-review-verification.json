@@ -1,0 +1,32 @@
+{
+  "candidateReleaseId": "4423a5b567777114f2a15485e9e8f5bf246812826c5c39ca8034572a8330f333",
+  "capitals": 195,
+  "completeRecords": 195,
+  "validMonthlyValues": 16770,
+  "dailyValues": 510120,
+  "verifiedCapitalFiles": 195,
+  "verifiedAnnualMapFiles": 8,
+  "maxIndependentMonthlyDifferencePPM": 2.2737367544323206e-13,
+  "candidateBytes": 3098043,
+  "activeWebRelease": "c85b3d22a5ab6ea5a80840e06022efd15cae60a93946ece4ab9ba2aa3093eb2d",
+  "webCO2Enabled": false,
+  "databaseRequiredByWeb": false,
+  "webTestsPassed": 160,
+  "reviewTestsPassed": 6,
+  "invalidDatabaseBuild": "passed",
+  "browserPagesVerified": [
+    "World explorer",
+    "Thailand explorer",
+    "Guess the graph",
+    "Hotspot map",
+    "Methods",
+    "Landing"
+  ],
+  "browserConsoleErrors": 0,
+  "scope": "Local production preview; no Vercel deployment or live upstream Workbench service certification.",
+  "pipelineTestsPassed": 91,
+  "credentialScan": "passed",
+  "currentCandidateReleaseBytes": 1646659,
+  "activeManifestSha256": "21b76bcd1676c08945f703f14326f27c0f688444b92a466ee72a7af870682571",
+  "concurrentWorkspaceEdit": "web/src/styles.css changed independently after the verified build; left untouched and not included in that browser/build result."
+}

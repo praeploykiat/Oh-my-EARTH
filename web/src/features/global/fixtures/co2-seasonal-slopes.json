@@ -1,0 +1,1274 @@
+{
+  "sourceReleaseId": "4423a5b567777114f2a15485e9e8f5bf246812826c5c39ca8034572a8330f333",
+  "method": "scipy.stats.mstats.sen_seasonal_slopes.inter_slope * 10",
+  "scipyVersion": "1.18.1",
+  "cases": [
+    {
+      "code": "AD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.164378707823502
+    },
+    {
+      "code": "AE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.123921950315165
+    },
+    {
+      "code": "AF",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.14283467741933
+    },
+    {
+      "code": "AG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.559360215053943
+    },
+    {
+      "code": "AL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.0918445494994
+    },
+    {
+      "code": "AM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.175616071428948
+    },
+    {
+      "code": "AO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.313793010752626
+    },
+    {
+      "code": "AR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.415354838709717
+    },
+    {
+      "code": "AT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.100067204301126
+    },
+    {
+      "code": "AU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.302305555555577
+    },
+    {
+      "code": "AU",
+      "start": 2015,
+      "end": 2017,
+      "ppmPerDecade": 25.652338709677167
+    },
+    {
+      "code": "AU",
+      "start": 2017,
+      "end": 2021,
+      "ppmPerDecade": 24.0998387096774
+    },
+    {
+      "code": "AU",
+      "start": 2019,
+      "end": 2021,
+      "ppmPerDecade": 22.432645161289884
+    },
+    {
+      "code": "AU",
+      "start": 2016,
+      "end": 2020,
+      "ppmPerDecade": 24.070758064516156
+    },
+    {
+      "code": "AZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.16267526881709
+    },
+    {
+      "code": "BA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.054838709677654
+    },
+    {
+      "code": "BB",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.504408602150534
+    },
+    {
+      "code": "BD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.14197580645157
+    },
+    {
+      "code": "BE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.14446774193543
+    },
+    {
+      "code": "BF",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.600951612903472
+    },
+    {
+      "code": "BG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.171389784946285
+    },
+    {
+      "code": "BH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.172678571428648
+    },
+    {
+      "code": "BI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.4702311827957
+    },
+    {
+      "code": "BJ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.91864964157702
+    },
+    {
+      "code": "BN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.103376344086108
+    },
+    {
+      "code": "BO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.610188172042946
+    },
+    {
+      "code": "BR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.677416666666687
+    },
+    {
+      "code": "BS",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.748588709677477
+    },
+    {
+      "code": "BT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.16005459770099
+    },
+    {
+      "code": "BW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.31770593317978
+    },
+    {
+      "code": "BY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.84050750834257
+    },
+    {
+      "code": "BZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.788610215053907
+    },
+    {
+      "code": "CA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.288801587301563
+    },
+    {
+      "code": "CD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.586021505376337
+    },
+    {
+      "code": "CF",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.3300161290324
+    },
+    {
+      "code": "CG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.49157258064531
+    },
+    {
+      "code": "CH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.9345
+    },
+    {
+      "code": "CI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.435573617952997
+    },
+    {
+      "code": "CL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.647607526881735
+    },
+    {
+      "code": "CM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.917258064515764
+    },
+    {
+      "code": "CN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 26.488250000000093
+    },
+    {
+      "code": "CO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.865537634408668
+    },
+    {
+      "code": "CR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.724731182795807
+    },
+    {
+      "code": "CU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.73747043010755
+    },
+    {
+      "code": "CV",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.563204301075228
+    },
+    {
+      "code": "CY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.026061827957065
+    },
+    {
+      "code": "CZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.933037634408578
+    },
+    {
+      "code": "DE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.988978653530637
+    },
+    {
+      "code": "DJ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.58626388888895
+    },
+    {
+      "code": "DK",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.0729166666667
+    },
+    {
+      "code": "DM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.552849462365643
+    },
+    {
+      "code": "DO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.586043010752707
+    },
+    {
+      "code": "DZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.02672580645165
+    },
+    {
+      "code": "EC",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.936967741935234
+    },
+    {
+      "code": "EE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.984224270353266
+    },
+    {
+      "code": "EG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.845645161290314
+    },
+    {
+      "code": "ER",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.543790322580747
+    },
+    {
+      "code": "ES",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.035620967741906
+    },
+    {
+      "code": "ET",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.66853897849458
+    },
+    {
+      "code": "FI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.947973118279492
+    },
+    {
+      "code": "FJ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.714677419354842
+    },
+    {
+      "code": "FM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.74217741935462
+    },
+    {
+      "code": "FR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.1156415770608
+    },
+    {
+      "code": "GA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.766949507389064
+    },
+    {
+      "code": "GB",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.343015053763548
+    },
+    {
+      "code": "GD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.987403225806517
+    },
+    {
+      "code": "GE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.065023809523836
+    },
+    {
+      "code": "GH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.741759229832
+    },
+    {
+      "code": "GM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.519305555555448
+    },
+    {
+      "code": "GN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.621413978494786
+    },
+    {
+      "code": "GQ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.65307204301064
+    },
+    {
+      "code": "GR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.184500000000106
+    },
+    {
+      "code": "GT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.783531362007267
+    },
+    {
+      "code": "GW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.440724014337007
+    },
+    {
+      "code": "GY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.541182795699257
+    },
+    {
+      "code": "HN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.606935483870885
+    },
+    {
+      "code": "HR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.183611111111148
+    },
+    {
+      "code": "HT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.608609831029185
+    },
+    {
+      "code": "HU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.09553360215058
+    },
+    {
+      "code": "ID",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.918283333333406
+    },
+    {
+      "code": "IE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.496505376344103
+    },
+    {
+      "code": "IL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.87661290322606
+    },
+    {
+      "code": "IN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.32925572064201
+    },
+    {
+      "code": "IQ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.878991935483825
+    },
+    {
+      "code": "IR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.445377956989205
+    },
+    {
+      "code": "IS",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.3039220430109
+    },
+    {
+      "code": "IT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.26565591397855
+    },
+    {
+      "code": "JM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.640456989247255
+    },
+    {
+      "code": "JO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.921370967742007
+    },
+    {
+      "code": "JP",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.0871637931034
+    },
+    {
+      "code": "KE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.78483102918588
+    },
+    {
+      "code": "KG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.1196428571428
+    },
+    {
+      "code": "KH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.202286290322704
+    },
+    {
+      "code": "KI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.625635304659454
+    },
+    {
+      "code": "KM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.352526881720472
+    },
+    {
+      "code": "KN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.580436781609194
+    },
+    {
+      "code": "KP",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.390475369458443
+    },
+    {
+      "code": "KR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.361895161290278
+    },
+    {
+      "code": "KW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.796709677419386
+    },
+    {
+      "code": "KZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.232575268817143
+    },
+    {
+      "code": "LA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.90995878136207
+    },
+    {
+      "code": "LB",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.85787096774196
+    },
+    {
+      "code": "LC",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.55759318996418
+    },
+    {
+      "code": "LI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.00174683179715
+    },
+    {
+      "code": "LK",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.84770161290328
+    },
+    {
+      "code": "LR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.36042050691242
+    },
+    {
+      "code": "LS",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.252903225806463
+    },
+    {
+      "code": "LT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.995067204301264
+    },
+    {
+      "code": "LU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.947911111111225
+    },
+    {
+      "code": "LV",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.03938172042993
+    },
+    {
+      "code": "LY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.9618817204301
+    },
+    {
+      "code": "MA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.03365591397862
+    },
+    {
+      "code": "MC",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.229362903225805
+    },
+    {
+      "code": "MD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.966922043010797
+    },
+    {
+      "code": "ME",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.120032258064498
+    },
+    {
+      "code": "MG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.200629032257964
+    },
+    {
+      "code": "MH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.9211102150538
+    },
+    {
+      "code": "MK",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.144974078341093
+    },
+    {
+      "code": "ML",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.568727598566326
+    },
+    {
+      "code": "MM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.33284946236563
+    },
+    {
+      "code": "MN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.157250000000033
+    },
+    {
+      "code": "MR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.4587577467027
+    },
+    {
+      "code": "MT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.182239247311884
+    },
+    {
+      "code": "MU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.33416666666656
+    },
+    {
+      "code": "MV",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.850604838709813
+    },
+    {
+      "code": "MV",
+      "start": 2015,
+      "end": 2017,
+      "ppmPerDecade": 29.157655913978573
+    },
+    {
+      "code": "MV",
+      "start": 2017,
+      "end": 2021,
+      "ppmPerDecade": 24.485677419354673
+    },
+    {
+      "code": "MV",
+      "start": 2019,
+      "end": 2021,
+      "ppmPerDecade": 23.449107526881505
+    },
+    {
+      "code": "MV",
+      "start": 2016,
+      "end": 2020,
+      "ppmPerDecade": 23.88290322580616
+    },
+    {
+      "code": "MW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.190616487455074
+    },
+    {
+      "code": "MX",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.698166666666637
+    },
+    {
+      "code": "MY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.193333333333257
+    },
+    {
+      "code": "MZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.156150537634325
+    },
+    {
+      "code": "NA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.183965053763572
+    },
+    {
+      "code": "NE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.62438172043018
+    },
+    {
+      "code": "NG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.843021505376385
+    },
+    {
+      "code": "NI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.637553763441062
+    },
+    {
+      "code": "NL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.203687589384998
+    },
+    {
+      "code": "NO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.153924731182784
+    },
+    {
+      "code": "NO",
+      "start": 2015,
+      "end": 2017,
+      "ppmPerDecade": 27.953306451613145
+    },
+    {
+      "code": "NO",
+      "start": 2017,
+      "end": 2021,
+      "ppmPerDecade": 24.775967741935858
+    },
+    {
+      "code": "NO",
+      "start": 2019,
+      "end": 2021,
+      "ppmPerDecade": 25.818793699348248
+    },
+    {
+      "code": "NO",
+      "start": 2016,
+      "end": 2020,
+      "ppmPerDecade": 24.436669911012174
+    },
+    {
+      "code": "NP",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.440564516128887
+    },
+    {
+      "code": "NR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.701720430107486
+    },
+    {
+      "code": "NZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.500443548387125
+    },
+    {
+      "code": "OM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.079217741935267
+    },
+    {
+      "code": "PA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.77756666666704
+    },
+    {
+      "code": "PE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.78080645161299
+    },
+    {
+      "code": "PG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.02257526881735
+    },
+    {
+      "code": "PH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.976195203665498
+    },
+    {
+      "code": "PK",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.277537972085412
+    },
+    {
+      "code": "PL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.99368333333328
+    },
+    {
+      "code": "PT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.947393913210405
+    },
+    {
+      "code": "PW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.651397849462473
+    },
+    {
+      "code": "PY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.2175743727599
+    },
+    {
+      "code": "QA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.160806451612885
+    },
+    {
+      "code": "RO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.05106451612903
+    },
+    {
+      "code": "RS",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.978247311828028
+    },
+    {
+      "code": "RU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.908728448275923
+    },
+    {
+      "code": "RW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.621489247311857
+    },
+    {
+      "code": "SA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.80302688172037
+    },
+    {
+      "code": "SB",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.06131989247308
+    },
+    {
+      "code": "SC",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.740249999999875
+    },
+    {
+      "code": "SD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.511634408602134
+    },
+    {
+      "code": "SE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.07447868001475
+    },
+    {
+      "code": "SG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.20798387096761
+    },
+    {
+      "code": "SI",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.13193010752687
+    },
+    {
+      "code": "SK",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.22325000000005
+    },
+    {
+      "code": "SL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.522277777777745
+    },
+    {
+      "code": "SM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.09689804147466
+    },
+    {
+      "code": "SN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.527634408602026
+    },
+    {
+      "code": "SO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.760322580644996
+    },
+    {
+      "code": "SR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.57023924731203
+    },
+    {
+      "code": "SS",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.663948924731358
+    },
+    {
+      "code": "ST",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.66425483870968
+    },
+    {
+      "code": "SV",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.56911290322566
+    },
+    {
+      "code": "SY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.862762096774134
+    },
+    {
+      "code": "SZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.11516666666661
+    },
+    {
+      "code": "TD",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.792580645161266
+    },
+    {
+      "code": "TG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.823682795698687
+    },
+    {
+      "code": "TH",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.963696236559038
+    },
+    {
+      "code": "TH",
+      "start": 2015,
+      "end": 2017,
+      "ppmPerDecade": 29.05078629032232
+    },
+    {
+      "code": "TH",
+      "start": 2017,
+      "end": 2021,
+      "ppmPerDecade": 24.8170967741936
+    },
+    {
+      "code": "TH",
+      "start": 2019,
+      "end": 2021,
+      "ppmPerDecade": 25.445806451612754
+    },
+    {
+      "code": "TH",
+      "start": 2016,
+      "end": 2020,
+      "ppmPerDecade": 23.841282258064496
+    },
+    {
+      "code": "TJ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.097787634408633
+    },
+    {
+      "code": "TL",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.61045833333344
+    },
+    {
+      "code": "TM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.183767921147037
+    },
+    {
+      "code": "TN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.132620967741985
+    },
+    {
+      "code": "TO",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.57279166666659
+    },
+    {
+      "code": "TR",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.996033026113807
+    },
+    {
+      "code": "TT",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.514620967741934
+    },
+    {
+      "code": "TV",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.763693548387025
+    },
+    {
+      "code": "TZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.44317204301096
+    },
+    {
+      "code": "UA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.93376344086021
+    },
+    {
+      "code": "UG",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.792331541218573
+    },
+    {
+      "code": "US",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.120322580644938
+    },
+    {
+      "code": "UY",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.446919354838556
+    },
+    {
+      "code": "UZ",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.15072043010747
+    },
+    {
+      "code": "VA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.26565591397855
+    },
+    {
+      "code": "VC",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.54487347052286
+    },
+    {
+      "code": "VE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.530529569892323
+    },
+    {
+      "code": "VN",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.91346082949309
+    },
+    {
+      "code": "VU",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.758999086286288
+    },
+    {
+      "code": "WS",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.657137096774264
+    },
+    {
+      "code": "XK",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 25.21538978494621
+    },
+    {
+      "code": "YE",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.71182142857188
+    },
+    {
+      "code": "ZA",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.139215053763607
+    },
+    {
+      "code": "ZM",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.44987903225808
+    },
+    {
+      "code": "ZW",
+      "start": 2015,
+      "end": 2021,
+      "ppmPerDecade": 24.35132258064509
+    }
+  ],
+  "inference": "No confidence intervals, significance tests or forecasts."
+}

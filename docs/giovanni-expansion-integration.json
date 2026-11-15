@@ -1,0 +1,49 @@
+{
+  "releaseId": "c85b3d22a5ab6ea5a80840e06022efd15cae60a93946ece4ab9ba2aa3093eb2d",
+  "period": {
+    "end": 2024,
+    "start": 2001
+  },
+  "ingestion": {
+    "succeeded": 390,
+    "failed": 0,
+    "AOD": {
+      "completeCapitals": 195,
+      "validMonths": 56160
+    },
+    "EVAPOTRANSPIRATION": {
+      "completeCapitals": 148,
+      "missingCapitals": 47,
+      "validMonths": 42624,
+      "missingMonths": 13536
+    }
+  },
+  "validation": {
+    "webTestsPassed": 144,
+    "pipelineTestsPassed": 85,
+    "publishedFilesValidated": 372,
+    "productionBuildWithInvalidDatabaseURL": "passed",
+    "browser": [
+      "AOD Bangkok trend and confidence interval",
+      "ET Bangkok 2024 annual total 439.67 mm/year",
+      "ET map 148 usable capitals",
+      "Male ET explicitly missing, not zero",
+      "Workbench renders",
+      "Game question and charts render",
+      "Methods renders",
+      "Experience renders"
+    ],
+    "browserConsoleErrors": 0,
+    "scope": "Local production preview and API middleware tests; no live Vercel deployment or live Workbench upstream availability certification."
+  },
+  "storage": {
+    "currentReleaseFiles": 373,
+    "currentReleaseBytes": 15137523,
+    "allPublishedCacheBytes": 25595318
+  },
+  "credentials": {
+    "publicCacheAndBuildScan": "passed",
+    "tokenValuesPrinted": false
+  },
+  "deployment": "Global Explorer uses static published files; PostgreSQL and NASA credentials only needed for local refresh. Not committed or deployed."
+}

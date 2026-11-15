@@ -1,0 +1,28 @@
+{
+  "co2ReleaseId": "4423a5b567777114f2a15485e9e8f5bf246812826c5c39ca8034572a8330f333",
+  "capitals": 195,
+  "annualYears": [
+    2015,
+    2021
+  ],
+  "unit": "ppm",
+  "trendEnabled": false,
+  "webTestsPassed": 165,
+  "existingCacheFilesVerified": 372,
+  "co2CacheFilesVerified": 202,
+  "productionBuildWithInvalidDatabaseURL": "passed",
+  "browserChecks": [
+    "unsupported CO2 trend/2024 deep link normalized to annual average/2021",
+    "Bangkok 2021 annual average 416.21 ppm",
+    "Bangkok October 2015 lowest month 398.91 ppm",
+    "Male December 2015 highest month 400.90 ppm",
+    "CO2 provenance and download path",
+    "switching back to POWER restores normal trend/range",
+    "Workbench, Game, Hotspot, Methods and Landing render"
+  ],
+  "consoleErrors": 0,
+  "credentialScan": "passed",
+  "existingCacheManifestUnchanged": true,
+  "databaseRequiredForExplorer": false,
+  "deployment": "Not deployed or committed. Verified local production preview, not upstream availability of live Workbench services."
+}
