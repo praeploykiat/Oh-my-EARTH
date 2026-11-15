@@ -232,18 +232,16 @@ export function Tour({ onClose, onImport }: { onClose: () => void; onImport: (op
   useLayoutEffect(() => {
     if (!step) return;
     onImport(!!step.importOpen);
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
-        const el = document.querySelector<HTMLElement>(step.target);
-        if (!el) return setBox(null);
-        const rect = el.getBoundingClientRect();
-        if (rect.top < 80 || rect.bottom > window.innerHeight - 260) {
-          el.scrollIntoView({ block: rect.height > window.innerHeight * 0.5 ? 'start' : 'center' });
-        }
-        measure();
-      });
-    });
-    return () => cancelAnimationFrame(frame);
+    const timer = window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>(step.target);
+      if (!el) return setBox(null);
+      const rect = el.getBoundingClientRect();
+      if (rect.top < 80 || rect.bottom > window.innerHeight - 260) {
+        el.scrollIntoView({ block: rect.height > window.innerHeight * 0.5 ? 'start' : 'center' });
+      }
+      measure();
+    }, 40);
+    return () => window.clearTimeout(timer);
   }, [step, measure, onImport]);
 
   useEffect(() => {
