@@ -75,6 +75,12 @@ export function MapExplorer({ selected, onSelect, variable, range, view, recordU
     async function consume(){while(run===generation.current && cursor<queue.length){const capital=queue[cursor++];try{const record=await fetchExplorerRecord(capital,variable);if(run===generation.current)setRecords((r)=>({...r,[capital.code]:record}));}catch{if(run===generation.current)setErrors((e)=>({...e,[capital.code]:true}));}}}
     await Promise.all([consume(),consume()]);if(run===generation.current)setRunning(false);
   }
+  // Prepared maps load above. For other periods, automatically load saved monthly
+  // records with the same two-download limit used by the manual retry control.
+  useEffect(()=>{
+    if(!wanted && available.length)void loadAll();
+    return()=>{generation.current++;};
+  },[key,wanted,available]);
   const mapReady=wanted && cached.key===key && !cached.error;
   const values=wanted?mapReady?cached.values:{}:trends.key===key?trends.values:{};
   const domain=mapScale(variable,mode,annualRain);

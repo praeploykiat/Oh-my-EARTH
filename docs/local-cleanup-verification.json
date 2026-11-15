@@ -1,0 +1,26 @@
+{
+  "removedFiles": 635,
+  "reclaimedBytes": 27327908,
+  "backup": "pipeline/raw/backups/earth-trends-20261115-before-cleanup.dump",
+  "backupBytes": 3834696,
+  "backupSha256": "d745a9d7e63eaa1b74f781035db534674977cca8977e3d181e9c19319f4b4c61",
+  "restoreTest": "Passed: restored into new disposable database; observations/batches/jobs/CO2 counts matched, then disposable database removed.",
+  "restoredCounts": {
+    "observations": 393408,
+    "batches": 781,
+    "jobs": 781,
+    "co2": 195
+  },
+  "postgresql": "Stopped; original container and volume retained",
+  "publishedCaches": "Retained unchanged; all 575 referenced assets validated",
+  "webTestsPassed": 169,
+  "invalidDatabaseProductionBuild": "passed",
+  "browser": [
+    "custom-range POWER auto-load reached 195 loaded / 195 colored / 0 failures without clicking fetch",
+    "switch to CO2 automatically loaded prepared map and +24.96 ppm/decade chart",
+    "Workbench/Game/Hotspot/Methods rendered"
+  ],
+  "browserConsoleErrors": 0,
+  "fetchBehavior": "Published data automatically on entry/variable/period change; no live NASA fetching. At most two simultaneous monthly-file downloads for custom maps.",
+  "rawRetention": "Unique source downloads and database-referenced artifacts retained for resumability and reproducible validation."
+}
