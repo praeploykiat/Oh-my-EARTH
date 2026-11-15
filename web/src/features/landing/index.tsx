@@ -44,70 +44,95 @@ function Hero() {
     setGuess(Array(hiddenCount).fill(null));
   }, [hiddenCount]);
 
+  const warmest = points ? points.reduce((best, p, i) => (p.value > points[best].value ? i : best), 0) : -1;
+  const note = points && warmest >= split ? { index: warmest, text: t('landing.warmest', { year: points[warmest].year }) } : null;
+
   return (
     <section className="landing-hero">
-      <div className="landing-hero-text">
-        <h1>{t('landing.title')}</h1>
-        <p>{t('landing.lead')}</p>
-      </div>
+      <div className="landing-hero-inner">
+        <div className="landing-hero-text">
+          <h1>{t('landing.title')}</h1>
+          <p>{t('landing.lead')}</p>
+        </div>
 
-      <div className="landing-play">
-        <p className="landing-play-ask">{t('landing.ask', { last: SPLIT_YEAR - 1 })}</p>
-        {points && split > 0 ? (
-          <>
-            <HeroChart points={points} split={split} unit={t('landing.unit')} revealed={revealed} guess={guess} onGuess={setGuess} />
-            <div className="landing-play-foot">
-              <div className="landing-legend">
-                <span className="is-known">{t('landing.legendKnown')}</span>
-                <span className="is-guess">{t('landing.legendGuess')}</span>
-                {revealed && <span className="is-real">{t('landing.legendReal')}</span>}
-              </div>
-              {revealed ? (
-                <button type="button" className="landing-link" onClick={reset}>
-                  {t('landing.again')}
-                </button>
-              ) : (
-                <button type="button" className="button" disabled={drawn < Math.ceil(hiddenCount * MIN_DRAWN_SHARE)} onClick={() => setRevealed(true)}>
-                  {t('landing.reveal')}
-                </button>
-              )}
-            </div>
-            {result && (
-              <div className="landing-result" aria-live="polite">
-                <p className="landing-result-main">
-                  {t(result.perDecade >= 0 ? 'landing.warmed' : 'landing.cooled', { value: Math.abs(result.perDecade).toFixed(2) })}{' '}
-                  {t(result.significant ? 'landing.real' : 'landing.notSure')}
-                </p>
-                <p>
-                  {Math.abs(result.gap) < 0.15
-                    ? t('landing.gapClose')
-                    : t(result.gap > 0 ? 'landing.gapAbove' : 'landing.gapBelow', { value: Math.abs(result.gap).toFixed(1) })}
-                </p>
-                <p className="landing-bridge">{t('landing.bridge')}</p>
-                <div className="landing-result-next">
-                  <a className="button" href="#/game">
-                    {t('landing.tryGame')}
-                  </a>
-                  <a className="button button-secondary" href="#/workbench">
-                    {t('landing.tryProvince')}
-                  </a>
+        <div className="landing-ctas">
+          <a className="button" href="#/game">
+            {t('landing.ctaGame')}
+          </a>
+          <a className="button button-secondary" href="#/workbench">
+            {t('landing.thailandCta')}
+          </a>
+          <a className="landing-quiet" href="#/global">
+            {t('nav.global')}
+          </a>
+          <a className="landing-quiet" href="#/hotspot">
+            {t('nav.hotspot')}
+          </a>
+        </div>
+
+        <div className="landing-play">
+          <p className="landing-play-ask">{t('landing.ask', { last: SPLIT_YEAR - 1 })}</p>
+          {points && split > 0 ? (
+            <>
+              <HeroChart
+                points={points}
+                split={split}
+                unit={t('landing.unit')}
+                revealed={revealed}
+                guess={guess}
+                onGuess={setGuess}
+                note={revealed ? note : null}
+              />
+              <div className="landing-play-foot">
+                <div className="landing-legend">
+                  <span className="is-known">{t('landing.legendKnown')}</span>
+                  <span className="is-guess">{t('landing.legendGuess')}</span>
+                  {revealed && <span className="is-real">{t('landing.legendReal')}</span>}
                 </div>
+                {revealed ? (
+                  <button type="button" className="landing-link" onClick={reset}>
+                    {t('landing.again')}
+                  </button>
+                ) : (
+                  <button type="button" className="button" disabled={drawn < Math.ceil(hiddenCount * MIN_DRAWN_SHARE)} onClick={() => setRevealed(true)}>
+                    {t('landing.reveal')}
+                  </button>
+                )}
               </div>
-            )}
-          </>
-        ) : (
-          <div className="landing-play-wait">
-            {data.status === 'error' ? (
-              <p>
-                {t('landing.offline')}{' '}
-                <a href="#/workbench">{t('landing.tryProvince')}</a>
-              </p>
-            ) : (
-              <p>{t('landing.loading')}</p>
-            )}
-          </div>
-        )}
-        <p className="landing-source">{t('landing.chartSource')}</p>
+              {result && (
+                <div className="landing-result" aria-live="polite">
+                  <p className="landing-number">
+                    {result.perDecade >= 0 ? '+' : '−'}
+                    {Math.abs(result.perDecade).toFixed(2)}
+                    <span>{t('landing.perDecade')}</span>
+                  </p>
+                  <div className="landing-result-text">
+                    <p className="landing-result-main">
+                      {t(result.perDecade >= 0 ? 'landing.warmed' : 'landing.cooled', { value: Math.abs(result.perDecade).toFixed(2) })}
+                    </p>
+                    <p>
+                      {t(result.significant ? 'landing.real' : 'landing.notSure')}{' '}
+                      {Math.abs(result.gap) < 0.15
+                        ? t('landing.gapClose')
+                        : t(result.gap > 0 ? 'landing.gapAbove' : 'landing.gapBelow', { value: Math.abs(result.gap).toFixed(1) })}
+                    </p>
+                    <p className="landing-bridge">
+                      {t('landing.bridge')} <a href="#/game">{t('landing.tryGame')}</a>
+                    </p>
+                  </div>
+                  <span className={`stamp ${result.significant ? '' : 'is-unsure'}`} aria-hidden="true">
+                    {t(result.significant ? 'landing.stampReal' : 'landing.stampUnsure')}
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="landing-play-wait">
+              <p>{data.status === 'error' ? t('landing.offline') : t('landing.loading')}</p>
+            </div>
+          )}
+          <p className="landing-source">{t('landing.chartSource')}</p>
+        </div>
       </div>
     </section>
   );
@@ -121,21 +146,20 @@ interface Way {
   title: MessageKey;
   text: MessageKey;
   links: { href: string; label: MessageKey }[];
-  soon?: boolean;
   art: 'play' | 'see' | 'investigate';
 }
 
 const WAYS: Way[] = [
-  { verb: 'landing.playVerb', ask: 'landing.playAsk', title: 'nav.game', text: 'landing.playText', links: [{ href: '#/game', label: 'landing.playCta' }], art: 'play' },
-  { verb: 'landing.seeVerb', ask: 'landing.seeAsk', title: 'nav.hotspot', text: 'landing.seeText', links: [{ href: '#/hotspot', label: 'landing.seeCta' }], soon: true, art: 'see' },
+  { verb: 'landing.playVerb', ask: 'landing.playAsk', title: 'nav.game', text: 'landing.playText', links: [{ href: '#/game', label: 'nav.game' }], art: 'play' },
+  { verb: 'landing.seeVerb', ask: 'landing.seeAsk', title: 'nav.hotspot', text: 'landing.seeText', links: [{ href: '#/hotspot', label: 'nav.hotspot' }], art: 'see' },
   {
     verb: 'landing.investigateVerb',
     ask: 'landing.investigateAsk',
     title: 'landing.investigateTitle',
     text: 'landing.investigateText',
     links: [
-      { href: '#/global', label: 'landing.worldCta' },
-      { href: '#/workbench', label: 'landing.thailandCta' },
+      { href: '#/global', label: 'nav.global' },
+      { href: '#/workbench', label: 'nav.workbench' },
     ],
     art: 'investigate',
   },
@@ -180,25 +204,22 @@ function Ways() {
       <h2 id="ways-title">{t('landing.waysTitle')}</h2>
       <ol>
         {WAYS.map((way) => (
-          <li key={way.verb} className={way.soon ? 'is-soon' : undefined}>
-            <span className="landing-verb">{t(way.verb)}</span>
+          <li key={way.verb} className={way.links.length === 1 ? 'is-one' : undefined}>
+            <div className="landing-way-art">
+              <Art kind={way.art} />
+              <span className="landing-verb">{t(way.verb)}</span>
+            </div>
             <div className="landing-way-body">
               <h3>{t(way.ask)}</h3>
-              <p className="landing-way-name">
-                {t(way.title)} {way.soon && <em className="landing-soon">{t('landing.soon')}</em>}
-              </p>
               <p>{t(way.text)}</p>
-              {way.links.length > 0 && (
-                <div className="landing-way-links">
-                  {way.links.map((link) => (
-                    <a key={link.href} href={link.href}>
-                      {t(link.label)}
-                    </a>
-                  ))}
-                </div>
-              )}
             </div>
-            <Art kind={way.art} />
+            <div className="landing-way-links">
+              {way.links.map((link) => (
+                <a key={link.href} href={link.href}>
+                  {t(link.label)}
+                </a>
+              ))}
+            </div>
           </li>
         ))}
       </ol>

@@ -225,19 +225,12 @@ button:hover,
   transition: color 0.15s;
 }
 
-.nav-links a:hover,
-.nav-links a[aria-current='true'] {
+.nav-links a:hover {
   color: var(--fg);
 }
 
-.nav-links a[aria-current='true']::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  background: var(--accent);
+.nav-links a[aria-current='page'] {
+  color: var(--accent);
 }
 
 .language-switcher {
@@ -4165,4 +4158,599 @@ button,
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+/* Immersive shell: one continuous page, no tab chrome */
+
+.app {
+  background: linear-gradient(180deg, #070a0b 0, #0d1414 720px, #0b1110 100%);
+}
+
+.header {
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  backdrop-filter: none;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.header.is-scrolled {
+  border-bottom-color: var(--glass-line);
+  background: rgba(7, 10, 11, 0.78);
+  backdrop-filter: blur(14px);
+}
+
+.nav-links {
+  gap: 26px;
+}
+
+.nav-links a {
+  gap: 7px;
+  color: #c9d3cf;
+}
+
+.nav-links a svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.nav-links a:hover {
+  color: var(--fg);
+}
+
+.nav-links a[aria-current='page'] {
+  color: var(--accent);
+}
+
+.page {
+  animation: page-in 0.45s ease-out both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.footer {
+  border-top-color: var(--glass-line);
+  background: #0c0f0f;
+}
+
+.footer-brand strong {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.footer-brand span,
+.footer-links a {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.footer-brand span {
+  font-size: 13px;
+}
+
+.footer-links a {
+  font-size: 14px;
+  color: #c9d3cf;
+}
+
+.footer-disclaimer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+
+/* Stamp: the one celebratory moment after a reveal */
+
+.stamp {
+  position: absolute;
+  right: 0;
+  top: -10px;
+  padding: 6px 14px;
+  border: 3px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-8deg);
+  pointer-events: none;
+  animation: stamp-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) 1.3s both;
+}
+
+:lang(th) .stamp {
+  letter-spacing: 0;
+}
+
+.stamp.is-unsure {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.6);
+  }
+}
+
+/* Landing */
+
+.landing {
+  display: block;
+  width: auto;
+  padding: 0;
+}
+
+.landing h2 {
+  font-size: clamp(26px, 3vw, 34px);
+}
+
+.landing .button {
+  min-height: 46px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+  margin-top: calc(-1 * var(--header-height));
+  padding: var(--header-height) 0 150px;
+  background:
+    radial-gradient(140% 90% at 50% 125%, #1d5a49 0%, #12352d 28%, rgba(13, 20, 20, 0) 55%),
+    linear-gradient(#070a0b, #0d1414);
+}
+
+.landing-hero::after {
+  content: '';
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -1300px;
+  height: 1420px;
+  border-radius: 50%;
+  box-shadow: 0 -2px 0 rgba(127, 224, 192, 0.55), 0 -30px 80px rgba(79, 209, 165, 0.25);
+  pointer-events: none;
+}
+
+.landing-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 22px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 56px var(--gutter) 0;
+}
+
+.landing-hero h1 {
+  max-width: 18ch;
+  font-size: clamp(40px, 6vw, 70px);
+  line-height: 1.03;
+}
+
+.landing-hero-text p {
+  max-width: 52ch;
+  margin-top: 22px;
+  color: #c9d3cf;
+  font-size: clamp(17px, 1.6vw, 19px);
+}
+
+.landing-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-ctas .button-secondary {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--fg);
+}
+
+.landing-quiet {
+  margin-left: 6px;
+  color: #c9d3cf;
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
+
+.landing-quiet:hover {
+  color: var(--fg);
+}
+
+.landing-play {
+  margin-top: 36px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.landing-play-ask {
+  color: #c9d3cf;
+  font-size: 16px;
+}
+
+.landing-play .hero-chart {
+  max-height: min(460px, 56vh);
+}
+
+.hero-chart-future {
+  fill: rgba(255, 154, 61, 0.06);
+  stroke: none;
+}
+
+.hero-chart-note circle {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.hero-chart-note text {
+  fill: var(--accent);
+  font-family: 'Caveat', var(--font-sans);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.hero-chart-note {
+  animation: landing-fade 0.4s ease-out 1.2s both;
+}
+
+.landing-result {
+  position: relative;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 26px;
+  padding: 28px 200px 0 0;
+  border-top: 0;
+}
+
+.landing-result .landing-number {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: clamp(52px, 6vw, 72px);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.landing-number span {
+  margin-left: 8px;
+  color: #c9d3cf;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.landing-result-text {
+  display: grid;
+  gap: 6px;
+}
+
+.landing-result .landing-result-main {
+  font-size: 20px;
+}
+
+.landing-result .landing-bridge {
+  margin-top: 4px;
+}
+
+.landing-bridge a {
+  color: var(--accent);
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+
+.landing-ways,
+.landing-how {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 80px var(--gutter) 0;
+}
+
+.landing-how {
+  padding-bottom: 100px;
+}
+
+.landing-ways li {
+  position: relative;
+  grid-template-columns: 140px minmax(0, 1fr) auto;
+  gap: 28px;
+  padding: 26px 0;
+  border-top-color: var(--glass-line);
+}
+
+.landing-ways li:last-child {
+  border-bottom-color: var(--glass-line);
+}
+
+.landing-way-art {
+  display: grid;
+  gap: 8px;
+}
+
+.landing-way-art .landing-art {
+  width: 120px;
+  height: 64px;
+}
+
+.landing-ways .landing-verb {
+  color: var(--accent);
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.landing-way-body h3 {
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  transition: color 0.15s;
+}
+
+.landing-way-body p {
+  color: #c9d3cf;
+}
+
+.landing-way-links {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0;
+}
+
+.landing-way-links a {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.landing-way-links a:hover {
+  color: var(--fg);
+}
+
+.landing-ways li.is-one a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.landing-ways li.is-one:hover h3 {
+  color: var(--accent);
+}
+
+.landing-how h2 {
+  margin-bottom: 28px;
+}
+
+.landing-how li p,
+.landing-sources ul {
+  color: #c9d3cf;
+}
+
+.landing-sources {
+  border-top-color: var(--glass-line);
+}
+
+/* Game */
+
+.game {
+  gap: 40px;
+  width: min(100%, 960px);
+  padding: 40px var(--gutter) 96px;
+}
+
+.game .button {
+  border-radius: 999px;
+}
+
+.game-head {
+  gap: 16px;
+  text-align: left;
+}
+
+.game-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-meta .game-kicker {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.game-meta .game-stats {
+  justify-self: auto;
+  padding: 0;
+  border: 0;
+  font-size: 14px;
+}
+
+.game-head h1 {
+  max-width: 22ch;
+  font-size: clamp(30px, 4.4vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+}
+
+:lang(th) .game-head h1 {
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.game-draw-title {
+  text-align: left;
+}
+
+.game-actions,
+.game-legend {
+  justify-content: flex-start;
+}
+
+.game-skip {
+  flex-basis: auto;
+}
+
+.sketch-mark text {
+  fill: var(--accent);
+  font-family: 'Caveat', var(--font-sans);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.game-result {
+  position: relative;
+  grid-template-columns: 170px minmax(0, 1fr);
+  overflow: visible;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(26, 31, 30, 0.8);
+  box-shadow: inset 0 0 0 1px var(--glass-line);
+}
+
+.game-score {
+  align-content: center;
+}
+
+.game-score strong {
+  font-size: 76px;
+  color: var(--gold);
+}
+
+.game-feedback h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+.game-feedback li {
+  color: #c9d3cf;
+}
+
+.game-next {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.game-stamp {
+  right: 28px;
+  top: -16px;
+  padding: 4px 12px;
+  background: #0d1414;
+  font-size: 16px;
+  transform: rotate(-6deg);
+}
+
+.game-stamp.is-good {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.game-stamp.is-off {
+  border-color: #ff8a7a;
+  color: #ff8a7a;
+}
+
+/* Immersive shell on small screens */
+
+@media (max-width: 760px) {
+  .header.is-scrolled {
+    background: rgba(7, 10, 11, 0.9);
+  }
+
+  .nav-links a svg {
+    display: none;
+  }
+
+  .landing-hero {
+    padding-bottom: 90px;
+  }
+
+  .landing-hero-inner {
+    padding-top: 32px;
+  }
+
+  .landing-quiet {
+    margin-left: 0;
+  }
+
+  .landing-result {
+    grid-template-columns: 1fr;
+    padding: 56px 0 0;
+  }
+
+  .stamp {
+    top: 0;
+    font-size: 16px;
+  }
+
+  .landing-ways li {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .landing-way-links {
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .game-result {
+    grid-template-columns: 1fr;
+    padding-top: 36px;
+  }
+
+  .game-score {
+    justify-items: start;
+  }
+
+  .game-next {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .stamp,
+  .hero-chart-note {
+    animation: none;
+  }
+}
+
+/* Methods: steps read as one page, not three boxes */
+
+.methods .steps {
+  gap: 32px;
+  border: 0;
+  background: none;
+}
+
+.methods .card.step {
+  padding: 20px 0 0;
+  border: 0;
+  border-top: 1px solid var(--glass-line);
+  border-radius: 0;
+  background: none;
+}
+
+.landing-result .stamp {
+  top: 30px;
+}
+
+@media (max-width: 760px) {
+  .landing-result .stamp {
+    top: 0;
+  }
 }
