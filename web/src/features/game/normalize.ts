@@ -64,8 +64,14 @@ export function importRounds(current: GameRound[], text: string, mode: ImportMod
   }
   let added = 0;
   let replaced = 0;
+  if (list.length === 0) problems.push('The file has no questions in it.');
+  const seen = new Map<string, number>();
 
   list.forEach((raw, i) => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      problems.push(`Question ${i + 1}: this is not a question { … }`);
+      return;
+    }
     const round = normalizeRound(raw, `q-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}${i}`);
     const o = (raw ?? {}) as { given?: { values?: unknown[] }; hidden?: { values?: unknown[] } };
     const mismatch = [o.given?.values, o.hidden?.values].some((v) => !Array.isArray(v) || v.length !== round.time.length);
@@ -76,6 +82,12 @@ export function importRounds(current: GameRound[], text: string, mode: ImportMod
       problems.push(`Question ${i + 1}${place}${named}: ${problem}`);
       return;
     }
+    const earlier = seen.get(round.id);
+    if (earlier !== undefined) {
+      problems.push(`Question ${i + 1} ${round.place.en}: uses the same id as question ${earlier + 1} (${round.id}). Give each question its own id.`);
+      return;
+    }
+    seen.set(round.id, i);
     const at = rounds.findIndex((r) => r.id === round.id);
     if (at >= 0) {
       rounds[at] = round;

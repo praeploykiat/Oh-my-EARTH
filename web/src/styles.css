@@ -3607,3 +3607,19 @@ button,
   padding: 6px 8px;
   border-top: 1px solid var(--line);
 }
+
+.admin-diff {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.admin-diff dt {
+  color: var(--muted);
+}
+
+.admin-diff dd {
+  margin: 0;
+}

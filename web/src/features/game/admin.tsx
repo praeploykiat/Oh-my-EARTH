@@ -4,7 +4,7 @@ import { Result, ResultPeek, RoundView, scoreRound } from './index';
 import { normalizeRound } from './normalize';
 import { htmlToMarkdown, markdownToHtml } from './richText';
 import type { Feedback } from './score';
-import { Checklist, download, IdNote, missingItems, Optional, questionTitle, Step, Tour, tourWanted } from './adminParts';
+import { changedParts, Checklist, download, IdNote, missingItems, Optional, questionTitle, Step, Tour, tourWanted } from './adminParts';
 import { ImportPanel } from './adminImport';
 import { withUnit } from './answer';
 import { formatTime, monthsBetween, monthsOfYear, timeKind, yearsBetween } from './time';
@@ -119,7 +119,7 @@ function when(iso: string): string {
 interface TextPairProps {
   label: string;
   value: Localized;
-  onChange: (v: Localized) => void;
+  onChange: (change: (v: Localized) => Localized) => void;
   hint?: string;
   required?: boolean;
   placeholder?: Localized;
@@ -135,11 +135,17 @@ function TextPair({ label, value, onChange, hint, required = true, placeholder }
       <div className="admin-pair">
         <label className="admin-lang-input">
           <small>English</small>
-          <input aria-label={`${label} in English`} placeholder={placeholder?.en} value={value.en} onChange={(e) => onChange({ ...value, en: e.target.value })} />
+          <input aria-label={`${label} in English`} placeholder={placeholder?.en} value={value.en} onChange={(e) => {
+              const en = e.target.value;
+              onChange((v) => ({ ...v, en }));
+            }} />
         </label>
         <label className="admin-lang-input">
           <small>Thai</small>
-          <input aria-label={`${label} in Thai`} placeholder={placeholder?.th} value={value.th} onChange={(e) => onChange({ ...value, th: e.target.value })} />
+          <input aria-label={`${label} in Thai`} placeholder={placeholder?.th} value={value.th} onChange={(e) => {
+              const th = e.target.value;
+              onChange((v) => ({ ...v, th }));
+            }} />
         </label>
       </div>
     </div>
@@ -464,17 +470,17 @@ function RichAnswer({ value, onChange, label }: { value: string; onChange: (v: s
   );
 }
 
-function AnswerEditor({ value, onChange }: { value: Localized; onChange: (v: Localized) => void }) {
+function AnswerEditor({ value, onChange }: { value: Localized; onChange: (change: (v: Localized) => Localized) => void }) {
   return (
     <div className="admin-field">
       <div className="admin-answer-pair">
         <div>
           <p className="admin-lang">English</p>
-          <RichAnswer label="Answer in English" value={value.en} onChange={(en) => onChange({ ...value, en })} />
+          <RichAnswer label="Answer in English" value={value.en} onChange={(en) => onChange((v) => ({ ...v, en }))} />
         </div>
         <div>
           <p className="admin-lang">Thai</p>
-          <RichAnswer label="Answer in Thai" value={value.th} onChange={(th) => onChange({ ...value, th })} />
+          <RichAnswer label="Answer in Thai" value={value.th} onChange={(th) => onChange((v) => ({ ...v, th }))} />
         </div>
       </div>
     </div>
@@ -559,7 +565,7 @@ function JsonEditor({ round, onApply, onClose }: { round: GameRound; onApply: (r
 
 // History of one question
 
-function History({ id, onRestore }: { id: string; onRestore: (q: GameRound) => void }) {
+function History({ id, current, onRestore }: { id: string; current: Stored; onRestore: (q: GameRound) => void }) {
   const [versions, setVersions] = useState<Stored[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -569,14 +575,14 @@ function History({ id, onRestore }: { id: string; onRestore: (q: GameRound) => v
 
   if (error) return <p className="admin-status is-error">{error}</p>;
   if (!versions) return <p className="admin-note">Loading…</p>;
-  if (versions.length === 0) return <p className="admin-note">No earlier versions of this question yet.</p>;
+  const all = [current, ...versions.filter((v) => v.version !== current.version)];
 
   return (
     <ul className="admin-history">
-      {versions.map((v) => (
+      {all.map((v, i) => (
         <li key={v.version}>
           <span>
-            Saved {when(v.updatedAt)} · {v.question.place.en || 'no place'}
+            {i === 0 ? 'Last saved, live now' : 'Saved'} {when(v.updatedAt)} · {v.question.place.en || 'no place'} · {v.question.time.length} time points
           </span>
           <button type="button" onClick={() => onRestore(v.question)}>
             Restore this
@@ -808,6 +814,11 @@ export function GameAdmin() {
   };
 
   const missing = round ? missingItems(round) : [];
+
+  const update = (change: (r: GameRound) => GameRound) => {
+    const latest = entriesRef.current.find((e) => e.draft.id === selected)?.draft;
+    if (latest) edit(change(latest));
+  };
   const saved = entries.flatMap((e) => (e.base ? [e.base] : []));
 
   const copyId = async (id: string) => {
@@ -923,6 +934,17 @@ export function GameAdmin() {
                       ? `Another person saved a different version at ${when(entry.remote.updatedAt)} while you were editing. Which one should we keep?`
                       : 'Another person deleted it while you were editing. Keep your version, or let it go?'}
                   </p>
+                  {entry.remote && (
+                    <dl className="admin-diff">
+                      <dt>They changed</dt>
+                      <dd>{changedParts(entry.base?.question, entry.remote.question).join(', ') || 'Nothing you can see'}</dd>
+                      <dt>You changed</dt>
+                      <dd>{changedParts(entry.base?.question, entry.draft).join(', ') || 'Nothing yet'}</dd>
+                    </dl>
+                  )}
+                  {entry.remote && (
+                    <p className="admin-hint">Use theirs throws away your changes. Keep mine saves yours on top, and theirs stays in Earlier versions.</p>
+                  )}
                   <div className="admin-import-actions">
                     <button type="button" onClick={() => useTheirs(entry)}>
                       {entry.remote ? 'Use theirs' : 'Let it go'}
@@ -975,7 +997,7 @@ export function GameAdmin() {
                 </div>
                 <IdNote id={round.id} copied={copied} onCopy={() => copyId(round.id)} />
                 {panel === 'json' && <JsonEditor round={round} onApply={edit} onClose={() => setPanel(null)} />}
-                {panel === 'history' && entry.base && <History id={round.id} onRestore={(q) => edit({ ...q, id: round.id })} />}
+                {panel === 'history' && entry.base && <History id={round.id} current={entry.base} onRestore={(q) => edit({ ...q, id: round.id })} />}
                 {entry.state === 'error' && entry.message ? (
                   <p className="admin-status is-error">
                     Could not save: {entry.message}{' '}
@@ -989,7 +1011,7 @@ export function GameAdmin() {
               </section>
 
               <Step n={1} id="step-place" title="Place">
-                <TextPair label="Place name" value={round.place} placeholder={{ en: 'Chiang Mai', th: 'เชียงใหม่' }} onChange={(place) => edit({ ...round, place })} />
+                <TextPair label="Place name" value={round.place} placeholder={{ en: 'Chiang Mai', th: 'เชียงใหม่' }} onChange={(f) => update((r) => ({ ...r, place: f(r.place) }))} />
               </Step>
 
               <Step n={2} id="step-time" title="Time axis" hint="What runs along the bottom of both charts. Pick a kind, set the range, then press Use this time axis.">
@@ -999,7 +1021,7 @@ export function GameAdmin() {
                   required={false}
                   placeholder={{ en: 'Average for each month, 2001 to 2024', th: 'ค่าเฉลี่ยแต่ละเดือน 2001 ถึง 2024' }}
                   value={round.timeLabel}
-                  onChange={(timeLabel) => edit({ ...round, timeLabel })}
+                  onChange={(f) => update((r) => ({ ...r, timeLabel: f(r.timeLabel) }))}
                 />
               </Step>
 
@@ -1015,7 +1037,7 @@ export function GameAdmin() {
                         label="Name"
                         placeholder={key === 'given' ? { en: 'Rainfall', th: 'ปริมาณฝน' } : { en: 'Soil moisture', th: 'ความชื้นในดิน' }}
                         value={round[key].label}
-                        onChange={(label) => edit({ ...round, [key]: { ...round[key], label } })}
+                        onChange={(f) => update((r) => ({ ...r, [key]: { ...r[key], label: f(r[key].label) } }))}
                       />
                       <label className="admin-field">
                         <span className="admin-label">
@@ -1024,7 +1046,10 @@ export function GameAdmin() {
                         <input
                           placeholder={key === 'given' ? 'mm/day' : 'kg/m²'}
                           value={round[key].unit}
-                          onChange={(e) => edit({ ...round, [key]: { ...round[key], unit: e.target.value } })}
+                          onChange={(e) => {
+                            const unit = e.target.value;
+                            update((r) => ({ ...r, [key]: { ...r[key], unit } }));
+                          }}
                         />
                       </label>
                     </div>
@@ -1056,7 +1081,7 @@ export function GameAdmin() {
                   </>
                 }
               >
-                <AnswerEditor value={round.answer} onChange={(answer) => edit({ ...round, answer })} />
+                <AnswerEditor value={round.answer} onChange={(f) => update((r) => ({ ...r, answer: f(r.answer) }))} />
               </Step>
 
               <Step n={6} id="step-source" title="Data source" optional>
@@ -1064,7 +1089,10 @@ export function GameAdmin() {
                   aria-label="Data source"
                   placeholder="NASA POWER (MERRA-2), NASA GLDAS Noah 2.1"
                   value={round.source}
-                  onChange={(e) => edit({ ...round, source: e.target.value })}
+                  onChange={(e) => {
+                    const source = e.target.value;
+                    update((r) => ({ ...r, source }));
+                  }}
                 />
               </Step>
             </main>
