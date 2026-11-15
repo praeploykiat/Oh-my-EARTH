@@ -4,7 +4,7 @@ NASA Space Apps Challenge 2026 (Bangkok), challenge **Be An Earth System Trend D
 
 A bilingual (English and Thai) website that turns NASA Earth observation data into games and explorers. People guess how a record continues, find where change is strongest, and test whether a change at a place is a real trend or could be chance.
 
-Live site: <https://space-apps-challenge-th.vercel.app>
+Live site: <https://oh-my-earth.vercel.app>
 
 ## What is on the site
 
