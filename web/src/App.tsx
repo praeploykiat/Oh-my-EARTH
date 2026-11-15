@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from './core/i18n';
 import { splitHash } from './core/url';
-import { Experience } from './features/experience';
 import { Game } from './features/game';
 import { GameAdmin } from './features/game/admin';
+import { Hotspot } from './features/hotspot';
+import { Landing } from './features/landing';
 import { Methods } from './features/methods';
 import { Workbench } from './features/workbench';
 import { GlobalExplorer } from './features/global';
 import { BrandMark, Footer, LanguageSwitcher } from './shared';
 
 const ROUTES = {
-  '/': Experience,
+  '/': Landing,
   '/workbench': Workbench,
   '/global': GlobalExplorer,
   '/game': Game,
   '/game/admin': GameAdmin,
+  '/hotspot': Hotspot,
   '/methods': Methods,
 } as const;
 
@@ -48,19 +50,19 @@ export function App() {
           <span>{t('app.title')}</span>
         </a>
         <nav className="nav-links" aria-label={t('nav.main')}>
-          <a href="#/" aria-current={route === '/'}>
-            {t('nav.experience')}
-          </a>
-          <a href="#/workbench" aria-current={route === '/workbench'}>
-            {t('nav.workbench')}
-          </a>
           <a href="#/game" aria-current={route === '/game'}>
             {t('nav.game')}
+          </a>
+          <a href="#/hotspot" aria-current={route === '/hotspot'}>
+            {t('nav.hotspot')}
           </a>
           <a href="#/global" aria-current={route === '/global'}>
             {t('nav.global')}
           </a>
-          <a href="#/methods" aria-current={route === '/methods'}>
+          <a href="#/workbench" aria-current={route === '/workbench'}>
+            {t('nav.workbench')}
+          </a>
+          <a href="#/methods" className="nav-aside" aria-current={route === '/methods'}>
             {t('nav.methods')}
           </a>
         </nav>
